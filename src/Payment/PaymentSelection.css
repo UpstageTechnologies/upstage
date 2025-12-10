@@ -1,0 +1,198 @@
+/* ---------- GLOBAL ---------- */
+.wrapper {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #2140df, #bbcff2);
+    min-height: 100vh;  /* use min-height instead of height */
+    width: 100vw;
+  
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+    overflow-y: auto;  /* allow vertical scrolling */
+    flex-wrap: wrap;
+  }
+  
+
+/* ---------- PAYMENT WRAPPER ---------- */
+.payment-body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: transparent;
+    min-height: 100vh;     /* better than fixed height */
+    display: flex;
+    flex-direction: column;
+    align-items: center;   /* keep this */
+    justify-content: flex-start;  /* content starts from top */
+    padding-top: 20px;     /* small spacing */
+}
+
+.payment-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    padding: 60px 20px 50px; /* FIXED - lowered top padding */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ---------- TITLE ---------- */
+.payment-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px 20px 50px; /* reduced from 60px */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+/* ---------- PAYMENT CONTAINER ---------- */
+.payment-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px 10px 50px; /* reduced from 105px */
+}
+
+
+/* ---------- PLAN BOX ---------- */
+.plan-box {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+   
+    width: 280px;
+    height: 500px;
+    transition: 0.5s;
+}
+
+.plan-box:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+    background-color: #f9f9f9;
+    color: black;
+}
+
+/* Hover text & price */
+.plan-box:hover h3,
+.plan-box:hover .desc {
+    color: black !important;
+}
+
+.plan-box:hover .price {
+    color: #0a53e4;
+}
+
+/* ---------- TEXT ---------- */
+.plan-box h3 {
+    color: white;
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+.price {
+    color: #ffe680;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.desc {
+    color: #f3f3f3;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+/* ---------- BUTTON ---------- */
+.choose-btn {
+    background: #0a53e4;
+    color: white;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: 0.25s;
+    margin-top: 20px;
+}
+
+.choose-btn:hover {
+    background: white;
+    color: #0a53e4;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+/* ---------- MOBILE RESPONSIVE ---------- */
+@media (max-width: 768px) {
+    .payment-container {
+        flex-direction: column;
+        align-items: center;
+        padding-top: 60px;
+    }
+
+    .plan-box {
+        width: 90%;
+        height: auto;
+        margin-bottom: 20px;
+    }
+}
+.payment-title{
+    color: #f9f9f9;
+}
+.tick{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.tick li{
+    position: relative;
+    padding-left: 20px;
+    margin: 6px 0;
+    padding-left: 20px;
+    margin-left: 25px;
+}
+.tick li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: green;       /* tick color */
+    font-size: 18px;    /* size */
+    font-weight: bold;
+  }
+  .tick .wrong{
+    list-style: none;
+    padding: 0;
+    
+}
+.tick .wrong li{
+    position: relative;
+    padding-left: 20px;
+    margin-left: 25px;
+    margin-bottom: 6px;
+}
+.tick .wrong ::before {
+    
+    content: "✘";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: rgb(195, 39, 7);       /* tick color */
+    font-size: 18px;    /* size */
+    font-weight: bold;
+  }
+  .old{
+    text-decoration: line-through;
+  }

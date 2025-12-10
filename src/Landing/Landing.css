@@ -1,0 +1,150 @@
+/* Wrapper */
+.wrapper {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Landing Container */
+.landing-container {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #2140df, #bbcff2);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  position: relative;
+}
+
+/* Navbar */
+.nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 20px 40px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: transparent;   /* CHANGED */
+  backdrop-filter: blur(5px); /* Smooth glass effect */
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+
+.nav-logo h2 {
+  margin: 0;
+  font-size: 24px;
+  color: white;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+}
+
+.nav-links a {
+  margin-left: 30px;
+  font-size: 16px;
+  text-decoration: none;
+  color: rgb(1, 1, 4);
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+
+  color: #e8f75e; /* gold hover effect */
+  
+}
+
+.start-btn {
+  padding: 8px 16px;
+  background: #3cd7d7;
+  color: #000;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background 0.3s;
+  
+}
+
+.nav-links .start-btn:hover {
+  background:transpar;
+  color: #2140df;
+}
+
+/* Hero Section */
+.hero {
+  margin-top: 50px; /* space below fixed navbar */
+  padding: 60px 20px;
+}
+
+.hero h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.hero h1 span {
+  color: #ffd700;
+}
+
+.hero p {
+  font-size: 20px;
+  margin-bottom: 40px;
+}
+
+.hero-buttons .btn-primary {
+  padding: 12px 28px;
+  background: white;
+  color: #2140df;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.hero-buttons .btn-primary:hover {
+  background: #e0e0e0;
+}
+
+/* Footer */
+
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px 20px;
+    background-color: transparent;
+  }
+
+  .nav-links {
+    margin-top: 10px;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .nav-links a {
+    margin: 10px 0;
+  }
+
+  .hero h1 {
+    font-size: 36px;
+  }
+
+  .hero p {
+    font-size: 18px;
+  }
+}

@@ -1,0 +1,51 @@
+
+  
+  .logout-box {
+    background: white;
+    padding: 40px;
+    width: 350px;
+    text-align: center;
+    border-radius: 15px;
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+  }
+  
+  .logout-box h2 {
+    margin-bottom: 10px;
+    color: #222;
+  }
+  
+  .logout-box p {
+    margin-bottom: 25px;
+    color: #555;
+    font-size: 1rem;
+  }
+  
+  .login-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: #2140df;
+    color: white;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  
+  .login-btn:hover {
+    background: #0e2fcc;
+  }
+  .wrapper {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #2140df, #bbcff2);
+    min-height: 100vh; /* use min-height instead of height */
+    width: 100vw;
+  
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto; /* allow vertical scrolling */
+    flex-wrap: wrap;
+  }

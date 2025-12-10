@@ -1,0 +1,29 @@
+.header {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    position: fixed;   /* keep on top */
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: transparent;  /* TRANSPARENT background */
+    z-index: 1000;
+    width: 200px;
+    height: 250px;
+    cursor: pointer;
+
+  }
+  
+  .header .logo {
+    height: 150px;
+    width: 150px;
+    object-fit: contain;
+    margin-left: 80px;
+    margin-right: 10px;
+    margin-bottom: 200px;
+    display: inline-block;
+  
+    
+    
+  }
+ 
