@@ -34,7 +34,7 @@ const Register = () => {
         isGoogle: true,
       });
 
-      navigate("/payment", {
+      navigate("/dashboard", {
         state: { email: user.email, isGoogle: true }
       });
 
@@ -63,7 +63,7 @@ const Register = () => {
         isGoogle: false
       });
 
-      navigate("/payment", {
+      navigate("/dashboard", {
         state: { email, password, username, isGoogle: false }
       });
 
@@ -101,41 +101,34 @@ const Register = () => {
             required
           />
 
-          {/* PASSWORD */}
-          <div >
-            <input style={{ position: "relative", width: "80%", margin: "10px 20px" }}
-              type={showPass ? "text" : "password"}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              
-            />
+{/* PASSWORD */}
+<div className="password-wrapper">
+  <input
+    type={showPass ? "text" : "password"}
+    placeholder="Password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    required
+  />
+  <span className="eye-icon" onClick={() => setShowPass(!showPass)}>
+    {showPass ? <FaEyeSlash /> : <FaEye />}
+  </span>
+</div>
 
-            <span
-              onClick={() => setShowPass(!showPass)}
-              style={{
-                position: "absolute",
-                right: "60px",
-                top: "48.5%",
-                transform: "translateY(-50%)",
-                cursor: "pointer",
-                color: "white",
-              }}
-            >
-              {showPass ? <FaEyeSlash /> : <FaEye />}
-            </span>
-          </div>
+{/* CONFIRM PASSWORD */}
+<div className="password-wrapper">
+  <input
+    type={showPass ? "text" : "password"}
+    placeholder="Confirm Password"
+    value={confirmPassword}
+    onChange={(e) => setConfirmPassword(e.target.value)}
+    required
+  />
+  <span className="eye-icon" onClick={() => setShowPass(!showPass)}>
+    
+  </span>
+</div>
 
-          {/* CONFIRM PASSWORD */}
-          <input
-            type={showPass ? "text" : "password"}
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            style={{ width: "80%", margin: "10px 20px" }}
-          />
 
           {error && <p style={{ color: "red" }}>{error}</p>}
 

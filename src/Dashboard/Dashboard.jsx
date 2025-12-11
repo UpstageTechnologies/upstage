@@ -13,6 +13,10 @@ const Dashboard = () => {
   const [school, setSchool] = useState("");
   const navigate = useNavigate();
 
+  const goToLogin = () => {
+    navigate("/payment");
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
@@ -24,7 +28,7 @@ const Dashboard = () => {
           setSchool(userData.school || "");
         }
       } else {
-        navigate("/login");
+        navigate("/login",{replace:true});
       }
     });
 
@@ -33,7 +37,7 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     await signOut(auth);
-    navigate("/logout",{ replace: true }); // LOGOUT → LOGIN PAGE
+    navigate("/logout"); // LOGOUT → LOGIN PAGE
   };
 
   return (
@@ -43,6 +47,7 @@ const Dashboard = () => {
       <div className="sidebar">
         <ul>
           <li><FaHome /> Home</li>
+          <li onClick={goToLogin}><FaSignOutAlt />Upgrade</li><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
           <li><FaCog /> Settings</li>
           <li onClick={handleLogout}><FaSignOutAlt /> Logout</li>
         </ul>

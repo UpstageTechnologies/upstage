@@ -151,48 +151,45 @@
 .payment-title{
     color: #f9f9f9;
 }
-.tick{
+/* MAIN TICK LIST */
+.tick {
     list-style: none;
     padding: 0;
     margin: 0;
 }
-.tick li{
-    position: relative;
-    padding-left: 20px;
+
+.tick li,
+.wrong li {
+    display: flex;
+    align-items: center;
+    gap: 10px;          /* text & icon spacing */
     margin: 6px 0;
-    padding-left: 20px;
-    margin-left: 25px;
+    font-size: 15px;
+    margin-left: 10px;
 }
+
+/* TICK ICON */
 .tick li::before {
     content: "✓";
-    position: absolute;
-    left: 0;
-    top: 0;
-    color: green;       /* tick color */
-    font-size: 18px;    /* size */
+    color: green;
+    font-size: 18px;
     font-weight: bold;
-  }
-  .tick .wrong{
+}
+
+/* WRONG LIST (INSIDE BASIC PLAN) */
+.wrong {
     list-style: none;
-    padding: 0;
-    
+    padding-left: 0;
+    margin-top: 5px;
 }
-.tick .wrong li{
-    position: relative;
-    padding-left: 20px;
-    margin-left: 25px;
-    margin-bottom: 6px;
-}
-.tick .wrong ::before {
-    
+
+.wrong li::before {
     content: "✘";
-    position: absolute;
-    left: 0;
-    top: 0;
-    color: rgb(195, 39, 7);       /* tick color */
-    font-size: 18px;    /* size */
+    color: rgb(195, 39, 7);
+    font-size: 18px;
     font-weight: bold;
-  }
+}
+
   .old{
     text-decoration: line-through;
   }
