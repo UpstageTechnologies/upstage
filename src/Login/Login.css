@@ -179,6 +179,7 @@
 @media (max-width: 360px) {
   .log {
     padding: 18px 16px;
+    
   }
 
   .log h2 {
@@ -215,4 +216,12 @@
 .logo {
   width: clamp(80px, 18vw, 150px);
   cursor: pointer;
+}
+.top-left-logo {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: clamp(80px, 12vw, 120px);
+  cursor: pointer;
+  z-index: 10;
 }
