@@ -36,7 +36,7 @@ const Payment = () => {
 
   const openRazorpay = (amount, planName) => {
     const options = {
-      key: "rzp_test_RqckwEGqKZFqMk",  
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,  
       amount: amount * 100,          
       currency: "INR",
       name: "UpStageTeachnology",
