@@ -137,18 +137,20 @@ footer {
 }
 
 /* ---------- MOBILE ---------- */
+/* ---------- MOBILE ---------- */
 @media (max-width: 480px) {
+
   .nav-bar {
-    flex-direction: column;
-    justify-content: center;
+    flex-direction: row;   /* <<< Ensure items stay in one line */
+    justify-content: space-between;
     align-items: center;
-    gap: 8px;
     padding: 10px 15px;
+    gap: 0;
   }
 
   .nav-links {
     flex-direction: row;
-    gap: 12px;
+    gap: 10px;
   }
 
   .nav-links a {
@@ -163,20 +165,8 @@ footer {
   .hero {
     padding: 110px 15px 40px;
   }
-
-  .hero h1 {
-    font-size: 28px;
-  }
-
-  .hero p {
-    font-size: 16px;
-  }
-
-  .hero-buttons .btn-primary {
-    padding: 10px 24px;
-    font-size: 16px;
-  }
 }
+
 
 /* ---------- EXTRA SMALL SCREENS (iPhone SE / Android Small) ---------- */
 @media (max-width: 360px) {

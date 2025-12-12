@@ -11,9 +11,8 @@ export default function Landing() {
       
         
       <nav className="nav-bar">
-          <div className="nav-logo">
+        
           <img src={logo} alt="Company Logo" className="logo" />
-          </div>
           <div className="nav-links">
             <a href="#features">Features</a>
             <a href="#about">About</a>
