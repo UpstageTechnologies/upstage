@@ -57,83 +57,66 @@ const Login = () => {
 
   return (
     <>
-    
-    
-    
-    
     <span>
-    <img src={logo} alt="Company Logo" className="top-left-logo" /></span>
-    <div className="wrapper">
+  <img src={logo} alt="Company Logo" className="top-left-logo" />
+</span>
 
-      <div className="log">
-        <h2>Login</h2>
-      
+<div className="wrapper">
 
-        <form onSubmit={handleLogin}>
-          {/* EMAIL */}
-          
+  <div className="log">
 
-           <input 
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-           />
-         
+    <h2>Login</h2>
 
+    <form onSubmit={handleLogin} className="form-box">
 
-          {/* PASSWORD WITH SHOW/HIDE */}
-          <div
-            className="poss"
-            style={{ position: "relative", width: "80%", margin: "0px 20px" }}
-          >
-            <input
-              type={showPass ? "text" : "password"}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={{ width: "100%" }}
-            />
+      {/* EMAIL */}
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
 
-            <span
-              onClick={() => setShowPass(!showPass)}
-              style={{
-                position: "absolute",
-                right: "12px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                cursor: "pointer",
-                color: "white",
-              }}
-            >
-              {showPass ? <FaEyeSlash /> : <FaEye />}
-            </span>
-          </div>
+      {/* PASSWORD */}
+      <div className="poss">
+        <input
+          type={showPass ? "text" : "password"}
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
 
-          <p className="forgot-text" onClick={handleForgotPassword}>
-             Forgot Password?
-          </p>
-
-
-          {/* LOGIN BUTTON */}
-          <button type="submit" className="log-button">Login</button>
-        </form>
-
-        <div className="or">--- or ---</div>
-
-        {/* GOOGLE LOGIN BUTTON */}
-        <button type="button" onClick={handleGoogleSignIn} className="google-btn">
-          <FcGoogle className="google-icon" /> Sign in with Google
-        </button>
-
-        <p>
-          Don't have an account? <Link to="/register">Register here</Link>
-        </p>
+        <span onClick={() => setShowPass(!showPass)}>
+          {showPass ? <FaEyeSlash /> : <FaEye />}
+        </span>
       </div>
-      </div>
-    </>
+
+      <p className="forgot-text" onClick={handleForgotPassword}>
+        Forgot Password?
+      </p>
+
+      {/* LOGIN BUTTON */}
+      <button type="submit" className="log-button">
+        Login
+      </button>
+    </form>
+
+    <div className="or">--- or ---</div>
+
+    {/* GOOGLE LOGIN */}
+    <button type="button" onClick={handleGoogleSignIn} className="google-btn">
+      <FcGoogle className="google-icon" /> Sign in with Google
+    </button>
+
+    <p>
+      Don't have an account? <Link to="/register">Register here</Link>
+    </p>
+
+  </div>
+</div>
+</>
   );
 };
 

@@ -202,4 +202,70 @@
   color: #fff;
   font-size: 18px;
 }
+/* ---------- EXTRA SMALL SCREENS (360px) ---------- */
+@media (max-width: 360px) {
+  .log {
+    width: 95%;
+    padding: 25px 12px;
+  }
+  .log h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+  .log input,
+  .password-wrapper input,
+  .log button,
+  .google-btn {
+    width: 100%;
+    font-size: 13px;
+    padding: 10px;
+  }
+  .password-wrapper {
+    width: 100%;
+    margin-left: 0;
+  }
+  .password-wrapper input {
+    padding: 12px 35px 12px 12px;
+  }
+  .eye-icon {
+    font-size: 16px;
+    right: 10px;
+  }
+}
+
+/* ---------- SMALL PHONES (480px) ---------- */
+@media (max-width: 480px) {
+  .log {
+    width: 95%;
+    padding: 30px 15px;
+  }
+  .log h2 {
+    font-size: 22px;
+  }
+  .log input,
+  .password-wrapper input,
+  .log button,
+  .google-btn {
+    font-size: 14px;
+    padding: 10px;
+  }
+}
+
+/* ---------- TABLETS (768px) ---------- */
+@media (max-width: 768px) {
+  .log {
+    width: 90%;
+    padding: 35px 20px;
+  }
+  .log h2 {
+    font-size: 24px;
+  }
+  .log input,
+  .password-wrapper input,
+  .log button,
+  .google-btn {
+    font-size: 15px;
+    padding: 12px;
+  }
+}
 

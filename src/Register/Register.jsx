@@ -77,10 +77,11 @@ const Register = () => {
 
   return (
     <>
-      
+      <span>
+     <img src={logo} alt="Company Logo" className="top-left-logo" />
+    </span>
       <div className="wrapper">
-      <nav className="nav-bar" style={{backgroundColor:"transparent"}}>
-    <img src={logo} alt="Company Logo" className="logo" /></nav>
+      
       <div className="log" style={{ marginTop: "80px" }}>
         <h2>Register</h2>
 
@@ -150,7 +151,7 @@ const Register = () => {
         </p>
       </div>
       </div>
-    </>
+      </>
   );
 };
 
