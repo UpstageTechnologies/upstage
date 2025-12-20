@@ -1,0 +1,100 @@
+.role-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.nnav{
+    position: fixed;
+    top: 10px;
+    left: 20px;
+}
+.role-logo {
+  width: 80px;
+  margin-top: 20px;
+
+}
+
+.role-box {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  padding: 30px;
+  border-radius: 18px;
+  text-align: center;
+  width: 90%;
+  max-width: 360px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.role-box h2 {
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.role-box p {
+  color: #eaeaea;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+/* Cards */
+.role-card {
+  display: block;
+  margin-bottom: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.role-card span {
+  display: block;
+  font-size: 12px;
+  opacity: 0.9;
+  margin-top: 4px;
+}
+
+/* Colors */
+.admin {
+  background: linear-gradient(135deg, #ffb703, #fb8500);
+}
+
+.teacher {
+  background: linear-gradient(135deg, #06d6a0, #1b9aaa);
+}
+
+.parent {
+  background: linear-gradient(135deg, #ef476f, #d62828);
+}
+
+.role-card:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+/* Animation */
+.role-fade {
+  animation: roleFade 0.5s ease forwards;
+}
+
+@keyframes roleFade {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .role-box {
+    padding: 22px;
+  }
+}

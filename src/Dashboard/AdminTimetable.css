@@ -1,0 +1,120 @@
+.tt-container {
+    padding: 20px;
+    background: #f4f7fc;
+    min-height: 100vh;
+  }
+  
+  .tt-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+  
+  .tt-sub {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 14px 0;
+  }
+  
+  /* CLASS GRID */
+  .class-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  
+  .class-card {
+    width: 120px;
+    padding: 18px;
+    background: #2140df;
+    color: #fff;
+    border-radius: 14px;
+    text-align: center;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  
+  /* SECTION */
+  .section-row {
+    display: flex;
+    gap: 16px;
+    margin: 20px 0;
+  }
+  
+  .section-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #2140df;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  
+  /* DAYS */
+  .day-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin-bottom: 12px;
+  }
+  
+  .day-btn {
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: none;
+    background: #eee;
+    cursor: pointer;
+  }
+  
+  .day-btn.active {
+    background: #2140df;
+    color: #fff;
+  }
+  
+  /* PERIOD */
+  .period-row {
+    background: #fff;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .period-row label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  
+  .period-row input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+  
+  /* SAVE */
+  .save-btn {
+    width: 100%;
+    padding: 14px;
+    background: #2140df;
+    color: #fff;
+    font-weight: 800;
+    border: none;
+    border-radius: 14px;
+    margin-top: 12px;
+    cursor: pointer;
+  }
+  
+  /* BACK */
+  .back {
+    text-align: center;
+    color: #2140df;
+    font-weight: 700;
+    margin-top: 12px;
+    cursor: pointer;
+  }
+  

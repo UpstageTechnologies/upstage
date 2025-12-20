@@ -6,7 +6,7 @@ const Logout = () => {
   const navigate = useNavigate();
 
   const goToLogin = () => {
-    navigate("/login",{ replace: true });
+    navigate("/",{ replace: true });
   };
 
   return (

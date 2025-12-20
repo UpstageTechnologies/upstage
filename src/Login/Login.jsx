@@ -8,7 +8,7 @@ import {
 } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import "./Login.css";
 import logo from "../logo.jpeg";
 import { FcGoogle } from "react-icons/fc";
@@ -20,14 +20,37 @@ const Login = () => {
   const [showPass, setShowPass] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const role = location.state?.role; 
   const provider = new GoogleAuthProvider();
 
   // NORMAL LOGIN
   const handleLogin = async (e) => {
     e.preventDefault();
+
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const cred = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      const user = cred.user;
+
+      // 🔍 Check admin document in users collection
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      // ❌ Teacher / Parent → no document
+      if (!userSnap.exists()) {
+        await signOut(auth);
+        alert("Access denied");
+        return;
+      }
+
+      // ✅ Admin allowed
       navigate("/dashboard");
+
     } catch (error) {
       alert(error.message);
     }
@@ -46,38 +69,40 @@ const Login = () => {
     }
   };
 
-  // ✅ GOOGLE LOGIN (REGISTER CHECK ADDED)
+  
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // 🔍 CHECK USER IN FIRESTORE
       const userRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
-        // ❌ NOT REGISTERED
         await signOut(auth);
-        alert("This Google account is not registered. Please sign up first.");
+        alert("Access denied");
         return;
       }
 
-      // ✅ REGISTERED USER
       navigate("/dashboard");
 
     } catch (error) {
-      alert(error.message);
+      
     }
   };
+  
 
   return (
     <>
       <img src={logo} alt="Logo" className="logo" />
+      
 
       <div className="wrapper">
+      <Link to="/choose-login" className="ch-btn">School Login</Link>
         <div className="log">
-          <h2>Login</h2>
+          <h2>
+            Login  <span style={{ fontSize: "14px" }}> </span>
+          </h2>
 
           <form onSubmit={handleLogin}>
             <input
@@ -105,18 +130,26 @@ const Login = () => {
               Forgot Password?
             </p>
 
-            <button className="log-btn" type="submit">Login</button>
+            <button className="log-btn" type="submit">
+              Login
+            </button>
           </form>
 
-          <p>--- or ---</p>
+          
+          
+            
+              <p>--- or ---</p>
 
-          <button className="google-btn" onClick={handleGoogleSignIn}>
-            <FcGoogle /> Sign in with Google
-          </button>
+              <button className="google-btn" onClick={handleGoogleSignIn}>
+                <FcGoogle /> Sign in with Google
+              </button>
 
-          <p>
-            Don&apos;t have an account? <Link to="/register">Register</Link>
-          </p>
+              <p>
+                Don&apos;t have an account?{" "}
+                <Link to="/register">Register</Link>
+              </p>
+            
+          
         </div>
       </div>
     </>

@@ -34,6 +34,7 @@ const Register = () => {
         email: user.email,
         isGoogle: true,
         plan: "basic",
+        role: "admin",
         createdAt: serverTimestamp()
       });
 
@@ -65,6 +66,7 @@ const Register = () => {
         email,
         isGoogle: false,
         plan: "basic",
+        role: "admin",
         createdAt: serverTimestamp()
       });
 
