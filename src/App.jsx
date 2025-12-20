@@ -1,5 +1,6 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
+
 import Landing from "./useTheme/pages/Landing";
 import Login from "./useTheme/pages/Login";
 import Register from "./useTheme/pages/Register";
@@ -11,28 +12,22 @@ import TeacherLogin from "./useTheme/pages/TeacherLogin";
 import ParentLogin from "./useTheme/pages/ParentLogin";
 import AdminLogin from "./useTheme/pages/AdminLogin";
 
-
-
-
-
 function App() {
   return (
-    <Router>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/payment" element={<PaymentSelection />} /> 
+        <Route path="/payment" element={<PaymentSelection />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/choose-login" element={<ChooseLogin />} />
         <Route path="/teacher-login" element={<TeacherLogin />} />
         <Route path="/parent-login" element={<ParentLogin />} />
         <Route path="/admin-login" element={<AdminLogin />} />
-
-        
       </Routes>
-    </Router>
+    </HashRouter>
   );
 }
 
