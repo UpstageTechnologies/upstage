@@ -37,13 +37,13 @@
   "main": "eslint.config.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/UpstageTechnologies/upstagetechnologies.in.git"
+    "url": "git+https://github.com/UpstageTechnologies/upstage.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/UpstageTechnologies/upstagetechnologies.in/issues"
+    "url": "https://github.com/UpstageTechnologies/upstage/issues"
   },
-  "homepage": "https://github.com/UpstageTechnologies/upstagetechnologies.in"
+  "homepage": "https://github.com/UpstageTechnologies/upstage#readme"
 }
