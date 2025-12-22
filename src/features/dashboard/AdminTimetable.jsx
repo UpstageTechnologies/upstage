@@ -19,7 +19,8 @@ const AdminTimetable = () => {
   const [table, setTable] = useState({});
 
   // ADMIN UID (from dashboard / login)
-  const adminUid = localStorage.getItem("adminUid");
+  const adminUid =
+  auth.currentUser?.uid || localStorage.getItem("adminUid");
 
   /* ================= LOAD ================= */
   const loadTimetable = async () => {
@@ -49,9 +50,13 @@ const AdminTimetable = () => {
   /* ================= SAVE ================= */
   const saveTimetable = async () => {
     try {
-      const user = auth.currentUser;
+      const adminUid =
+        auth.currentUser?.uid || localStorage.getItem("adminUid");
   
-      if (!user) {
+      const role = localStorage.getItem("role");
+      const subAdminId = localStorage.getItem("adminId"); // admin01
+  
+      if (!adminUid) {
         alert("Admin not logged in. Please logout & login again.");
         return;
       }
@@ -59,16 +64,21 @@ const AdminTimetable = () => {
       const ref = doc(
         db,
         "users",
-        user.uid,
+        adminUid,
         "timetables",
         `${selectedClass}_${selectedSection}`
       );
   
-      await setDoc(
-        ref,
-        { [selectedDay]: table },
-        { merge: true }
-      );
+      const payload = {
+        [selectedDay]: table
+      };
+  
+      // 🔥 ONLY FOR SUB ADMIN
+      if (role === "sub_admin") {
+        payload.createdBy = subAdminId;
+      }
+  
+      await setDoc(ref, payload, { merge: true });
   
       alert("✅ Timetable saved successfully");
     } catch (err) {

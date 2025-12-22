@@ -12,6 +12,9 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../../services/firebase";
 
+const role = localStorage.getItem("role");
+const isAdmin = role === "admin";
+
 const Admin = () => {
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
@@ -175,7 +178,7 @@ const Admin = () => {
                 <td>{a.gender || "-"}</td>
                 <td>{a.qualification || "-"}</td>
                 <td>{a.experience || "-"}</td>
-
+                
                 <td>
                   <button
                     className="edit-btn"

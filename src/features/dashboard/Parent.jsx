@@ -12,8 +12,12 @@ import {
 import { auth, db } from "../../services/firebase";
 import "../dashboard_styles/Teacher.css";
 
+
+
 const Parent = () => {
-  const adminUid = auth.currentUser?.uid;
+  const adminUid =
+  auth.currentUser?.uid || localStorage.getItem("adminUid");
+
 
   const [parents, setParents] = useState([]);
   const [search, setSearch] = useState("");

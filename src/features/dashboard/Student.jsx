@@ -21,8 +21,13 @@ const sections = Array.from({ length: 26 }, (_, i) =>
   String.fromCharCode(65 + i)
 );
 
+
 const Student = () => {
-  const [uid, setUid] = useState(null);
+  const uid =
+  auth.currentUser?.uid || localStorage.getItem("adminUid");
+
+
+
 
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");

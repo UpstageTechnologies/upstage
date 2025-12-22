@@ -21,13 +21,19 @@ const sections = Array.from({ length: 26 }, (_, i) =>
 );
 
 const Teacher = () => {
+  /* ================= BASIC ================= */
+  const adminUid =
+    auth.currentUser?.uid || localStorage.getItem("adminUid");
+
+  const role = localStorage.getItem("role"); // admin | sub_admin
+
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
   const [teachers, setTeachers] = useState([]);
   const [editId, setEditId] = useState(null);
   const [password, setPassword] = useState("");
 
-  /* ===== MAIN FORM ===== */
+  /* ================= FORM ================= */
   const [form, setForm] = useState({
     name: "",
     teacherId: "",
@@ -40,14 +46,11 @@ const Teacher = () => {
     assignedClasses: []
   });
 
-  /* ===== ASSIGNED CLASS FORM ===== */
   const [classForm, setClassForm] = useState({
     className: "",
     section: "",
     subject: ""
   });
-
-  const adminUid = auth.currentUser?.uid;
 
   /* ================= FETCH TEACHERS ================= */
   const fetchTeachers = async () => {
@@ -76,15 +79,15 @@ const Teacher = () => {
       return;
     }
 
-    setForm({
-      ...form,
-      assignedClasses: [...form.assignedClasses, classForm]
-    });
+    setForm(prev => ({
+      ...prev,
+      assignedClasses: [...prev.assignedClasses, classForm]
+    }));
 
     setClassForm({ className: "", section: "", subject: "" });
   };
 
-  /* ================= ADD / EDIT TEACHER ================= */
+  /* ================= SAVE ================= */
   const handleSaveTeacher = async () => {
     if (
       !form.name ||
@@ -97,12 +100,35 @@ const Teacher = () => {
       return;
     }
 
+    /* 🔴 SUB ADMIN → APPROVAL */
+    if (role === "sub_admin") {
+      await addDoc(
+        collection(db, "users", adminUid, "approval_requests"),
+        {
+          module: "teacher",
+          action: editId ? "update" : "create",
+          targetId: editId || null,
+          payload: {
+            ...form,
+            password: password || null
+          },
+          status: "pending",
+          createdBy: localStorage.getItem("adminId"),
+          createdAt: Timestamp.now()
+        }
+      );
+
+      alert("⏳ Sent for admin approval");
+      resetForm();
+      return;
+    }
+
+    /* 🟢 MAIN ADMIN → DIRECT SAVE */
     if (editId) {
       const updateData = {
         ...form,
         updatedAt: Timestamp.now()
       };
-
       if (password) updateData.password = password;
 
       await updateDoc(
@@ -110,13 +136,15 @@ const Teacher = () => {
         updateData
       );
     } else {
-      await addDoc(collection(db, "users", adminUid, "teachers"), {
-        ...form,
-        adminUid: adminUid,  
-        password, // 🔐 used for teacher login
-        role: "teacher",
-        createdAt: Timestamp.now()
-      });
+      await addDoc(
+        collection(db, "users", adminUid, "teachers"),
+        {
+          ...form,
+          password,
+          role: "teacher",
+          createdAt: Timestamp.now()
+        }
+      );
     }
 
     resetForm();
@@ -126,10 +154,31 @@ const Teacher = () => {
   /* ================= DELETE ================= */
   const handleDelete = async (id) => {
     if (!window.confirm("Delete teacher?")) return;
+
+    /* 🔴 SUB ADMIN → APPROVAL */
+    if (role === "sub_admin") {
+      await addDoc(
+        collection(db, "users", adminUid, "approval_requests"),
+        {
+          module: "teacher",
+          action: "delete",
+          targetId: id,
+          status: "pending",
+          createdBy: localStorage.getItem("adminId"),
+          createdAt: Timestamp.now()
+        }
+      );
+
+      alert("⏳ Delete request sent");
+      return;
+    }
+
+    /* 🟢 MAIN ADMIN */
     await deleteDoc(doc(db, "users", adminUid, "teachers", id));
     fetchTeachers();
   };
 
+  /* ================= RESET ================= */
   const resetForm = () => {
     setShowModal(false);
     setEditId(null);
@@ -148,6 +197,7 @@ const Teacher = () => {
     setClassForm({ className: "", section: "", subject: "" });
   };
 
+  /* ================= UI ================= */
   return (
     <div className="teacher-page">
       <div className="teacher-header">
@@ -159,7 +209,7 @@ const Teacher = () => {
             <input
               placeholder="Search teacher..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={e => setSearch(e.target.value)}
             />
           </div>
 
@@ -169,7 +219,7 @@ const Teacher = () => {
         </div>
       </div>
 
-      {/* ===== TABLE ===== */}
+      {/* TABLE */}
       <table className="teacher-table">
         <thead>
           <tr>
@@ -194,44 +244,30 @@ const Teacher = () => {
                 <td>{t.email}</td>
                 <td>{t.phone}</td>
                 <td>
-                 {t.assignedClasses && t.assignedClasses.length > 0
-                   ? t.assignedClasses
-                   .map(c => `${c.className}-${c.section}`)
-                   .join(", ")
-                   : "-"}
-              </td>
-
+                  {t.assignedClasses?.length
+                    ? t.assignedClasses
+                        .map(c => `${c.className}-${c.section}`)
+                        .join(", ")
+                    : "-"}
+                </td>
                 <td>
                   <button
                     className="edit-btn"
                     onClick={() => {
-                      setForm({
-                        name: t.name || "",
-                        teacherId: t.teacherId || "",
-                        email: t.email || "",
-                        phone: t.phone || "",
-                        address: t.address || "",
-                        gender: t.gender || "",
-                        qualification: t.qualification || "",
-                        experience: t.experience || "",
-                        assignedClasses: t.assignedClasses || []
-                      });
-                    
+                      setForm({ ...t });
                       setEditId(t.id);
-                      setPassword(""); // new password optional
-                      setClassForm({ className: "", section: "", subject: "" });
+                      setPassword("");
                       setShowModal(true);
                     }}
-                    
                   >
-                    <FaEdit />Edit
+                    <FaEdit /> Edit
                   </button>
 
                   <button
                     className="delete-btn"
                     onClick={() => handleDelete(t.id)}
                   >
-                    <FaTrash />Detele
+                    <FaTrash /> Delete
                   </button>
                 </td>
               </tr>
@@ -239,7 +275,7 @@ const Teacher = () => {
         </tbody>
       </table>
 
-      {/* ===== MODAL ===== */}
+      {/* MODAL */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal">
@@ -254,7 +290,9 @@ const Teacher = () => {
             <input
               placeholder="Teacher ID"
               value={form.teacherId}
-              onChange={e => setForm({ ...form, teacherId: e.target.value })}
+              onChange={e =>
+                setForm({ ...form, teacherId: e.target.value })
+              }
             />
 
             <input
@@ -276,12 +314,6 @@ const Teacher = () => {
               onChange={e => setForm({ ...form, phone: e.target.value })}
             />
 
-            <input
-              placeholder="Address"
-              value={form.address}
-              onChange={e => setForm({ ...form, address: e.target.value })}
-            />
-
             <select
               value={form.gender}
               onChange={e => setForm({ ...form, gender: e.target.value })}
@@ -291,22 +323,6 @@ const Teacher = () => {
               <option>Female</option>
               <option>Other</option>
             </select>
-
-            <input
-              placeholder="Qualification"
-              value={form.qualification}
-              onChange={e =>
-                setForm({ ...form, qualification: e.target.value })
-              }
-            />
-
-            <input
-              placeholder="Experience"
-              value={form.experience}
-              onChange={e =>
-                setForm({ ...form, experience: e.target.value })
-              }
-            />
 
             <h4>Assigned Classes</h4>
 
@@ -342,9 +358,7 @@ const Teacher = () => {
               }
             />
 
-            <button type="button" onClick={addAssignedClass}>
-              + Add Class
-            </button>
+            <button onClick={addAssignedClass}>+ Add Class</button>
 
             <ul>
               {form.assignedClasses.map((c, i) => (
@@ -353,11 +367,15 @@ const Teacher = () => {
                 </li>
               ))}
             </ul>
-            <div className="modal-actions">
 
-            <button className="save" onClick={handleSaveTeacher}>Save</button>
-            <button className="cancel" onClick={resetForm}>Cancel</button>
-          </div>
+            <div className="modal-actions">
+              <button className="save" onClick={handleSaveTeacher}>
+                Save
+              </button>
+              <button className="cancel" onClick={resetForm}>
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

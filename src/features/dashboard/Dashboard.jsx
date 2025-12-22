@@ -5,6 +5,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../services/firebase";
 import { useNavigate } from "react-router-dom";
 import "../dashboard_styles/Dashboard.css";
+import Approvals from "../../useTheme/pages/Approvals";
 
 import {
   FaUserCircle,
@@ -23,6 +24,8 @@ import Student from "./Student";
 import Admin from "./Admin";
 import StudentDetails from "./StudentDetails";
 import AdminTimetable from "./AdminTimetable";
+import TeacherTimetable from "./TeacherTimetable";
+
 
 
 /* ================= SLIDER ================= */
@@ -35,12 +38,14 @@ const sliderImages = [
   "/slider/slide6.jpg"
 ];
 
+const SPECIAL_USER_UID = "vd8GKjbWrgfpO3FnokO5qHe2o1s2";
+
 const DashboardSlider = () => {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % sliderImages.length);
+      setIndex(prev => (prev + 1) % sliderImages.length);
     }, 3000);
     return () => clearInterval(timer);
   }, []);
@@ -85,6 +90,8 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
 
+  const isAdminOrSubAdmin = role === "admin" || role === "sub_admin";
+
   const formatDate = (timestamp) => {
     if (!timestamp) return "No Expiry";
     return timestamp.toDate().toLocaleDateString("en-IN", {
@@ -98,28 +105,25 @@ const Dashboard = () => {
   useEffect(() => {
     const storedRole = localStorage.getItem("role");
 
- // 🔐 TEACHER / PARENT / SUB ADMIN (Firestore login)
-if (
-  storedRole === "teacher" ||
-  storedRole === "parent" ||
-  storedRole === "sub_admin"
-) {
-  setRole(storedRole);
+    // 🔐 TEACHER / PARENT / SUB ADMIN
+    if (
+      storedRole === "teacher" ||
+      storedRole === "parent" ||
+      storedRole === "sub_admin"
+    ) {
+      setRole(storedRole);
+      setUser({
+        displayName:
+          localStorage.getItem("adminName") ||
+          localStorage.getItem("teacherName") ||
+          localStorage.getItem("parentName") ||
+          "User",
+        email: localStorage.getItem("email") || ""
+      });
+      return;
+    }
 
-  setUser({
-    displayName:
-      localStorage.getItem("adminName") ||
-      localStorage.getItem("teacherName") ||
-      localStorage.getItem("parentName") ||
-      "User",
-    email: localStorage.getItem("email") || ""
-  });
-
-  return; // ❗ VERY IMPORTANT
-}
-
-
-    // 🔐 ADMIN (Firebase Auth)
+    // 🔐 MASTER ADMIN
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
         navigate("/login", { replace: true });
@@ -129,24 +133,18 @@ if (
       setUser(currentUser);
 
       const adminSnap = await getDoc(doc(db, "users", currentUser.uid));
-      if (adminSnap.exists()) {
-        const data = adminSnap.data();
-
-        setRole("admin");
-        setSchool(data.school || "");
-        setPlan(data.plan || "basic");
-        setPlanExpiry(data.planExpiry || null);
-
-        // ✅ FIXED: username field use pannrom
-        localStorage.setItem(
-          "adminName",
-          data.username || "Admin"
-        );
-
+      if (!adminSnap.exists()) {
+        navigate("/login");
         return;
       }
 
-      navigate("/login");
+      const data = adminSnap.data();
+      setRole("admin");
+      setSchool(data.school || "");
+      setPlan(data.plan || "basic");
+      setPlanExpiry(data.planExpiry || null);
+
+      localStorage.setItem("adminName", data.username || "Admin");
     });
 
     return () => unsubscribe && unsubscribe();
@@ -188,36 +186,53 @@ if (
             </li>
           )}
 
-          {role === "admin" &&
-            (plan === "premium" || plan === "lifetime") && (
-              <>
-                <li
-                  className="account-main"
-                  onClick={() => setAccountMenuOpen(!accountMenuOpen)}
-                >
-                  <FaUserCircle /> Account Creation
-                  {accountMenuOpen ? <FaChevronUp /> : <FaChevronDown />}
-                </li>
+          {/* 🔑 ADMIN + SUB_ADMIN */}
+          {(
+            (role === "admin" &&
+              (plan === "premium" || plan === "lifetime")) ||
+            role === "sub_admin"
+          ) && (
+            <>
+              <li
+                className="account-main"
+                onClick={() => setAccountMenuOpen(!accountMenuOpen)}
+              >
+                <FaUserCircle /> Account Creation
+                {accountMenuOpen ? <FaChevronUp /> : <FaChevronDown />}
+              </li>
 
-                {accountMenuOpen && (
-                  <ul className="account-submenu">
-                    <li onClick={() => setActivePage("admin")}>Admin</li>
-                    <li onClick={() => setActivePage("teacher")}>Teacher</li>
-                    <li onClick={() => setActivePage("parent")}>Parent</li>
-                    <li onClick={() => setActivePage("student")}>Student</li>
-                  </ul>
-                )}
-                {role === "admin" && (
-                     <li onClick={() => setActivePage("timetable")}>
-                      📅 Timetable
-                     </li>)}
-              </>
-            )}
+              {accountMenuOpen && (
+                <ul className="account-submenu">
+                  {role === "admin" && (
+                  <li onClick={() => setActivePage("admin")}>Admin</li>)}
+                  <li onClick={() => setActivePage("teacher")}>Teacher</li>
+                  <li onClick={() => setActivePage("parent")}>Parent</li>
+                  <li onClick={() => setActivePage("student")}>Student</li>
+                </ul>
+              )}
+
+              <li onClick={() => setActivePage("timetable")}>
+                📅 Timetable
+              </li>
+             
+            </>
+          )}
 
           {(role === "teacher" || role === "parent") && (
+            <>
             <li onClick={() => setActivePage("studentDetails")}>
               <FaUserGraduate /> Student Details
             </li>
+             <li onClick={() => setActivePage("teacher-timetable")}>
+             📅 Teacher Timetable
+           </li>
+           </>
+          )}
+          
+            {role === "admin" && (
+           <li onClick={() => setActivePage("approvals")}>
+           Approvals
+           </li>
           )}
 
           <li>
@@ -246,7 +261,6 @@ if (
             </span>
           </div>
 
-          {/* ✅ USER NAME CORRECT */}
           <div className="user-info">
             <FaUserCircle />
             <span className="username">
@@ -261,37 +275,45 @@ if (
         </nav>
 
         <div className="dashboard-content">
-          {activePage === "home" && (
-            <>
-              <DashboardSlider />
-              <h2 style={{ marginTop: "20px" }}>Welcome Dashboard</h2>
-            </>
-          )}
-          
+        {activePage === "home" && (
+        <>
+            <DashboardSlider />
 
-          {role === "admin" && activePage === "teacher" && (
+          {/* 🔒 ONLY FOR SPECIFIC USER DOCUMENT */}
+          {user?.uid === SPECIAL_USER_UID && (
+           <h2 style={{ marginTop: "20px" }}>
+           Hello Riyaz 👋 Welcome Dashboard
+           </h2>
+          )}
+         </>
+       )}
+
+
+          {isAdminOrSubAdmin && activePage === "teacher" && (
             <Teacher adminUid={adminUid} />
           )}
 
-          {role === "admin" && activePage === "parent" && (
+          {isAdminOrSubAdmin && activePage === "parent" && (
             <Parent adminUid={adminUid} />
           )}
 
-          {role === "admin" && activePage === "student" && (
+          {isAdminOrSubAdmin && activePage === "student" && (
             <Student adminUid={adminUid} />
           )}
-          
 
-          {activePage === "studentDetails" &&
-            (role === "teacher" || role === "parent") && (
-              <StudentDetails />
-            )}
-            {activePage === "timetable" && role === "admin" && (
-             <AdminTimetable />
-              )}
-              {role === "admin" && activePage === "admin" && (
-                <Admin />
-              )}
+          {(role === "teacher" || role === "parent") &&
+            activePage === "studentDetails" && <StudentDetails />}
+
+          {isAdminOrSubAdmin && activePage === "timetable" && (
+            <AdminTimetable />
+          )}
+
+          {(role === "admin") && activePage === "admin" && <Admin />}
+
+          {activePage === "approvals" && role === "admin" && <Approvals />}
+          {role === "teacher" && activePage === "teacher-timetable" && (
+           <TeacherTimetable />
+          )}
 
 
         </div>
