@@ -1,4 +1,4 @@
-import React, { useEffect, useState , useRef  } from "react";
+import React, { useEffect, useState } from "react";
 import { auth } from "../../services/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
@@ -91,37 +91,6 @@ const Dashboard = () => {
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [activePage, setActivePage] = useState("home");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-
-  const accountRef = useRef(null);
-  const userMenuRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        accountMenuOpen &&
-        accountRef.current &&
-        !accountRef.current.contains(e.target)
-      ) {
-        setAccountMenuOpen(false);
-      }
-  
-      if (
-        userMenuOpen &&
-        userMenuRef.current &&
-        !userMenuRef.current.contains(e.target)
-      ) {
-        setUserMenuOpen(false);
-      }
-    };
-  
-    document.addEventListener("pointerdown", handleClickOutside, true);
-  
-    return () => {
-      document.removeEventListener("pointerdown", handleClickOutside, true);
-    };
-  }, [accountMenuOpen, userMenuOpen]);
-  
-
 
 
   const navigate = useNavigate();
@@ -236,7 +205,7 @@ const Dashboard = () => {
             role === "sub_admin"
           ) && (
             <>
-              <li ref={accountRef}
+              <li
                 className="account-main"
                 onClick={() => setAccountMenuOpen(!accountMenuOpen)}
               >
@@ -299,10 +268,9 @@ const Dashboard = () => {
           </div>
 
        <div
-        className="user-info"
-        ref={userMenuRef}
-         onClick={() => setUserMenuOpen(!userMenuOpen)}
- >
+  className="user-info"
+  onClick={() => setUserMenuOpen(!userMenuOpen)}
+>
   <FaUserCircle />
   <span className="username">
     {localStorage.getItem("adminName") ||
