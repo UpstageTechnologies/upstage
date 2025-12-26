@@ -9,29 +9,10 @@ import {
   addDoc
 } from "firebase/firestore";
 import { db } from "../../services/firebase";
-import "../dashboard_styles/AdminTimetable.css";
-import { Pie } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-ChartJS.register(ArcElement, Tooltip, Legend);
+import "../dashboard_styles/attendance.css";
 
-/* ⭐ SAME CLASSES YOU USED IN TIMETABLE */
-const CLASSES = ["LKG","UKG","Play Group", ...Array.from({ length: 12 }, (_, i) => i + 1)];
-const SECTIONS = ["A","B","C","D"];
-
-/* 🔥 converts BOTH formats:
-   26 / 12 / 2025   → Date()
-   2025-12-26       → Date()
-*/
-function normalize(dateString) {
-  if (!dateString) return null;
-
-  if (dateString.includes("/")) {
-    const [dd, mm, yyyy] = dateString.split("/").map(s => s.trim());
-    return new Date(`${yyyy}-${mm}-${dd}`);
-  }
-
-  return new Date(dateString);
-}
+const CLASSES = ["LKG", "UKG", "Play Group", ...Array.from({ length: 12 }, (_, i) => i + 1)];
+const SECTIONS = ["A", "B", "C", "D"];
 
 export default function Attendance({ adminUid }) {
 
@@ -46,14 +27,13 @@ export default function Attendance({ adminUid }) {
 
   const [date, setDate] = useState(new Date().toISOString().substring(0, 10));
 
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
+  const [history, setHistory] = useState({});
+  const [dayLabels, setDayLabels] = useState([]);
 
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [chartData, setChartData] = useState(null);
-  const [percentages, setPercentages] = useState(null);
+  // 👇 store late time for each student
+  const [lateTimes, setLateTimes] = useState({});
 
-  /* ================= LOAD STUDENTS ================= */
+  /* ================= LOAD STUDENTS & HISTORY ================= */
   const loadStudents = async () => {
     if (!uid || !selectedClass || !selectedSection) return;
 
@@ -64,24 +44,59 @@ export default function Attendance({ adminUid }) {
       .filter(
         s =>
           String(s.className) === String(selectedClass) &&
-          String(s.section).toUpperCase() ===
-            String(selectedSection).toUpperCase()
+          String(s.section).toUpperCase() === String(selectedSection).toUpperCase()
       )
       .sort((a, b) => a.studentName.localeCompare(b.studentName));
 
     setStudents(filtered);
 
     const docId = `${date}_${selectedClass}_${selectedSection}`;
-    const attendSnap = await getDoc(
-      doc(db, "users", uid, "attendance", docId)
-    );
+    const attendSnap = await getDoc(doc(db, "users", uid, "attendance", docId));
 
-    if (attendSnap.exists()) setRecords(attendSnap.data().records || {});
-    else {
+    if (attendSnap.exists()) {
+      const data = attendSnap.data();
+      setRecords(data.records || {});
+      setLateTimes(data.lateTimes || {});   // 👈 restore saved late times
+    } else {
       const init = {};
       filtered.forEach(s => (init[s.id] = "present"));
       setRecords(init);
     }
+
+    const historyData = {};
+    const labels = [];
+
+    for (let i = 1; i <= 7; i++) {
+      const d = new Date(date);
+      d.setDate(d.getDate() - i);
+
+      const y = d.toISOString().substring(0, 10);
+      const day = String(d.getDate()).padStart(2, "0");
+
+      labels.push(day);
+
+      const pastId = `${y}_${selectedClass}_${selectedSection}`;
+      const pastSnap = await getDoc(doc(db, "users", uid, "attendance", pastId));
+
+      if (pastSnap.exists()) {
+        const rec = pastSnap.data().records || {};
+
+        filtered.forEach(s => {
+          if (!historyData[s.id]) historyData[s.id] = [];
+          historyData[s.id].push(rec[s.id] || null);
+        });
+
+      } else {
+        filtered.forEach(s => {
+          if (!historyData[s.id]) historyData[s.id] = [];
+          historyData[s.id].push(null);
+        });
+      }
+    }
+
+    Object.keys(historyData).forEach(sid => historyData[sid].reverse());
+    setHistory(historyData);
+    setDayLabels(labels.reverse());
   };
 
   useEffect(() => {
@@ -99,7 +114,7 @@ export default function Attendance({ adminUid }) {
         module: "attendance",
         action: "save",
         docId,
-        payload: { date, class: selectedClass, section: selectedSection, records },
+        payload: { date, class: selectedClass, section: selectedSection, records, lateTimes },
         status: "pending",
         createdBy: localStorage.getItem("adminId"),
         createdAt: Timestamp.now()
@@ -111,67 +126,18 @@ export default function Attendance({ adminUid }) {
 
     await setDoc(
       doc(db, "users", uid, "attendance", docId),
-      { date, class: selectedClass, section: selectedSection, records, createdAt: Timestamp.now() },
+      {
+        date,
+        class: selectedClass,
+        section: selectedSection,
+        records,
+        lateTimes,        // 👈 save late times
+        createdAt: Timestamp.now()
+      },
       { merge: true }
     );
 
     alert("✅ Attendance saved");
-  };
-
-  /* ================= POPUP ANALYTICS ================= */
-  const openStudentPopup = async student => {
-    if (!fromDate || !toDate) return alert("Select From & To dates");
-  
-    setSelectedStudent(student);
-  
-    const snap = await getDocs(collection(db, "users", uid, "attendance"));
-  
-    let present = 0, absent = 0, late = 0, total = 0;
-  
-    const from = normalize(fromDate);
-    const to   = normalize(toDate);
-  
-    snap.docs.forEach(d => {
-      const a = d.data();
-      const attDate = normalize(a.date);
-  
-      if (
-        attDate &&
-        attDate >= from &&
-        attDate <= to &&
-        a.class === selectedClass &&
-        a.section === selectedSection
-      ) {
-        const st = a.records?.[student.id];
-        if (!st) return;
-  
-        total++;
-  
-        if (st === "present") present++;
-        else if (st === "absent") absent++;
-        else if (st === "late") late++;
-      }
-    });
-  
-    const pct = {
-      present: total ? Math.round((present / total) * 100) : 0,
-      absent: total ? Math.round((absent / total) * 100) : 0,
-      late: total ? Math.round((late / total) * 100) : 0
-    };
-  
-    setPercentages(pct);
-  
-    setChartData({
-      labels: ["Present", "Absent", "Late"],
-      datasets: [{ data: [present, absent, late], backgroundColor: ["#4caf50", "#e74c3c", "#f1c40f"] }]
-    });
-  };
-  
-
-  const resetAll = () => {
-    setSelectedClass(null);
-    setSelectedSection(null);
-    setStudents([]);
   };
 
   return (
@@ -225,44 +191,54 @@ export default function Attendance({ adminUid }) {
             style={{ marginBottom: 10 }}
           />
 
-          <div style={{ display: "flex", gap: 14, marginBottom: 12 }}>
-            <div>
-              <label>From</label>
-              <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} />
-            </div>
-
-            <div>
-              <label>To</label>
-              <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} />
-            </div>
-          </div>
-
-          {students.length === 0 && <p>No students found.</p>}
-
           {students.length > 0 && (
             <table className="teacher-table">
               <thead>
                 <tr>
                   <th>Name</th>
                   <th>Student ID</th>
-                  <th>Status</th>
+                  <th style={{ width: "400px" }}>Status</th>
+
+                  <th colSpan={dayLabels.length} style={{ textAlign: "center" }}>
+                    Previous 7 Days
+                  </th>
+                </tr>
+
+                <tr>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+
+                  {dayLabels.map((d, i) => (
+                    <th key={i} style={{ textAlign: "center", width: 32 }}>
+                      {d}
+                    </th>
+                  ))}
                 </tr>
               </thead>
 
               <tbody>
                 {students.map(s => (
+                  <>
                   <tr key={s.id}>
-                    <td style={{ cursor: "pointer" }} onClick={() => openStudentPopup(s)}>
-                      {s.studentName}
-                    </td>
+                    <td>{s.studentName}</td>
                     <td>{s.studentId}</td>
 
                     <td>
-                      <div style={{ display: "flex", gap: 8 }}>
+                      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                         {["present", "absent", "late"].map(st => (
                           <button
                             key={st}
-                            onClick={() => setRecords({ ...records, [s.id]: st })}
+                            onClick={() => {
+                              setRecords({ ...records, [s.id]: st });
+
+                              if (st === "late") {
+                                const t = prompt("Enter late time (HH:MM)", "00:00");
+                                if (t) {
+                                  setLateTimes(prev => ({ ...prev, [s.id]: t }));
+                                }
+                              }
+                            }}
                             style={{
                               padding: "6px 10px",
                               borderRadius: 6,
@@ -282,9 +258,69 @@ export default function Attendance({ adminUid }) {
                             {st[0].toUpperCase() + st.slice(1)}
                           </button>
                         ))}
+
+                        {records[s.id] === "late" && lateTimes[s.id] && (
+                          <span style={{ fontSize: 12, color: "#555" }}>
+                            ⏰ {lateTimes[s.id]}
+                          </span>
+                        )}
                       </div>
                     </td>
+
+                    {dayLabels.map((_, i) => {
+                      const st = (history[s.id] || [])[i];
+
+                      return (
+                        <td key={i} style={{ textAlign: "center", width: 40 }}>
+                          <span
+                            style={{
+                              fontSize: 13,
+                              fontWeight: 700,
+                              color:
+                                st === "present" ? "green" :
+                                st === "absent" ? "red" :
+                                "#c9a000"
+                            }}
+                          >
+                            {st === "present" ? "✔"
+                              : st === "absent" ? "✖"
+                              : st ? "L" : "—"}
+                          </span>
+                        </td>
+                      );
+                    })}
+                    
                   </tr>
+                 
+                  <tr className="mobile-prev-row">
+  <td colSpan={dayLabels.length + 3}>
+    <div className="prev-box">
+
+      {/* dates — SAME ORDER AS DESKTOP */}
+      <div className="prev-dates">
+        {dayLabels.map((d, i) => (
+          <span key={i}>{d}</span>
+        ))}
+      </div>
+
+      {/* icons — SAME ORDER AS DESKTOP */}
+      <div className="prev-row">
+        {(history[s.id] || []).map((st, i) => (
+          <span key={i} className="prev-icon">
+            {st === "present" ? "✔"
+            : st === "absent" ? "✖"
+            : st ? "L" : "—"}
+          </span>
+        ))}
+      </div>
+
+    </div>
+  </td>
+</tr>
+
+</>
+
+                  
                 ))}
               </tbody>
             </table>
@@ -296,24 +332,6 @@ export default function Attendance({ adminUid }) {
             </button>
           )}
         </>
-      )}
-
-      {selectedStudent && chartData && (
-        <div className="att-modal">
-          <div className="att-modal-content">
-            <h4>{selectedStudent.studentName}</h4>
-
-            <Pie data={chartData} options={{ responsive: false }} />
-
-            <p>Present: {percentages?.present}%</p>
-            <p>Absent: {percentages?.absent}%</p>
-            <p>Late: {percentages?.late}%</p>
-
-            <button className="close-btn" onClick={() => setSelectedStudent(null)}>
-              Close
-            </button>
-          </div>
-        </div>
       )}
     </div>
   );
