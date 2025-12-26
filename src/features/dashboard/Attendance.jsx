@@ -221,8 +221,8 @@ export default function Attendance({ adminUid }) {
                 {students.map(s => (
                   <>
                   <tr key={s.id}>
-                    <td>{s.studentName}</td>
-                    <td>{s.studentId}</td>
+                    <td data-label="Name">{s.studentName}</td>
+                    <td data-label="Student Id">{s.studentId}</td>
 
                     <td>
                       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
