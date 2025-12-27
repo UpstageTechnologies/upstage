@@ -65,6 +65,8 @@ useEffect(() => {
   // 👇 store late time for each student
   const [lateTimes, setLateTimes] = useState({});
 
+  
+
   /* ================= LOAD STUDENTS & HISTORY ================= */
   const loadStudents = async () => {
     if (!uid || !selectedClass || !selectedSection) return;
@@ -91,7 +93,7 @@ useEffect(() => {
       setLateTimes(data.lateTimes || {});   // 👈 restore saved late times
     } else {
       const init = {};
-      filtered.forEach(s => (init[s.id] = "present"));
+      filtered.forEach(s => (init[s.id] = ""));
       setRecords(init);
     }
 

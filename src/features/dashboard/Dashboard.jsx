@@ -14,7 +14,7 @@ import {
   FaCog,FaUserCheck,
   FaSignOutAlt,
   FaChevronDown,
-  FaChevronUp,FaCalendarAlt,FaClipboardCheck
+  FaChevronUp,FaCalendarAlt,FaClipboardCheck,FaUserTimes
 } from "react-icons/fa";
 
 import schoolLogo from "../../assets/school-logo.png";
@@ -27,6 +27,8 @@ import AdminTimetable from "./AdminTimetable";
 import TeacherTimetable from "./TeacherTimetable";
 import BackConfirm from "../../components/BackConfirm";
 import Attendance from "./Attendance";
+import ShowTodaysAbsent from "./ShowTodaysAbsent";
+
 
 
 
@@ -252,6 +254,12 @@ const Dashboard = () => {
            <li onClick={() => setActivePage("attendance")}>
            <FaUserCheck/> Attendance
           </li>
+          <li onClick={() => setActivePage("todays-absent")}>
+          
+             <FaUserTimes/>Today Absent
+         </li>
+
+
 
         
         </ul>
@@ -356,8 +364,12 @@ const Dashboard = () => {
            <TeacherTimetable />
           )}
        {isAdminOrSubAdmin && activePage === "attendance" && (
-  <Attendance adminUid={adminUid} />
-)}
+            <Attendance adminUid={adminUid} />
+            )}
+          {isAdminOrSubAdmin && activePage === "todays-absent" && (
+            <ShowTodaysAbsent adminUid={adminUid} />
+          )}
+
 
 
 

@@ -12,6 +12,7 @@ import ParentLogin from "./useTheme/pages/ParentLogin";
 import AdminLogin from "./useTheme/pages/AdminLogin";
 import CalendarPage from "./useTheme/pages/CalendarPage";
 import Attendance from "./features/dashboard/Attendance";
+import ShowTodaysAbsent from "./features/dashboard/ShowTodaysAbsent";
 
 
 
@@ -32,6 +33,8 @@ function App() {
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="attendance" element={<Attendance />} />
+        <Route path="/todays-absent" element={<ShowTodaysAbsent />} />
+
 
         
       </Routes>
