@@ -77,7 +77,7 @@ useEffect(() => {
     const filtered = all
       .filter(
         s =>
-          String(s.className) === String(selectedClass) &&
+          String(s.class) === String(selectedClass) &&
           String(s.section).toUpperCase() === String(selectedSection).toUpperCase()
       )
       .sort((a, b) => a.studentName.localeCompare(b.studentName));
