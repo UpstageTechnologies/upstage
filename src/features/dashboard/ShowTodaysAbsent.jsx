@@ -1,28 +1,58 @@
 import React, { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import "../dashboard_styles/Teacher.css";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
 import { db } from "../../services/firebase";
 
 const ShowTodaysAbsent = ({ adminUid }) => {
-  const uid =
+
+  /* ---------- ROLE + UID ---------- */
+  const role = (localStorage.getItem("role") || "").toLowerCase();
+
+  const [uid, setUid] = useState(
     adminUid ||
     localStorage.getItem("ownerUid") ||
-    localStorage.getItem("adminUid");
+    localStorage.getItem("adminUid")
+  );
 
   const [date, setDate] = useState(new Date().toISOString().substring(0, 10));
   const [absents, setAbsents] = useState([]);
   const [search, setSearch] = useState("");
 
+  /* ---------- RESOLVE OWNER (SUB ADMIN) ---------- */
+  useEffect(() => {
+    async function resolveOwner() {
+      if (role !== "sub_admin") return;
+
+      const snap = await getDoc(
+        doc(db, "users", localStorage.getItem("adminUid"))
+      );
+
+      if (snap.exists()) {
+        const data = snap.data();
+        const main = data.ownerUid || data.createdBy || data.adminUid;
+
+        if (main) {
+          localStorage.setItem("ownerUid", main);
+          setUid(main);
+        }
+      }
+    }
+
+    resolveOwner();
+  }, [role]);
+
+
+  /* ---------- LOAD ABSENT LIST ---------- */
   const loadAbsents = async () => {
     if (!uid) return;
 
-    // 🔹 Get all students
+    // students list
     const sSnap = await getDocs(collection(db, "users", uid, "students"));
     const studentMap = {};
     sSnap.forEach(d => (studentMap[d.id] = d.data()));
 
-    // 🔹 Attendance for selected date
+    // attendance for date
     const q = query(
       collection(db, "users", uid, "attendance"),
       where("date", "==", date)
@@ -55,11 +85,10 @@ const ShowTodaysAbsent = ({ adminUid }) => {
 
   useEffect(() => {
     loadAbsents();
-  }, [date]);
+  }, [date, uid]);
 
   return (
     <div className="teacher-page">
-      {/* HEADER like Student.jsx */}
       <div className="teacher-header">
         <h2>Today’s Absent</h2>
 
@@ -82,7 +111,6 @@ const ShowTodaysAbsent = ({ adminUid }) => {
         </div>
       </div>
 
-      {/* TABLE */}
       <table className="teacher-table">
         <thead>
           <tr>
@@ -103,7 +131,7 @@ const ShowTodaysAbsent = ({ adminUid }) => {
                 <td data-label="Name">{a.name}</td>
                 <td data-label="Student ID">{a.studentId}</td>
                 <td data-label="Class">{a.class}</td>
-                <td data-label="Section" >{a.section}</td><td></td>
+                <td data-label="Section">{a.section}</td>
               </tr>
             ))}
 
