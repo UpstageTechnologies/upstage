@@ -12,20 +12,16 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../../services/firebase";
 
-/* 🔢 Class 1–12 */
 const classes = Array.from({ length: 12 }, (_, i) => i + 1);
-
-/* 🔤 Section A–Z */
 const sections = Array.from({ length: 26 }, (_, i) =>
   String.fromCharCode(65 + i)
 );
 
 const Student = () => {
-  /* ================= BASIC ================= */
   const adminUid =
     auth.currentUser?.uid || localStorage.getItem("adminUid");
 
-  const role = localStorage.getItem("role"); // admin | sub_admin
+  const role = localStorage.getItem("role");
 
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
@@ -41,11 +37,10 @@ const Student = () => {
     dob: "",
     phone: "",
     address: "",
-    className: "",
+    class: "",
     section: ""
   });
 
-  /* ================= FETCH ================= */
   const fetchStudents = async () => {
     if (!adminUid) return;
 
@@ -65,21 +60,19 @@ const Student = () => {
     fetchStudents();
   }, [adminUid]);
 
-  /* ================= SAVE ================= */
   const handleSaveStudent = async () => {
     if (
       !form.studentName ||
       !form.studentId ||
       !form.parentId ||
       !form.parentName ||
-      !form.className ||
+      !form.class ||
       !form.section
     ) {
       alert("Required fields missing");
       return;
     }
 
-    /* 🔴 SUB ADMIN → APPROVAL */
     if (role === "sub_admin") {
       await addDoc(
         collection(db, "users", adminUid, "approval_requests"),
@@ -87,9 +80,7 @@ const Student = () => {
           module: "student",
           action: editId ? "update" : "create",
           targetId: editId || null,
-          payload: {
-            ...form
-          },
+          payload: { ...form },
           status: "pending",
           createdBy: localStorage.getItem("adminId"),
           createdAt: Timestamp.now()
@@ -101,7 +92,6 @@ const Student = () => {
       return;
     }
 
-    /* 🟢 MAIN ADMIN → DIRECT SAVE */
     if (editId) {
       await updateDoc(
         doc(db, "users", adminUid, "students", editId),
@@ -124,11 +114,9 @@ const Student = () => {
     fetchStudents();
   };
 
-  /* ================= DELETE ================= */
   const handleDeleteStudent = async (id) => {
     if (!window.confirm("Delete student?")) return;
 
-    /* 🔴 SUB ADMIN → APPROVAL */
     if (role === "sub_admin") {
       await addDoc(
         collection(db, "users", adminUid, "approval_requests"),
@@ -146,14 +134,10 @@ const Student = () => {
       return;
     }
 
-    /* 🟢 MAIN ADMIN */
-    await deleteDoc(
-      doc(db, "users", adminUid, "students", id)
-    );
+    await deleteDoc(doc(db, "users", adminUid, "students", id));
     fetchStudents();
   };
 
-  /* ================= RESET ================= */
   const resetForm = () => {
     setShowModal(false);
     setEditId(null);
@@ -166,12 +150,11 @@ const Student = () => {
       dob: "",
       phone: "",
       address: "",
-      className: "",
+      class: "",
       section: ""
     });
   };
 
-  /* ================= UI ================= */
   return (
     <div className="teacher-page">
       <div className="teacher-header">
@@ -193,7 +176,6 @@ const Student = () => {
         </div>
       </div>
 
-      {/* TABLE */}
       <table className="teacher-table">
         <thead>
           <tr>
@@ -207,50 +189,46 @@ const Student = () => {
         </thead>
 
         <tbody>
-  {students
-    .filter(s =>
-      JSON.stringify(s).toLowerCase().includes(search.toLowerCase())
-    )
-    .map(s => (
-      <tr key={s.id} className="mobile-card">
-        <td data-label="Name">{s.studentName}</td>
-        <td data-label="Student ID">{s.studentId}</td>
-        <td data-label="Parent">{s.parentName}</td>
-        <td data-label="Class">{s.className}</td>
-        <td data-label="Section">{s.section}</td>
+          {students
+            .filter(s =>
+              JSON.stringify(s).toLowerCase().includes(search.toLowerCase())
+            )
+            .map(s => (
+              <tr key={s.id} className="mobile-card">
+                <td data-label="Name">{s.studentName}</td>
+                <td data-label="Student ID">{s.studentId}</td>
+                <td data-label="Parent">{s.parentName}</td>
+                <td data-label="Class">{s.class}</td>
+                <td data-label="Section">{s.section}</td>
 
-        <td data-label="Action" className="action-cell">
-          <button
-            className="edit-btn"
-            onClick={() => {
-              setForm({ ...s });
-              setEditId(s.id);
-              setShowModal(true);
-            }}
-          >
-            <FaEdit /> Edit
-          </button>
+                <td data-label="Action" className="action-cell">
+                  <button
+                    className="edit-btn"
+                    onClick={() => {
+                      setForm({ ...s });
+                      setEditId(s.id);
+                      setShowModal(true);
+                    }}
+                  >
+                    <FaEdit /> Edit
+                  </button>
 
-          <button
-            className="delete-btn"
-            onClick={() => handleDeleteStudent(s.id)}
-          >
-            <FaTrash /> Delete
-          </button>
-        </td>
-      </tr>
-    ))}
-</tbody>
-
+                  <button
+                    className="delete-btn"
+                    onClick={() => handleDeleteStudent(s.id)}
+                  >
+                    <FaTrash /> Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+        </tbody>
       </table>
 
-      {/* MODAL */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal">
             <h3>{editId ? "Edit Student" : "Add Student"}</h3>
-
-            {/* SAME INPUTS – NO UI CHANGE */}
 
             <input
               placeholder="Student Name"
@@ -285,9 +263,9 @@ const Student = () => {
             />
 
             <select
-              value={form.className}
+              value={form.class}
               onChange={e =>
-                setForm({ ...form, className: e.target.value })
+                setForm({ ...form, class: e.target.value })
               }
             >
               <option value="">Class</option>

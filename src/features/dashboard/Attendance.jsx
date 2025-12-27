@@ -16,8 +16,40 @@ const SECTIONS = ["A", "B", "C", "D"];
 
 export default function Attendance({ adminUid }) {
 
-  const uid = adminUid || localStorage.getItem("adminUid");
+  
+
   const role = (localStorage.getItem("role") || "").toLowerCase();
+
+const uid =
+  adminUid ||
+  localStorage.getItem("ownerUid") ||
+  localStorage.getItem("adminUid");
+
+useEffect(() => {
+  async function resolveOwner() {
+    if (role !== "sub_admin") return;
+
+    const sub = await getDoc(
+      doc(db, "users", localStorage.getItem("adminUid"))
+    );
+
+    if (sub.exists()) {
+      const data = sub.data();
+      const main = data.ownerUid || data.createdBy || data.adminUid;
+
+      if (main) {
+        localStorage.setItem("ownerUid", main);
+        console.log("SET OWNER UID =", main);
+      }
+    }
+  }
+
+  resolveOwner();
+}, [role]);
+
+  
+
+  
 
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
@@ -106,39 +138,30 @@ export default function Attendance({ adminUid }) {
   /* ================= SAVE ================= */
   const saveAttendance = async () => {
     if (!uid || !students.length) return;
-
+  
     const docId = `${date}_${selectedClass}_${selectedSection}`;
-
-    if (role === "sub_admin") {
-      await addDoc(collection(db, "users", uid, "approval_requests"), {
-        module: "attendance",
-        action: "save",
-        docId,
-        payload: { date, class: selectedClass, section: selectedSection, records, lateTimes },
-        status: "pending",
-        createdBy: localStorage.getItem("adminId"),
-        createdAt: Timestamp.now()
-      });
-
-      alert("⏳ Attendance request sent to Admin");
-      return;
+  
+    try {
+      await setDoc(
+        doc(db, "users", uid, "attendance", docId),
+        {
+          date,
+          class: selectedClass,
+          section: selectedSection,
+          records,
+          lateTimes,
+          createdAt: Timestamp.now()
+        },
+        { merge: true }
+      );
+  
+      alert("✅ Attendance saved");
+    } catch (err) {
+      console.error("SAVE ERROR:", err);
+      alert("❌ Failed to save attendance (check console).");
     }
-
-    await setDoc(
-      doc(db, "users", uid, "attendance", docId),
-      {
-        date,
-        class: selectedClass,
-        section: selectedSection,
-        records,
-        lateTimes,        // 👈 save late times
-        createdAt: Timestamp.now()
-      },
-      { merge: true }
-    );
-
-    alert("✅ Attendance saved");
-  };
+  }; 
+  
 
   return (
     <div className="tt-container">
@@ -225,7 +248,7 @@ export default function Attendance({ adminUid }) {
                     <td data-label="Student Id">{s.studentId}</td>
 
                     <td>
-                      <div style={{ display: "flex", gap: 8, alignItems: "center" , justifyContent: "center" ,width: "100%"}}>
+                      <div style={{ display: "flex", gap: 8, alignItems: "center" ,width: "100%"}}>
                         {["present", "absent", "late"].map(st => (
                           <button
                             key={st}
@@ -304,15 +327,32 @@ export default function Attendance({ adminUid }) {
       </div>
 
       {/* icons — SAME ORDER AS DESKTOP */}
-      <div className="prev-row" >
-        {(history[s.id] || []).map((st, i) => (
-          <span key={i} className="prev-icon">
-            {st === "present" ? "✔"
-            : st === "absent" ? "✖"
-            : st ? "L" : "—"}
-          </span>
-        ))}
-      </div>
+      <div className="prev-row">
+  {(history[s.id] || []).map((st, i) => (
+    <span
+      key={i}
+      className="prev-icon"
+      style={{
+        fontWeight: 700,
+        color:
+          st === "present"
+            ? "green"
+            : st === "absent"
+            ? "red"
+            : "#c9a000"
+      }}
+    >
+      {st === "present"
+        ? "✔"
+        : st === "absent"
+        ? "✖"
+        : st
+        ? "L"
+        : "—"}
+    </span>
+  ))}
+</div>
+
 
     </div>
   </td>
