@@ -6,6 +6,8 @@ import { db } from "../../services/firebase";
 import { useNavigate } from "react-router-dom";
 import "../dashboard_styles/Dashboard.css";
 import Approvals from "./Approvals";
+import Courses from "./Courses";
+
 
 import {
   FaUserCircle,
@@ -13,7 +15,7 @@ import {
   FaHome,
   FaCog,FaUserCheck,
   FaSignOutAlt,
-  FaChevronDown,
+  FaChevronDown,FaBookOpen,
   FaChevronUp,FaCalendarAlt,FaClipboardCheck,FaUserTimes
 } from "react-icons/fa";
 
@@ -251,6 +253,10 @@ const Dashboard = () => {
            <FaClipboardCheck/>Approvals
            </li>
           )}
+          <li onClick={() => setActivePage("courses")}>
+          <FaBookOpen /> Courses
+          </li>
+
            <li onClick={() => setActivePage("attendance")}>
            <FaUserCheck/> Attendance
           </li>
@@ -369,6 +375,10 @@ const Dashboard = () => {
           {isAdminOrSubAdmin && activePage === "todays-absent" && (
             <ShowTodaysAbsent adminUid={adminUid} />
           )}
+          {isAdminOrSubAdmin && activePage === "courses" && (
+           <Courses />
+           )}
+
 
 
 

@@ -8,7 +8,8 @@ import {
   Timestamp,
   deleteDoc,
   doc,
-  updateDoc
+  updateDoc,
+  setDoc  
 } from "firebase/firestore";
 import { auth, db } from "../../services/firebase";
 
@@ -85,15 +86,16 @@ const Admin = () => {
         }
       );
     } else {
-      await addDoc(
-        collection(db, "users", superAdminUid, "admins"),
+      await setDoc(
+        doc(db, "users", superAdminUid, "admins", form.adminId),
         {
           ...form,
           password,
-          role: "sub_admin",   // ✅ as requested
+          role: "sub_admin",
           createdAt: Timestamp.now()
         }
       );
+      
     }
   
     resetForm();

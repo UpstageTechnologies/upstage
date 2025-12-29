@@ -88,6 +88,66 @@ const Approvals = () => {
           await deleteDoc(doc(db, ...base, r.targetId));
         }
       }
+      /* --- PARENTS --- */
+if (r.module === "parent") {
+  const base = ["users", adminUid, "parents"];
+
+  if (r.action === "create") {
+    await addDoc(collection(db, ...base), {
+      ...r.payload,
+      role: "parent",
+      createdAt: new Date()
+    });
+  }
+
+  if (r.action === "update") {
+    await updateDoc(
+      doc(db, ...base, r.targetId),
+      {
+        ...r.payload,
+        updatedAt: new Date()
+      }
+    );
+  }
+
+  if (r.action === "delete") {
+    await deleteDoc(doc(db, ...base, r.targetId));
+  }
+}
+
+
+/* --- STUDENTS --- */
+if (r.module === "student") {
+  const base = ["users", adminUid, "students"];
+
+  if (r.action === "create") {
+    const id = r.payload.studentId;
+
+    await setDoc(
+      doc(db, ...base, id),
+      {
+        ...r.payload,
+        createdAt: new Date()
+      }
+    );
+  }
+
+  if (r.action === "update") {
+    await updateDoc(
+      doc(db, ...base, r.targetId),
+      {
+        ...r.payload,
+        updatedAt: new Date()
+      }
+    );
+  }
+
+  if (r.action === "delete") {
+    await deleteDoc(doc(db, ...base, r.targetId));
+  }
+}
+
+
 
 
       /* MARK APPROVED */

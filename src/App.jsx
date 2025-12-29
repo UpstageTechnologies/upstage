@@ -13,6 +13,7 @@ import AdminLogin from "./useTheme/pages/AdminLogin";
 import CalendarPage from "./useTheme/pages/CalendarPage";
 import Attendance from "./features/dashboard/Attendance";
 import ShowTodaysAbsent from "./features/dashboard/ShowTodaysAbsent";
+import Courses from "./features/dashboard/Courses";
 
 
 
@@ -34,6 +35,8 @@ function App() {
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="attendance" element={<Attendance />} />
         <Route path="/todays-absent" element={<ShowTodaysAbsent />} />
+        <Route path="courses" element={<Courses />} />
+
 
 
         

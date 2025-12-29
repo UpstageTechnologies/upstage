@@ -1,62 +1,45 @@
 import React, { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import "../dashboard_styles/Teacher.css";
-import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
-import { db } from "../../services/firebase";
+import {
+  collection,
+  getDocs,
+  query,
+  where
+} from "firebase/firestore";
+import { auth, db } from "../../services/firebase";
 
-const ShowTodaysAbsent = ({ adminUid }) => {
+const ShowTodaysAbsent = () => {
 
-  /* ---------- ROLE + UID ---------- */
-  const role = (localStorage.getItem("role") || "").toLowerCase();
+  /* ---------- SAME METHOD AS TEACHER.jsx ---------- */
+  const adminUid =
+    auth.currentUser?.uid || localStorage.getItem("adminUid");
 
-  const [uid, setUid] = useState(
-    adminUid ||
-    localStorage.getItem("ownerUid") ||
-    localStorage.getItem("adminUid")
+  const [date, setDate] = useState(
+    new Date().toISOString().substring(0, 10)
   );
 
-  const [date, setDate] = useState(new Date().toISOString().substring(0, 10));
   const [absents, setAbsents] = useState([]);
   const [search, setSearch] = useState("");
 
-  /* ---------- RESOLVE OWNER (SUB ADMIN) ---------- */
-  useEffect(() => {
-    async function resolveOwner() {
-      if (role !== "sub_admin") return;
-
-      const snap = await getDoc(
-        doc(db, "users", localStorage.getItem("adminUid"))
-      );
-
-      if (snap.exists()) {
-        const data = snap.data();
-        const main = data.ownerUid || data.createdBy || data.adminUid;
-
-        if (main) {
-          localStorage.setItem("ownerUid", main);
-          setUid(main);
-        }
-      }
-    }
-
-    resolveOwner();
-  }, [role]);
-
-
   /* ---------- LOAD ABSENT LIST ---------- */
   const loadAbsents = async () => {
-    if (!uid) return;
+    if (!adminUid) return;
 
-    // students list
-    const sSnap = await getDocs(collection(db, "users", uid, "students"));
+    // students
+    const sSnap = await getDocs(
+      collection(db, "users", adminUid, "students")
+    );
+
     const studentMap = {};
     sSnap.forEach(d => (studentMap[d.id] = d.data()));
 
-    // attendance for date
+    // attendance (same path)
     const q = query(
-      collection(db, "users", uid, "attendance"),
+      collection(db, "users", adminUid, "attendance"),
       where("date", "==", date)
     );
+
     const aSnap = await getDocs(q);
 
     const list = [];
@@ -85,8 +68,9 @@ const ShowTodaysAbsent = ({ adminUid }) => {
 
   useEffect(() => {
     loadAbsents();
-  }, [date, uid]);
+  }, [date, adminUid]);
 
+  /* ---------- UI ---------- */
   return (
     <div className="teacher-page">
       <div className="teacher-header">
@@ -124,7 +108,9 @@ const ShowTodaysAbsent = ({ adminUid }) => {
         <tbody>
           {absents
             .filter(a =>
-              JSON.stringify(a).toLowerCase().includes(search.toLowerCase())
+              JSON.stringify(a)
+                .toLowerCase()
+                .includes(search.toLowerCase())
             )
             .map((a, i) => (
               <tr key={i}>
