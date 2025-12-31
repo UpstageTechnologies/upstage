@@ -8,9 +8,16 @@ import {
   Timestamp,
   deleteDoc,
   doc,
-  updateDoc
+  updateDoc,
+  query,
+  where
 } from "firebase/firestore";
+
 import { auth, db } from "../../services/firebase";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+
+
+
 
 /* 🔢 Class 1–12 */
 const classes = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -32,6 +39,7 @@ const Teacher = () => {
   const [teachers, setTeachers] = useState([]);
   const [editId, setEditId] = useState(null);
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   /* ================= FORM ================= */
   const [form, setForm] = useState({
@@ -47,7 +55,7 @@ const Teacher = () => {
   });
 
   const [classForm, setClassForm] = useState({
-    className: "",
+    class: "",
     section: "",
     subject: ""
   });
@@ -65,6 +73,9 @@ const Teacher = () => {
         id: d.id,
         ...d.data()
       }))
+      .sort((a, b) =>
+      (a.name || "").toLowerCase().localeCompare((b.name || "").toLowerCase())
+    )
     );
   };
 
@@ -81,7 +92,7 @@ const Teacher = () => {
 
   /* ================= ADD CLASS ================= */
   const addAssignedClass = () => {
-    if (!classForm.className || !classForm.section || !classForm.subject) {
+    if (!classForm.class || !classForm.section || !classForm.subject) {
       alert("Fill class, section & subject");
       return;
     }
@@ -91,7 +102,7 @@ const Teacher = () => {
       assignedClasses: [...prev.assignedClasses, classForm]
     }));
 
-    setClassForm({ className: "", section: "", subject: "" });
+    setClassForm({ class: "", section: "", subject: "" });
   };
 
   /* ================= SAVE ================= */
@@ -106,6 +117,40 @@ const Teacher = () => {
       alert("Required fields missing");
       return;
     }
+    // 📞 Validate 10-digit phone
+const phoneClean = form.phone.trim();
+
+if (!/^\d{10}$/.test(phoneClean)) {
+  alert("📞 Phone number must be exactly 10 digits");
+  return;
+}
+
+
+  // ⭐ trim spaces
+  const teacherIdTrimmed = form.teacherId.trim();
+
+  // 🔎 CHECK DUPLICATE teacherId
+  const q = query(
+    collection(db, "users", adminUid, "teachers"),
+    where("teacherId", "==", teacherIdTrimmed)
+  );
+
+  const snap = await getDocs(q);
+
+  // ➤ ADD mode: must NOT exist
+  if (!editId && !snap.empty) {
+    alert("❌ Teacher ID already exists. Use another one.");
+    return;
+  }
+
+  // ➤ EDIT mode: allow only if belongs to the SAME teacher
+  if (editId && !snap.empty) {
+    const found = snap.docs[0];
+    if (found.id !== editId) {
+      alert("❌ Another teacher already uses this Teacher ID.");
+      return;
+    }
+  } 
 
     /* 🔴 SUB ADMIN → APPROVAL */
     if (role === "sub_admin") {
@@ -134,9 +179,13 @@ const Teacher = () => {
     if (editId) {
       const updateData = {
         ...form,
-        updatedAt: Timestamp.now()
+        teacherId: teacherIdTrimmed,
+        updatedAt: Timestamp.now(),
+        password: form.password || password  
       };
-      if (password) updateData.password = password;
+      if (password && password.trim() !== "") {
+        updateData.password = password;   // only when NEW entered
+      }
 
       await updateDoc(
         doc(db, "users", adminUid, "teachers", editId),
@@ -147,6 +196,7 @@ const Teacher = () => {
         collection(db, "users", adminUid, "teachers"),
         {
           ...form,
+          teacherId: teacherIdTrimmed,
           password,
           role: "teacher",
           createdAt: Timestamp.now()
@@ -201,7 +251,7 @@ const Teacher = () => {
       experience: "",
       assignedClasses: []
     });
-    setClassForm({ className: "", section: "", subject: "" });
+    setClassForm({ class: "", section: "", subject: "" });
   };
 
   /* ================= UI ================= */
@@ -257,7 +307,7 @@ const Teacher = () => {
                 <td data-label="Classes">
                 {t.assignedClasses?.length
                     ? t.assignedClasses
-                    .map(c => `${c.className}-${c.section}`)
+                    .map(c => `${c.class}-${c.section}`)
                     .join(", ")
                     : "-"}
                 </td>
@@ -268,7 +318,7 @@ const Teacher = () => {
     onClick={() => {
       setForm({ ...t });
       setEditId(t.id);
-      setPassword("");
+      setPassword(t.password || "");
       setShowModal(true); // ✅ FIXED
     }}
   >
@@ -309,12 +359,30 @@ const Teacher = () => {
               }
             />
 
-            <input
-              type="password"
-              placeholder={editId ? "New Password (optional)" : "Password"}
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-            />
+<div style={{ position: "relative" }}>
+  <input
+    type={showPassword ? "text" : "password"}
+    placeholder= "Password"
+    value={password}
+    onChange={e => setPassword(e.target.value)}
+    style={{ width: "100%", paddingRight: 40 }}
+  />
+
+  <span
+    onClick={() => setShowPassword(prev => !prev)}
+    style={{
+      position: "absolute",
+      right: 10,
+      top: 28,
+      transform: "translateY(-50%)",
+      cursor: "pointer",
+      color: "#555"
+    }}
+  >
+    {showPassword ? <FaEyeSlash /> : <FaEye />}
+  </span>
+</div>
+
 
             <input
               placeholder="Email"
@@ -322,11 +390,16 @@ const Teacher = () => {
               onChange={e => setForm({ ...form, email: e.target.value })}
             />
 
-            <input
-              placeholder="Phone"
-              value={form.phone}
-              onChange={e => setForm({ ...form, phone: e.target.value })}
-            />
+<input
+  placeholder="Phone"
+  value={form.phone}
+  maxLength={10}
+  onChange={e => {
+    const v = e.target.value.replace(/\D/g, "");   // remove non-digits
+    setForm({ ...form, phone: v.slice(0, 10) });   // max 10 digits
+  }}
+/>
+
 
             <select
               value={form.gender}
@@ -341,9 +414,9 @@ const Teacher = () => {
             <h4>Assigned Classes</h4>
 
             <select
-              value={classForm.className}
+              value={classForm.class}
               onChange={e =>
-                setClassForm({ ...classForm, className: e.target.value })
+                setClassForm({ ...classForm, class: e.target.value })
               }
             >
               <option value="">Class</option>
@@ -386,7 +459,7 @@ const Teacher = () => {
       }}
     >
       <span>
-        {c.className}-{c.section} ({c.subject})
+        {c.class}-{c.section} ({c.subject})
       </span>
 
       <button

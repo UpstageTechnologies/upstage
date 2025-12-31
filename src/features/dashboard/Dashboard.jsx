@@ -32,6 +32,8 @@ import Attendance from "./Attendance";
 import ShowTodaysAbsent from "./ShowTodaysAbsent";
 import TeacherAttendance from "./TeacherAttendance";
 import ShowTodaysTeacherAbsent from "./ShowTodaysTeacherAbsent";
+import Home from "./Home";
+
 
 
 
@@ -233,7 +235,7 @@ const Dashboard = () => {
               <FaCalendarAlt />Timetable
               </li>
              
-          <li onClick={() => setActivePage("todays-absent")}>
+          <li onClick={() => setActivePage("teacher-absents")}>
           
              <FaUserTimes/>Teacher's Absences
          </li>
@@ -242,10 +244,11 @@ const Dashboard = () => {
              <FaUserTimes/>Student's Absences
          </li>
          
-
+         {role === "sub_admin" && (
          <li onClick={() => setActivePage("attendance")}>
            <FaUserCheck/> Teacher's Attendance
           </li>
+         )}
              
             </>
           )}
@@ -340,18 +343,9 @@ const Dashboard = () => {
         </nav>
 
         <div className="dashboard-content">
-        {activePage === "home" && (
-        <>
-            <DashboardSlider />
+       {activePage === "home" && <Home adminUid={adminUid} role={role} />}
 
-          {/* 🔒 ONLY FOR SPECIFIC USER DOCUMENT */}
-          {user?.uid === SPECIAL_USER_UID && (
-           <h2 style={{ marginTop: "20px" }}>
-           Hello Riyaz 👋 Welcome Dashboard
-           </h2>
-          )}
-         </>
-       )}
+
 
 
           {isAdminOrSubAdmin && activePage === "teacher" && (
@@ -391,9 +385,10 @@ const Dashboard = () => {
            {role === "teacher" && activePage === "teacher-attendance" && (
            <TeacherAttendance />
            )}
-           {isAdminOrSubAdmin && activePage === "teacher-absent" && (
-  <ShowTodaysTeacherAbsent adminUid={adminUid} />
-)}
+           {isAdminOrSubAdmin && activePage === "teacher-absents" && (
+             <ShowTodaysTeacherAbsent adminUid={adminUid} />
+           )}
+           
 
 
 

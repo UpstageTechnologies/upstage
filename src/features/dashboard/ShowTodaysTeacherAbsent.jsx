@@ -59,13 +59,19 @@ const ShowTodaysTeacherAbsent = () => {
         list.push({
           name: t.name,
           teacherId: t.teacherId,
-          class:   t.assignedClasses?.[0]?.className || "-",
+          class:   t.assignedClasses?.[0]?.class || "-",
           section: t.assignedClasses?.[0]?.section || "-"
         });
       }
     });
 
-    setAbsents(list);
+    setAbsents(
+  list.sort((a, b) =>
+    (a.name || "").toLowerCase()
+      .localeCompare((b.name || "").toLowerCase())
+  )
+);
+
   };
 
   useEffect(() => {

@@ -6,7 +6,7 @@
     getDoc,
     setDoc,
     doc,
-    Timestamp
+    Timestamp,deleteDoc
   } from "firebase/firestore";
 
   // ⭐ reuse dashboard styles
@@ -56,7 +56,18 @@
     const addSubject = async () => {
       const name = prompt("Enter Subject Name");
       if (!name) return;
-
+    
+      // ⭐ Create / ensure CLASS document (field name = class)
+      await setDoc(
+        doc(db, "users", adminUid, "courses", String(selectedClass)),
+        {
+          class: selectedClass,          // <<< CHANGE HERE
+          createdAt: Timestamp.now()
+        },
+        { merge: true }
+      );
+    
+      // ⭐ Add subject
       await setDoc(
         doc(
           db,
@@ -69,44 +80,29 @@
         ),
         { examGroups: [] }
       );
-
+    
       loadSubjects();
     };
+    const deleteSubject = async (name) => {
+      if (!window.confirm(`Delete subject "${name}"?`)) return;
+    
+      await deleteDoc(
+        doc(
+          db,
+          "users",
+          adminUid,
+          "courses",
+          String(selectedClass),
+          "subjects",
+          name
+        )
+      );
+    
+      loadSubjects();
+    };
+    
 
-    /* ========= DELETE SUBJECT ========= */
-const deleteSubject = async (name) => {
-  if (!window.confirm(`Delete subject "${name}"?`)) return;
 
-  await setDoc(
-    doc(
-      db,
-      "users",
-      adminUid,
-      "courses",
-      String(selectedClass),
-      "subjects",
-      name
-    ),
-    {},
-    { merge: false } // overwrite with empty → delete structure
-  );
-
-  // Firestore delete — safer way
-  await deleteDoc(
-    doc(
-      db,
-      "users",
-      adminUid,
-      "courses",
-      String(selectedClass),
-      "subjects",
-      name
-    )
-  );
-
-  // refresh list
-  loadSubjects();
-};
 
 
     /* ========= LOAD TOPICS FOR SUBJECT ========= */
@@ -185,28 +181,54 @@ const deleteSubject = async (name) => {
           </>
         )}
 
-        {/* ========== SUBJECT LIST ========== */}
-        {selectedClass && !selectedSubject && (
-          <>
-            <h3>Class {selectedClass} — Subjects</h3>
+{selectedClass && !selectedSubject && (
+  <>
+    <h3>Class {selectedClass} — Subjects</h3>
 
-            <button className="save-btn" onClick={addSubject} style={{ marginBottom: 16 }}        >
-              + Add Subject
-            </button>
+    <button
+      className="save-btn"
+      onClick={addSubject}
+      style={{ marginBottom: 16 }}
+    >
+      + Add Subject
+    </button>
 
-            <div className="class-grid">
-              {subjects.map((s) => (
-                <div
-                  key={s}
-                  className="class-card"
-                  onClick={() => loadTopics(s)}
-                >
-                  {s}
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+    <div className="class-grid">
+      {subjects.map((s) => (
+        <div
+          key={s}
+          className="class-card"
+          style={{ position: "relative" }}
+          onClick={() => loadTopics(s)}
+        >
+          {s}
+
+          {/* DELETE BUTTON */}
+          <button
+            style={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              background: "#ff4d4d",
+              color: "#fff",
+              border: "none",
+              padding: "4px 8px",
+              borderRadius: 6,
+              cursor: "pointer"
+            }}
+            onClick={(e) => {
+              e.stopPropagation();   // don't open subject
+              deleteSubject(s);
+            }}
+          >
+            ✖
+          </button>
+        </div>
+      ))}
+    </div>
+  </>
+)}
+
 
         {/* ========== TOPICS BUILDER ========== */}
         {selectedSubject && (

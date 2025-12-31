@@ -9,9 +9,13 @@ import {
   deleteDoc,
   doc,
   updateDoc,
-  setDoc  
+  getDoc,setDoc
 } from "firebase/firestore";
 import { auth, db } from "../../services/firebase";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+
+
+
 
 const role = localStorage.getItem("role");
 const isAdmin = role === "admin";
@@ -22,6 +26,7 @@ const Admin = () => {
   const [admins, setAdmins] = useState([]);
   const [editId, setEditId] = useState(null);
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   /* ===== ADMIN FORM ===== */
   const [form, setForm] = useState({
@@ -76,16 +81,36 @@ const Admin = () => {
       alert("Required fields missing");
       return;
     }
+    const phoneClean = form.phone.trim();
+
+if (!/^\d{10}$/.test(phoneClean)) {
+  alert("📞 Phone number must be exactly 10 digits");
+  return;
+}
+
   
     if (editId) {
+      // --- UPDATE (same as before) ---
+      const updateData = { ...form, updatedAt: Timestamp.now() };
+      if (password && password.trim() !== "") updateData.password = password;
+    
       await updateDoc(
         doc(db, "users", superAdminUid, "admins", editId),
-        {
-          ...form,
-          updatedAt: Timestamp.now()
-        }
+        updateData
       );
-    } else {
+    } 
+    else {
+      // 🔎 1️⃣ CHECK DUPLICATE
+      const existing = await getDoc(
+        doc(db, "users", superAdminUid, "admins", form.adminId)
+      );
+    
+      if (existing.exists()) {
+        alert("❌ Admin ID already exists. Use a different ID.");
+        return;
+      }
+    
+      // 🆕 2️⃣ CREATE NEW
       await setDoc(
         doc(db, "users", superAdminUid, "admins", form.adminId),
         {
@@ -95,8 +120,8 @@ const Admin = () => {
           createdAt: Timestamp.now()
         }
       );
-      
     }
+    
   
     resetForm();
     fetchAdmins();
@@ -196,7 +221,7 @@ const Admin = () => {
                 experience: a.experience || ""
               });
               setEditId(a.id);
-              setPassword("");
+              setPassword(a.password || ""); 
               setShowModal(true);
             }}
           >
@@ -238,12 +263,30 @@ const Admin = () => {
               }
             />
 
-            <input
-              type="password"
-              placeholder={editId ? "New Password (optional)" : "Password"}
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-            />
+<div style={{ position: "relative" }}>
+  <input
+    type={showPassword ? "text" : "password"}
+    placeholder={editId ? "New Password (optional)" : "Password"}
+    value={password}
+    onChange={e => setPassword(e.target.value)}
+    style={{ width: "100%", paddingRight: 40 }}
+  />
+
+  <span
+    onClick={() => setShowPassword(prev => !prev)}
+    style={{
+      position: "absolute",
+      right: 10,
+      top: 28,
+      transform: "translateY(-50%)",
+      cursor: "pointer",
+      color: "#555"
+    }}
+  >
+    {showPassword ? <FaEyeSlash /> : <FaEye />}
+  </span>
+</div>
+
 
             <input
               placeholder="Email"
@@ -253,13 +296,16 @@ const Admin = () => {
               }
             />
 
-            <input
-              placeholder="Phone"
-              value={form.phone}
-              onChange={e =>
-                setForm({ ...form, phone: e.target.value })
-              }
-            />
+<input
+  placeholder="Phone"
+  value={form.phone}
+  maxLength={10}
+  onChange={e => {
+    const v = e.target.value.replace(/\D/g, "");   // remove non-digits
+    setForm({ ...form, phone: v.slice(0, 10) });   // max 10 digits
+  }}
+/>
+
 
             <input
               placeholder="Address"

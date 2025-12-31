@@ -8,7 +8,7 @@ import {
   Timestamp,
   deleteDoc,
   doc,
-  updateDoc
+  updateDoc,query, where
 } from "firebase/firestore";
 import { auth, db } from "../../services/firebase";
 
@@ -53,6 +53,9 @@ const Student = () => {
         id: d.id,
         ...d.data()
       }))
+      .sort((a, b) =>
+      (a.studentName || "").toLowerCase().localeCompare((b.studentName || "").toLowerCase())
+    )
     );
   };
 
@@ -72,6 +75,30 @@ const Student = () => {
       alert("Required fields missing");
       return;
     }
+    const idTrim = form.studentId.trim();
+
+  // 🔎 CHECK DUPLICATE studentId
+  const q = query(
+    collection(db, "users", adminUid, "students"),
+    where("studentId", "==", idTrim)
+  );
+
+  const snap = await getDocs(q);
+
+  // ➤ ADD → must NOT exist
+  if (!editId && !snap.empty) {
+    alert("❌ Student ID already exists. Use another one.");
+    return;
+  }
+
+  // ➤ EDIT → allow only if same student document
+  if (editId && !snap.empty) {
+    const found = snap.docs[0];
+    if (found.id !== editId) {
+      alert("❌ Another student already uses this Student ID.");
+      return;
+    }
+  }
 
     if (role === "sub_admin") {
       await addDoc(

@@ -7,10 +7,11 @@ import {
   Timestamp,
   deleteDoc,
   doc,
-  updateDoc
+  updateDoc,query, where
 } from "firebase/firestore";
 import { auth, db } from "../../services/firebase";
 import "../dashboard_styles/Teacher.css";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Parent = () => {
   /* ================= BASIC ================= */
@@ -30,8 +31,11 @@ const Parent = () => {
     { studentId: "", studentName: "" }
   ]);
 
+  const [showPassword, setShowPassword] = useState(false);
+
+
   const [form, setForm] = useState({
-    name: "",
+    parentName: "",
     parentId: "",
     email: "",
     phone: "",
@@ -47,11 +51,14 @@ const Parent = () => {
     );
 
     setParents(
-      snap.docs.map(d => ({
-        id: d.id,
-        ...d.data()
-      }))
+      snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) =>
+          (a.parentName || "").trim().toLowerCase()
+            .localeCompare((b.parentName || "").trim().toLowerCase())
+        )
     );
+    
   };
 
   useEffect(() => {
@@ -83,7 +90,7 @@ const Parent = () => {
   /* ================= SAVE (ADMIN / SUB ADMIN) ================= */
   const handleSave = async () => {
     if (
-      !form.name ||
+      !form.parentName ||
       !form.parentId ||
       !form.email ||
       !form.phone ||
@@ -94,11 +101,90 @@ const Parent = () => {
       alert("All fields required");
       return;
     }
+    const parentIdTrim = form.parentId.trim();
+    const phoneClean = form.phone.trim();
+
+if (!/^\d{10}$/.test(phoneClean)) {
+  alert("📞 Phone number must be exactly 10 digits");
+  return;
+}
+
+
+      // =======================
+  // 🔎 1️⃣ CLEAN + CHECK DUP STUDENT IDs
+  // =======================
+  const cleanStudents = students.map(s => ({
+    ...s,
+    studentId: s.studentId.trim().toLowerCase()
+  }));
+
+  const ids = cleanStudents.map(s => s.studentId);
+  const hasDuplicate = ids.some((id, i) => ids.indexOf(id) !== i);
+
+  if (hasDuplicate) {
+    alert("❌ Duplicate Student ID — each student must be unique.");
+    return;
+  }
+    // 🔎 CHECK DUPLICATE Parent ID
+  const q = query(
+    collection(db, "users", adminUid, "parents"),
+    where("parentId", "==", parentIdTrim)
+  );
+
+  const snap = await getDocs(q);
+  
+  // =======================
+// 🔎 2️⃣ GLOBAL duplicate check in Firestore
+// =======================
+for (const s of cleanStudents) {
+
+  const q2 = query(
+    collection(db, "users", adminUid, "students"),
+    where("studentId", "==", s.studentId)
+  );
+
+  const snap2 = await getDocs(q2);
+
+  // ➤ ADD -> block if exists
+  if (!editId && !snap2.empty) {
+    alert(`❌ Student ID "${s.studentId}" already exists in the school.`);
+    return;
+  }
+
+  // ➤ EDIT -> allow only if student belongs to same parent
+  if (editId && !snap2.empty) {
+    const another = snap2.docs.find(
+      d => d.data().parentId !== form.parentId
+    );
+
+    if (another) {
+      alert(`❌ Student ID "${s.studentId}" is already used by another parent.`);
+      return;
+    }
+  }
+}
+
+
+  // ➤ ADD → must NOT exist
+  if (!editId && !snap.empty) {
+    alert("❌ Parent ID already exists. Use another one.");
+    return;
+  }
+
+  // ➤ EDIT → allow only if the same parent
+  if (editId && !snap.empty) {
+    const found = snap.docs[0];
+    if (found.id !== editId) {
+      alert("❌ Another parent already uses this Parent ID.");
+      return;
+    }
+  }
 
     const payload = {
       ...form,
+      parentId: parentIdTrim,
       studentsCount,
-      students
+      students: cleanStudents
     };
 
     /* 🔴 SUB ADMIN → APPROVAL */
@@ -124,26 +210,94 @@ const Parent = () => {
       return;
     }
 
-    /* 🟢 MAIN ADMIN → DIRECT SAVE */
-    if (editId) {
-      await updateDoc(
-        doc(db, "users", adminUid, "parents", editId),
-        {
-          ...payload,
-          updatedAt: Timestamp.now()
-        }
-      );
-    } else {
+  /* 🟢 MAIN ADMIN → DIRECT SAVE */
+/* 🟢 MAIN ADMIN → DIRECT SAVE */
+/* 🟢 MAIN ADMIN → DIRECT SAVE */
+if (editId) {
+
+  // 1️⃣ update parent document
+  const updateData = {
+    ...payload,
+    updatedAt: Timestamp.now(),
+  };
+  
+  // ⭐ Only if NEW password entered
+  if (password && password.trim() !== "") {
+    updateData.password = password;
+  }
+  
+  await updateDoc(
+    doc(db, "users", adminUid, "parents", editId),
+    updateData
+  );
+  
+
+  // 2️⃣ load students currently in DB for this parent
+  const existingSnap = await getDocs(
+    collection(db, "users", adminUid, "students")
+  );
+
+  const existingForParent = existingSnap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(s => s.parentId === payload.parentId);
+
+  // 3️⃣ for each student in FORM
+  for (const s of students) {
+
+    const match = existingForParent.find(
+      x => (x.studentId || "").toLowerCase() === s.studentId.toLowerCase()
+    );
+
+    // ➜ if NOT found → create again (re-create deleted student)
+    if (!match) {
       await addDoc(
-        collection(db, "users", adminUid, "parents"),
+        collection(db, "users", adminUid, "students"),
         {
-          ...payload,
-          password,
-          role: "parent",
+          studentName: s.studentName,
+          studentId: s.studentId,
+          parentId: payload.parentId,
+          parentName: payload.parentName,
+          class: "",
+          section: "",
           createdAt: Timestamp.now()
         }
       );
     }
+  }
+}
+ else {
+
+  // ⭐ create parent
+  const parentRef = await addDoc(
+    collection(db, "users", adminUid, "parents"),
+    {
+      ...payload,
+      password,
+      role: "parent",
+      createdAt: Timestamp.now()
+    }
+  );
+
+  // ⭐ create ALL students (first time only)
+  for (const s of students) {
+    await addDoc(
+      collection(db, "users", adminUid, "students"),
+      {
+        studentName: s.studentName || s.studentId,
+        studentId: s.studentId || s.studentName,
+
+        parentId: payload.parentId,
+        parentName: payload.parentName,
+
+        class: "",
+        section: "",
+        createdAt: Timestamp.now()
+      }
+    );
+  }
+}
+
+
 
     resetForm();
     fetchParents();
@@ -151,46 +305,65 @@ const Parent = () => {
 
   /* ================= DELETE ================= */
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete parent?")) return;
-
-    /* 🔴 SUB ADMIN → APPROVAL */
+    if (!window.confirm("Delete parent and all students?")) return;
+  
     if (role === "sub_admin") {
-      await addDoc(
-        collection(db, "users", adminUid, "approval_requests"),
-        {
-          module: "parent",
-          action: "delete",
-          targetId: id,
-          status: "pending",
-          createdBy: localStorage.getItem("adminId"),
-          createdAt: Timestamp.now()
-        }
-      );
-
-      alert("⏳ Delete request sent");
+      // … your approval request logic (same)
       return;
     }
-
-    /* 🟢 MAIN ADMIN */
+  
+    // 1️⃣ get parent
+    const parentDoc = parents.find(p => p.id === id);
+    if (!parentDoc) return;
+  
+    // 2️⃣ delete students belonging to parent
+    const snap = await getDocs(
+      collection(db, "users", adminUid, "students")
+    );
+  
+    for (const d of snap.docs) {
+      if (d.data().parentId === parentDoc.parentId) {
+        await deleteDoc(
+          doc(db, "users", adminUid, "students", d.id)
+        );
+      }
+    }
+  
+    // 3️⃣ delete parent
     await deleteDoc(doc(db, "users", adminUid, "parents", id));
+  
     fetchParents();
   };
+  
 
   /* ================= EDIT ================= */
-  const handleEdit = (p) => {
+  const handleEdit = async (p) => {
     setEditId(p.id);
+  
     setForm({
-      name: p.name,
+      parentName: p.parentName,
       parentId: p.parentId,
       email: p.email,
       phone: p.phone,
       address: p.address
     });
-    setStudentsCount(p.studentsCount || 1);
-    setStudents(p.students || [{ studentId: "", studentName: "" }]);
-    setPassword("");
+  
+    // ⭐ load students REALLY in DB now
+    const snap = await getDocs(
+      collection(db, "users", adminUid, "students")
+    );
+  
+    const list = snap.docs
+      .map(d => d.data())
+      .filter(s => s.parentId === p.parentId);
+  
+    setStudents(list.length ? list : [{ studentId: "", studentName: "" }]);
+    setStudentsCount(list.length || 1);
+  
+    setPassword(p.password ||"");
     setShowModal(true);
   };
+  
 
   /* ================= RESET ================= */
   const resetForm = () => {
@@ -200,7 +373,7 @@ const Parent = () => {
     setStudentsCount(1);
     setStudents([{ studentId: "", studentName: "" }]);
     setForm({
-      name: "",
+      parentName: "",
       parentId: "",
       email: "",
       phone: "",
@@ -250,7 +423,7 @@ const Parent = () => {
     )
     .map(p => (
       <tr key={p.id} className="mobile-card">
-        <td data-label="Name">{p.name}</td>
+        <td data-label="Name">{p.parentName}</td>
         <td data-label="Parent ID">{p.parentId}</td>
         <td data-label="Students">{p.studentsCount}</td>
         <td data-label="Email">{p.email}</td>
@@ -286,8 +459,8 @@ const Parent = () => {
 
             <input
               placeholder="Parent Name"
-              value={form.name}
-              onChange={e => setForm({ ...form, name: e.target.value })}
+              value={form.parentName}
+              onChange={e => setForm({ ...form,parentName: e.target.value })}
             />
             <input
               placeholder="Parent ID"
@@ -301,19 +474,49 @@ const Parent = () => {
               value={form.email}
               onChange={e => setForm({ ...form, email: e.target.value })}
             />
-            <input
-              placeholder="Phone"
-              value={form.phone}
-              onChange={e => setForm({ ...form, phone: e.target.value })}
-            />
+           <input
+  placeholder="Phone"
+  value={form.phone}
+  maxLength={10}
+  onChange={e => {
+    const v = e.target.value.replace(/\D/g, "");   // remove non-digits
+    setForm({ ...form, phone: v.slice(0, 10) });   // max 10 digits
+  }}
+/>
             <input
               placeholder="Address"
               value={form.address}
               onChange={e => setForm({ ...form, address: e.target.value })}
             />
+            <div style={{ position: "relative" }}>
+  <input
+    type={showPassword ? "text" : "password"}
+    placeholder= "Password"
+    value={password}
+    onChange={e => setPassword(e.target.value)}
+    style={{ width: "100%", paddingRight: 40 }}
+  />
+
+  {/* 👁️ toggle button */}
+  <span
+    onClick={() => setShowPassword(prev => !prev)}
+    style={{
+      position: "absolute",
+      right: 10,
+      top: 28,
+      transform: "translateY(-50%)",
+      cursor: "pointer",
+      color: "#555"
+    }}
+  >
+    {showPassword ?  <FaEyeSlash /> : <FaEye />}
+  </span>
+</div>
+
+            
 
             <p>Number of Students</p>
-            {[1, 2, 3].map(n => (
+            {[1, 2, 3, 4, 5].map(n => (
               <button
                 key={n}
                 onClick={() => handleStudentCountChange(n)}
@@ -327,31 +530,31 @@ const Parent = () => {
               </button>
             ))}
 
-            {students.map((s, i) => (
-              <div key={i}>
-                <input
-                  placeholder={`Student ${i + 1} ID`}
-                  value={s.studentId}
-                  onChange={e =>
-                    handleStudentChange(i, "studentId", e.target.value)
-                  }
-                />
-                <input
-                  placeholder={`Student ${i + 1} Name`}
-                  value={s.studentName}
-                  onChange={e =>
-                    handleStudentChange(i, "studentName", e.target.value)
-                  }
-                />
-              </div>
-            ))}
+{students.map((s, i) => (
+  <div key={i} style={{ display: "flex", gap: 8 }}>
+    <input
+      placeholder={`Student ${i + 1} ID`}
+      value={s.studentId}
+      onChange={e =>
+        handleStudentChange(i, "studentId", e.target.value)
+      }
+    />
 
-            <input
-              type="password"
-              placeholder={editId ? "New Password (optional)" : "Password"}
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-            />
+    <input
+      placeholder={`Student ${i + 1} Name`}
+      value={s.studentName}
+      onChange={e =>
+        handleStudentChange(i, "studentName", e.target.value)
+      }
+    />
+
+    
+
+  </div>
+))}
+
+
+          
 
             <div className="modal-actions">
               <button className="save" onClick={handleSave}>

@@ -90,7 +90,13 @@ const ShowTodaysAbsent = () => {
       });
     }
 
-    setAbsents(list);
+    setAbsents(
+  list.sort((a, b) =>
+    (a.name || "").toLowerCase()
+      .localeCompare((b.name || "").toLowerCase())
+  )
+);
+
   };
 
   useEffect(() => {
@@ -100,7 +106,7 @@ const ShowTodaysAbsent = () => {
   return (
     <div className="teacher-page">
       <div className="teacher-header">
-        <h2>Today’s Absent</h2>
+        <h2>Today’s Absent - Students</h2>
 
         <div className="teacher-actions">
 
@@ -147,7 +153,7 @@ const ShowTodaysAbsent = () => {
                 <td data-label = "Name">{a.name}</td>
                 <td data-label = "Student Id">{a.studentId}</td>
                 <td data-label = "Class">{a.class}</td>
-                <td data-label = "Section">{a.section}</td><td></td>
+                <td data-label = "Section">{a.section}</td> 
               </tr>
             ))}
 
