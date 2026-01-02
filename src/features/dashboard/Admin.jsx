@@ -206,7 +206,7 @@ if (!/^\d{10}$/.test(phoneClean)) {
         <td data-label="Qualification">{a.qualification || "-"}</td>
         <td data-label="Experience">{a.experience || "-"}</td>
 
-        <td data-label="Action" className="action-cell">
+        <td className="action-cell">
           <button
             className="edit-btn"
             onClick={() => {

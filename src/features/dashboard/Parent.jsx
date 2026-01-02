@@ -430,7 +430,7 @@ if (editId) {
         <td data-label="Phone">{p.phone}</td>
         <td data-label="Address">{p.address}</td>
 
-        <td data-label="Action" className="action-cell">
+        <td className="action-cell">
           <button
             className="edit-btn"
             onClick={() => handleEdit(p)}

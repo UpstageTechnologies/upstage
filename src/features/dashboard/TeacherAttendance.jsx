@@ -60,7 +60,7 @@ export default function TeacherAttendance() {
         .map(d => ({ id: d.id, ...d.data() }))
         .filter(
           s =>
-            String(s.className) === String(assigned.className) &&
+            String(s.class) === String(assigned.class) &&
             String(s.section).toUpperCase() ===
               String(assigned.section).toUpperCase()
         )
@@ -68,7 +68,7 @@ export default function TeacherAttendance() {
 
       setStudents(list);
 
-      const classKey = `${assigned.className}_${assigned.section}`;
+      const classKey = `${assigned.class}_${assigned.section}`;
 
       /* today */
       const today = await getDoc(
@@ -128,7 +128,7 @@ export default function TeacherAttendance() {
  async function saveAttendance() {
   if (!assigned) return;
 
-  const classKey = `${assigned.className}_${assigned.section}`;
+  const classKey = `${assigned.class}_${assigned.section}`;
 
   try {
 
@@ -136,7 +136,7 @@ export default function TeacherAttendance() {
     await setDoc(
       doc(db, "users", adminUid, "attendance", classKey),
       {
-        class: assigned.className,
+        class: assigned.class,
         section: assigned.section,
         createdAt: Timestamp.now()
       },
@@ -148,7 +148,7 @@ export default function TeacherAttendance() {
       doc(db, "users", adminUid, "attendance", classKey, "dates", date),
       {
         date,
-        class: assigned.className,
+        class: assigned.class,
         section: assigned.section,
         records,
         lateTimes,
@@ -173,7 +173,7 @@ export default function TeacherAttendance() {
       {assigned && (
         <>
           <h3 className="tt-sub">
-            Class {assigned.className} — Section {assigned.section}
+            Class {assigned.class} — Section {assigned.section}
           </h3>
 
           <input

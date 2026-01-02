@@ -312,7 +312,7 @@ if (!/^\d{10}$/.test(phoneClean)) {
                     : "-"}
                 </td>
 
-                <td data-label="Action">
+                <td>
   <button
     className="edit-btn"
     onClick={() => {

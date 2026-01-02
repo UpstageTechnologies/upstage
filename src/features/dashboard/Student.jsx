@@ -228,7 +228,7 @@ const Student = () => {
                 <td data-label="Class">{s.class}</td>
                 <td data-label="Section">{s.section}</td>
 
-                <td data-label="Action" className="action-cell">
+                <td className="action-cell">
                   <button
                     className="edit-btn"
                     onClick={() => {

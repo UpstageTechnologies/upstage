@@ -168,7 +168,7 @@ export default function TeacherAttendance() {
                 <tr>
                   <td data-label="Name">{t.name}</td>
                   <td data-label="Teacher Id">{t.teacherId}</td>
-                  <td data-label="Class"> {t.assignedClasses?.[0]?.className || "-"}</td>
+                  <td data-label="Class"> {t.assignedClasses?.[0]?.class || "-"}</td>
                   <td data-label="Section">{t.assignedClasses?.[0]?.section || "-"}</td>
 
                   <td>

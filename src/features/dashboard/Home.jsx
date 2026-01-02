@@ -3,6 +3,9 @@ import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "../../services/firebase";
 import "../dashboard_styles/Home.css";
 import { FaUserGraduate, FaUserTimes, FaChalkboardTeacher, FaUserCheck } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+
+
 
 
 const today = new Date().toLocaleDateString("en-CA");
@@ -14,6 +17,8 @@ export default function Home({ adminUid }) {
     teacherPresent: 0,
     teacherAbsent: 0
   });
+
+  const navigate = useNavigate();
 
   const loadData = async () => {
     if (!adminUid) return;
@@ -79,7 +84,7 @@ export default function Home({ adminUid }) {
           <p>Today</p>
         </div>
 
-        <div className="home-card red">
+        <div className="home-card red" onClick={() => navigate("/todays-absent")}>
           <h4>Students Absent  <FaUserTimes/></h4>
           <h1>{stats.studentAbsent}</h1>
           <p>Today</p>
@@ -91,7 +96,7 @@ export default function Home({ adminUid }) {
           <p>Today</p>
         </div>
 
-        <div className="home-card purple">
+        <div className="home-card purple" onClick={() => navigate("/teacher-absents")}>
           <h4>Teachers Absent  <FaChalkboardTeacher/></h4>
           <h1>{stats.teacherAbsent}</h1>
           <p>Today</p>
