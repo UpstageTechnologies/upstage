@@ -1,29 +1,26 @@
 import React, { useState } from "react";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { db } from "../../services/firebase";
-import "../styles/NewApplicationForm.css";
+import "../styles/ApplicationForm.css";
 
-export default function NewApplicationForm() {
+export default function ApplicationForm() {
 
   const [form, setForm] = useState({
     studentName: "",
     class: "",
-    section: "",
     dob: "",
     parentName: "",
     phone: "",
     address: ""
   });
 
-  const handleChange = (k, v) =>
-    setForm(prev => ({ ...prev, [k]: v }));
+  const handleChange = (key, value) =>
+    setForm(prev => ({ ...prev, [key]: value }));
 
   const handleSubmit = async () => {
-
     if (
       !form.studentName ||
       !form.class ||
-      !form.section ||
       !form.parentName ||
       !form.phone ||
       !form.address ||
@@ -33,26 +30,27 @@ export default function NewApplicationForm() {
       return;
     }
 
-    await addDoc(
-      collection(db, "applications"),
-      {
+    try {
+      await addDoc(collection(db, "applications"), {
         ...form,
         status: "pending",
         createdAt: Timestamp.now()
-      }
-    );
+      });
 
-    alert("🎉 Application submitted successfully");
+      alert("🎉 Application submitted successfully");
 
-    setForm({
-      studentName: "",
-      class: "",
-      section: "",
-      dob: "",
-      parentName: "",
-      phone: "",
-      address: ""
-    });
+      setForm({
+        studentName: "",
+        class: "",
+        dob: "",
+        parentName: "",
+        phone: "",
+        address: ""
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong — try again.");
+    }
   };
 
   return (
@@ -72,13 +70,6 @@ export default function NewApplicationForm() {
           placeholder="Class"
           value={form.class}
           onChange={e => handleChange("class", e.target.value)}
-        />
-
-        <input
-          className="appform-input"
-          placeholder="Section"
-          value={form.section}
-          onChange={e => handleChange("section", e.target.value)}
         />
 
         <input

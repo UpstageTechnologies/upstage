@@ -83,7 +83,7 @@ const ShowTodaysAbsent = ({ setActivePage }) => {
           list.push({
             name: s.studentName,
             studentId: s.studentId,
-            class: s.className,
+            class: s.class,
             section: s.section
           });
         }

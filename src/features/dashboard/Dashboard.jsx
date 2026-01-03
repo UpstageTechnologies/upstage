@@ -16,7 +16,7 @@ import {
   FaCog,FaUserCheck,
   FaSignOutAlt,
   FaChevronDown,FaBookOpen,
-  FaChevronUp,FaCalendarAlt,FaClipboardCheck,FaUserTimes
+  FaChevronUp,FaCalendarAlt,FaClipboardCheck,FaWpforms
 } from "react-icons/fa";
 
 import schoolLogo from "../../assets/school-logo.png";
@@ -33,8 +33,7 @@ import ShowTodaysAbsent from "./ShowTodaysAbsent";
 import TeacherAttendance from "./TeacherAttendance";
 import ShowTodaysTeacherAbsent from "./ShowTodaysTeacherAbsent";
 import Home from "./Home";
-
-
+import ApplicationList from "./ApplicationList";
 
 
 /* ================= SLIDER ================= */
@@ -228,10 +227,17 @@ const Dashboard = () => {
            <li onClick={() => setActivePage("approvals")}>
            <FaClipboardCheck/>Approvals
            </li>
+           
           )}
           <li onClick={() => setActivePage("courses")}>
           <FaBookOpen /> Courses
           </li>
+          {role === "admin" && (
+            <li onClick={() => setActivePage("applications")}>
+              <FaWpforms /> Applications
+              </li>
+          )}
+
 
        
 
@@ -354,7 +360,10 @@ const Dashboard = () => {
            {isAdminOrSubAdmin && activePage === "teacher-absents" && (
              <ShowTodaysTeacherAbsent adminUid={adminUid} setActivePage={setActivePage} />
            )}
-           
+           {role === "admin" && activePage === "applications" && (
+            <ApplicationList />
+            )}
+
 
         </div>
       </div>

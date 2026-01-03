@@ -1,0 +1,200 @@
+.appList-wrapper {
+    padding: 24px;
+  }
+  
+  .appList-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+  
+  .appList-grid {
+    display: grid;
+    gap: 14px;
+  }
+  
+  .appCard {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px 16px;
+    transition: 0.2s ease;
+  }
+  
+  .appCard:hover {
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    transform: translateY(-1px);
+  }
+  
+  .appCard-header {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  
+  .appCard-row {
+    color: #374151;
+    margin: 2px 0;
+  }
+  
+  .appCard-footer {
+    margin-top: 6px;
+    font-size: 12px;
+    color: gray;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  
+  .status-pending {
+    background: #fff7e6;
+    color: #b26a00;
+  }
+  
+  .status-approved {
+    background: #e7f6ee;
+    color: #0f7b38;
+  }
+  
+  .status-rejected {
+    background: #fde8e8;
+    color: #a30000;
+  }
+  .approve-btn {
+    background: #1f7a2d;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .approve-btn:disabled {
+    background: #9ac3a1;
+    cursor: not-allowed;
+  }
+  
+  .reject-btn {
+    background: #b10000;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .reject-btn:disabled {
+    background: #e2a3a3;
+    cursor: not-allowed;
+  }
+  .appTable {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  .appTable th,
+  .appTable td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .appTable th {
+    background: #f5f6fb;
+    text-align: left;
+  }
+  
+  .appTable.reject tr td {
+    color: #9b1c1c;
+  }
+  /* ================================
+   📱 MOBILE RESPONSIVE
+================================ */
+
+@media (max-width: 768px) {
+
+    .appList-wrapper {
+      padding: 14px;
+    }
+  
+    .appList-title {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+  
+    .appCard {
+      padding: 12px;
+    }
+  
+    .appCard-header {
+      font-size: 15px;
+    }
+  
+    .approve-btn,
+    .reject-btn {
+      flex: 1;
+      text-align: center;
+    }
+  
+    /* ----- TABLE MOBILE MODE ----- */
+  
+    .appTable,
+    .appTable thead,
+    .appTable tbody,
+    .appTable th,
+    .appTable td,
+    .appTable tr {
+      display: block;
+      width: 100%;
+    }
+  
+    .appTable thead {
+      display: none;
+    }
+  
+    .appTable tr {
+      margin-bottom: 10px;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      background: white;
+      padding: 8px;
+    }
+  
+    .appTable td {
+      border: none;
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 10px;
+      font-size: 14px;
+    }
+  
+    .appTable td::before {
+      content: attr(data-label);
+      font-weight: 700;
+      color: #374151;
+    }
+  }
+  
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f1f1f1;
+    padding: 6px 10px;
+    border-radius: 6px;
+  }
+  
+  .search-box input {
+    border: none;
+    outline: none;
+    background: transparent;
+  }
+  

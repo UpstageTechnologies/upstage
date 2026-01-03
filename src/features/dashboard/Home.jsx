@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  onSnapshot
+} from "firebase/firestore";
 import { db } from "../../services/firebase";
 import "../dashboard_styles/Home.css";
+
 import {
   FaUserGraduate,
   FaUserTimes,
@@ -20,77 +25,90 @@ export default function Home({ adminUid, setActivePage }) {
   });
 
   const [loading, setLoading] = useState(true);
-  
 
-  const loadData = async () => {
+  useEffect(() => {
     if (!adminUid) return;
 
     setLoading(true);
 
-    /* ================= STUDENTS ================= */
+    /* ================= STUDENTS — REALTIME ================= */
+    const classRef = collection(db, "users", adminUid, "attendance");
 
-    const classesSnap = await getDocs(
-      collection(db, "users", adminUid, "attendance")
-    );
+    const unsubStudents = onSnapshot(classRef, snap => {
+      let studentPresent = 0;
+      let studentAbsent = 0;
 
-    // fetch all date docs **together**
-    const datePromises = classesSnap.docs.map(c =>
-      getDoc(
-        doc(db, "users", adminUid, "attendance", c.id, "dates", today)
-      )
-    );
+      snap.docs.forEach(c => {
+        const dateRef = doc(
+          db,
+          "users",
+          adminUid,
+          "attendance",
+          c.id,
+          "dates",
+          today
+        );
 
-    const allDates = await Promise.all(datePromises);
+        onSnapshot(dateRef, d => {
+          if (!d.exists()) return;
 
-    let studentPresent = 0;
-    let studentAbsent = 0;
+          const rec = d.data().records || {};
 
-    allDates.forEach(dateDoc => {
-      if (!dateDoc.exists()) return;
-      const rec = dateDoc.data().records || {};
+          Object.values(rec).forEach(s => {
+            if (s === "present") studentPresent++;
+            if (s === "absent") studentAbsent++;
+          });
 
-      Object.values(rec).forEach(status => {
-        if (status === "present") studentPresent++;
-        if (status === "absent") studentAbsent++;
+          setStats(prev => ({
+            ...prev,
+            studentPresent,
+            studentAbsent
+          }));
+        });
       });
+
+      setLoading(false);
     });
 
-    /* ================= TEACHERS ================= */
-
-    let teacherPresent = 0;
-    let teacherAbsent = 0;
-
-    const tDoc = await getDoc(
-      doc(db, "users", adminUid, "teacherAttendance", today)
+    /* ================= TEACHERS — REALTIME ================= */
+    const teacherRef = doc(
+      db,
+      "users",
+      adminUid,
+      "teacherAttendance",
+      today
     );
 
-    if (tDoc.exists()) {
-      const rec = tDoc.data().records || {};
+    const unsubTeachers = onSnapshot(teacherRef, snap => {
+      let teacherPresent = 0;
+      let teacherAbsent = 0;
 
-      Object.values(rec).forEach(status => {
-        if (status === "present") teacherPresent++;
-        if (status === "absent") teacherAbsent++;
-      });
-    }
+      if (snap.exists()) {
+        const rec = snap.data().records || {};
 
-    setStats({
-      studentPresent,
-      studentAbsent,
-      teacherPresent,
-      teacherAbsent
+        Object.values(rec).forEach(s => {
+          if (s === "present") teacherPresent++;
+          if (s === "absent") teacherAbsent++;
+        });
+      }
+
+      setStats(prev => ({
+        ...prev,
+        teacherPresent,
+        teacherAbsent
+      }));
     });
 
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    loadData();
+    // cleanup listeners
+    return () => {
+      unsubStudents();
+      unsubTeachers();
+    };
   }, [adminUid]);
 
   return (
     <div className="home-wrapper">
       <div className="cards-row">
-
         {/* STUDENTS */}
         <div className="home-card green">
           <h4>
