@@ -18,7 +18,7 @@ import TeacherAttendance from "./features/dashboard/TeacherAttendance";
 import ShowTodaysTeacherAbsent from "./features/dashboard/ShowTodaysTeacherAbsent";
 import ApplicationForm from "./useTheme/pages/ApplicationForm";
 import ApplicationList from "./features/dashboard/ApplicationList";
-
+import  Accounts from "./features/dashboard/Accounts"
 function App() {
   return (
     <Router>
@@ -41,6 +41,7 @@ function App() {
         <Route path="/teacher-absents" element={<ShowTodaysTeacherAbsent />} />
         <Route path="/application" element={<ApplicationForm />} />
         <Route path="/admin/applications" element={<ApplicationList />} />
+        <Route path="Accounts" element={<Accounts/>}/>
 
       </Routes>
     </Router>

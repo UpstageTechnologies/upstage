@@ -33,7 +33,11 @@
   import ShowTodaysTeacherAbsent from "./ShowTodaysTeacherAbsent";
   import Home from "./Home";
   import ApplicationList from "./ApplicationList";
-  import Account from "./Accounts";
+  
+import FeesPage from "./accounts/FeesPage";
+import ExpensesPage from "./accounts/ExpensesPage";
+import ProfitPage from "./accounts/ProfitPage";
+
 
 
 
@@ -61,6 +65,8 @@
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [homeStats, setHomeStats] = useState(null);
     const [logo, setLogo] = useState(""); 
+    const [accountsSubMenuOpen, setAccountsSubMenuOpen] = useState(false);
+
 
     
 
@@ -267,9 +273,30 @@
                     <li onClick={() => {setActivePage("student");setAccountMenuOpen(false);}}>Student</li>
                   </ul>
                 )}
-                 <li onClick={() => setActivePage("Accounts")}>
-            <FaBookOpen /> Accounts
-            </li>
+                 <li
+  className="account-main"
+  onClick={() => setAccountsSubMenuOpen(!accountsSubMenuOpen)}
+>
+  <FaBookOpen /> Accounts
+  {accountsSubMenuOpen ? <FaChevronUp /> : <FaChevronDown />}
+</li>
+
+{accountsSubMenuOpen && (
+  <ul className="account-submenu">
+    <li onClick={() => { setActivePage("fees"); setAccountsSubMenuOpen(false); }}>
+      Fees
+    </li>
+
+    <li onClick={() => { setActivePage("expenses"); setAccountsSubMenuOpen(false); }}>
+      Expenses
+    </li>
+
+    <li onClick={() => { setActivePage("profit"); setAccountsSubMenuOpen(false); }}>
+      Profit
+    </li>
+  </ul>
+)}
+
               
                 
 
@@ -424,14 +451,30 @@
           </nav>
 
           <div className="dashboard-content">
-        {activePage === "home" &&
-    <Home
-      adminUid={adminUid}
-      setActivePage={setActivePage}
-      setHomeStats={setHomeStats}
-      homeStats={homeStats}
-    />
-  }
+
+{activePage === "home" && (
+  <Home
+    adminUid={adminUid}
+    setActivePage={setActivePage}
+    setHomeStats={setHomeStats}
+    homeStats={homeStats}
+  />
+)}
+
+{isAdminOrSubAdmin && activePage === "fees" && (
+  <FeesPage adminUid={adminUid} />
+)}
+
+{isAdminOrSubAdmin && activePage === "expenses" && (
+  <ExpensesPage adminUid={adminUid} />
+)}
+
+{isAdminOrSubAdmin && activePage === "profit" && (
+  <ProfitPage adminUid={adminUid} />
+)}
+
+{/* rest of the pages go here… */}
+
 
     
 
@@ -484,9 +527,7 @@
               {activePage === "profile" && (
     <Profile />
   )}
-  {role === "master" && activePage === "Accounts" && (
-  <Account adminUid={adminUid} />
-)}
+  
 
   
 
