@@ -39,6 +39,11 @@ export default function Account({ adminUid }) {
   const [teacher, setTeacher] = useState("");
   const [salaryDate, setSalaryDate] = useState("");
 
+  /* ===== OTHER EXPENSE ===== */
+  const [exName, setExName] = useState("");
+  const [exAmt, setExAmt] = useState("");
+  const [exDate, setExDate] = useState("");
+
   /* ================= FIRESTORE PATHS ================= */
   const feesMasterRef = collection(db,"users",adminUid,"Account","accounts","FeesMaster");
   const incomesRef    = collection(db,"users",adminUid,"Account","accounts","Income");
@@ -171,6 +176,25 @@ export default function Account({ adminUid }) {
   };
 
 
+  /* ================= ADD OTHER EXPENSE ================= */
+  const addOtherExpense = async () => {
+    if (!exName || !exAmt || !exDate)
+      return alert("Enter expense details");
+
+    await addDoc(expensesRef,{
+      type:"other",
+      name:exName,
+      amount:Number(exAmt),
+      date:exDate,
+      createdAt:new Date()
+    });
+
+    setExName("");
+    setExAmt("");
+    setExDate("");
+  };
+
+
   /* ================= CALC ================= */
   const totalIncome  = incomeList.reduce((t,x)=>t+x.amount,0);
   const totalExpense = expenseList.reduce((t,x)=>t+x.amount,0);
@@ -202,12 +226,6 @@ export default function Account({ adminUid }) {
         <input type="date" value={mdate} onChange={e=>setMdate(e.target.value)} />
 
         <button onClick={addMaster}>Save Master</button>
-
-        <ul>
-          {masterList.map(m=>(
-            <li key={m.id}>Class {m.className} — {m.name} — ₹{m.amount}</li>
-          ))}
-        </ul>
       </div>
 
 
@@ -215,19 +233,21 @@ export default function Account({ adminUid }) {
       <div className="card">
         <h3>Students & Collect Fees</h3>
 
-        <input placeholder="Student Name"
-          value={studentName} onChange={e=>setStudentName(e.target.value)} />
+        <div className="section">
+          <input placeholder="Student Name"
+            value={studentName} onChange={e=>setStudentName(e.target.value)} />
 
-        <input placeholder="Parent Name"
-          value={parentName} onChange={e=>setParentName(e.target.value)} />
+          <input placeholder="Parent Name"
+            value={parentName} onChange={e=>setParentName(e.target.value)} />
 
-        <select value={studentClass} onChange={e=>setStudentClass(e.target.value)}>
-          <option value="">Class</option>
-          {["PreKG","LKG","UKG","1","2","3","4","5","6","7","8","9","10","11","12"]
-            .map(c=><option key={c}>{c}</option>)}
-        </select>
+          <select value={studentClass} onChange={e=>setStudentClass(e.target.value)}>
+            <option value="">Class</option>
+            {["PreKG","LKG","UKG","1","2","3","4","5","6","7","8","9","10","11","12"]
+              .map(c=><option key={c}>{c}</option>)}
+          </select>
 
-        <button onClick={addStudent}>Create Student</button>
+          <button onClick={addStudent}>Create Student</button>
+        </div>
 
         <hr/>
 
@@ -254,14 +274,6 @@ export default function Account({ adminUid }) {
         <input type="date" value={cdate} onChange={e=>setCdate(e.target.value)} />
 
         <button onClick={collectFees}>Collect</button>
-
-        <ul>
-          {incomeList.map(i=>(
-            <li key={i.id}>
-              {i.studentName} — {i.feeName} — ₹{i.amount} ({i.date})
-            </li>
-          ))}
-        </ul>
       </div>
 
 
@@ -269,13 +281,15 @@ export default function Account({ adminUid }) {
       <div className="card">
         <h3>Teachers & Salary</h3>
 
-        <input placeholder="Teacher Name"
-          value={teacherName} onChange={e=>setTeacherName(e.target.value)} />
+        <div className="section">
+          <input placeholder="Teacher Name"
+            value={teacherName} onChange={e=>setTeacherName(e.target.value)} />
 
-        <input type="number" placeholder="Monthly Salary"
-          value={salaryMaster} onChange={e=>setSalaryMaster(e.target.value)} />
+          <input type="number" placeholder="Monthly Salary"
+            value={salaryMaster} onChange={e=>setSalaryMaster(e.target.value)} />
 
-        <button onClick={addTeacher}>Create Teacher</button>
+          <button onClick={addTeacher}>Create Teacher</button>
+        </div>
 
         <hr/>
 
@@ -290,11 +304,48 @@ export default function Account({ adminUid }) {
           value={salaryDate} onChange={e=>setSalaryDate(e.target.value)} />
 
         <button onClick={paySalary}>Pay Salary</button>
+      </div>
+
+
+      {/* ========= OTHER EXPENSE ========= */}
+      <div className="card">
+        <h3>Other Expenses</h3>
+
+        <input
+          placeholder="Expense (Diesel, Repair, Stationary...)"
+          value={exName}
+          onChange={e=>setExName(e.target.value)}
+        />
+
+        <input
+          type="number"
+          placeholder="Amount"
+          value={exAmt}
+          onChange={e=>setExAmt(e.target.value)}
+        />
+
+        <input
+          type="date"
+          value={exDate}
+          onChange={e=>setExDate(e.target.value)}
+        />
+
+        <button onClick={addOtherExpense}>Add Expense</button>
+      </div>
+
+
+      {/* ========= FULL EXPENSE LIST ========= */}
+      <div className="card">
+        <h3>All Expenses</h3>
 
         <ul>
           {expenseList.map(e=>(
             <li key={e.id}>
-              {e.teacher} — ₹{e.amount} ({e.date})
+              {e.type === "salary"
+                ? <>Salary — {e.teacher}</>
+                : <>{e.name}</>
+              }
+              &nbsp; — ₹{e.amount} ({e.date})
             </li>
           ))}
         </ul>
