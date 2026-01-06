@@ -9,7 +9,7 @@ export default function Profile() {
 
   const role = localStorage.getItem("role");
 
-  // editing panel toggle
+  // editing state
   const [editing, setEditing] = useState(false);
 
   // school fields
@@ -53,8 +53,10 @@ export default function Profile() {
 
       let ref;
 
-      if (role === "master") ref = doc(db, "users", adminUid);
-      else if (role === "admin")
+      if (role === "master") {
+        ref = doc(db, "users", adminUid);
+      } 
+      else if (role === "admin") {
         ref = doc(
           db,
           "users",
@@ -62,22 +64,25 @@ export default function Profile() {
           "admins",
           localStorage.getItem("adminId")
         );
-      else if (role === "teacher")
+      } 
+      else if (role === "teacher") {
         ref = doc(
           db,
           "users",
           adminUid,
           "teachers",
-          localStorage.getItem("teacherId")
+          localStorage.getItem("teacherDocId")   // ⭐ real doc id
         );
-      else if (role === "parent")
+      } 
+      else if (role === "parent") {
         ref = doc(
           db,
           "users",
           adminUid,
           "parents",
-          localStorage.getItem("parentId")
+          localStorage.getItem("parentDocId")   // ⭐ real doc id
         );
+      }
 
       const snap = await getDoc(ref);
       const d = snap.exists() ? snap.data() : {};
@@ -93,8 +98,10 @@ export default function Profile() {
     try {
       let ref;
 
-      if (role === "master") ref = doc(db, "users", adminUid);
-      else if (role === "admin")
+      if (role === "master") {
+        ref = doc(db, "users", adminUid);
+      } 
+      else if (role === "admin") {
         ref = doc(
           db,
           "users",
@@ -102,32 +109,35 @@ export default function Profile() {
           "admins",
           localStorage.getItem("adminId")
         );
-      else if (role === "teacher")
+      } 
+      else if (role === "teacher") {
         ref = doc(
           db,
           "users",
           adminUid,
           "teachers",
-          localStorage.getItem("teacherId")
+          localStorage.getItem("teacherDocId")
         );
-      else if (role === "parent")
+      } 
+      else if (role === "parent") {
         ref = doc(
           db,
           "users",
           adminUid,
           "parents",
-          localStorage.getItem("parentId")
+          localStorage.getItem("parentDocId")
         );
+      }
 
       await updateDoc(ref, {
         photoURL: data.photoURL || "",
         ...(role === "master" && {
           schoolName,
-          schoolLogo,
-        }),
+          schoolLogo
+        })
       });
-      localStorage.setItem("profilePhoto", data.photoURL || "");
 
+      localStorage.setItem("profilePhoto", data.photoURL || "");
       localStorage.setItem("schoolName", schoolName);
       localStorage.setItem("schoolLogo", schoolLogo);
 
@@ -141,10 +151,22 @@ export default function Profile() {
 
   if (!data) return <p>Loading…</p>;
 
+  /* -------- TEACHER CLASS + SECTION -------- */
+  const firstClass =
+    data?.assignedClasses?.length
+      ? data.assignedClasses[0].class
+      : "—";
+
+  const firstSection =
+    data?.assignedClasses?.length
+      ? data.assignedClasses[0].section
+      : "—";
+
   return (
     <div className="profile-page">
       <div className="profile-card">
-        {/* PROFILE IMAGE */}
+
+        {/* PROFILE / SCHOOL IMAGE */}
         <img
           src={data.photoURL || schoolLogo || "/default-logo.png"}
           className="profile-logo"
@@ -156,40 +178,35 @@ export default function Profile() {
         <hr />
 
         <p>
-          <b>Name:</b> {data.username || data.name || "—"}
-        </p>
-        <p>
-          <b>Email:</b> {data.email || "—"}
-        </p>
-        <p>
-          <b>Role:</b> {role}
-        </p>
+  <b>Name:</b>{" "}
+  {role === "parent"
+    ? data.parentName || "—"
+    : data.username || data.name || "—"}
+</p>
+
+        <p><b>Email:</b> {data.email || "—"}</p>
+        <p><b>Role:</b> {role}</p>
 
         {role === "admin" && (
-          <p>
-            <b>Admin ID:</b> {data.adminId}
-          </p>
+          <p><b>Admin ID:</b> {data.adminId}</p>
         )}
 
         {role === "teacher" && (
           <>
-            <p>
-              <b>Class:</b> {data.class}
-            </p>
-            <p>
-              <b>Section:</b> {data.section}
-            </p>
+            <p><b>Class:</b> {firstClass}</p>
+            <p><b>Section:</b> {firstSection}</p>
           </>
         )}
 
-        {/* EDIT BUTTON (EVERYONE) */}
+        {/* EDIT MODE */}
         {!editing ? (
           <button className="edit-btn" onClick={() => setEditing(true)}>
             Edit Profile
           </button>
         ) : (
           <div className="edit-box">
-            {/* PROFILE PHOTO (ALL ROLES) */}
+
+            {/* PROFILE PHOTO PICKER */}
             <div className="logo-picker">
               <input
                 type="file"
@@ -200,9 +217,9 @@ export default function Profile() {
 
                   const reader = new FileReader();
                   reader.onloadend = () =>
-                    setData((prev) => ({
+                    setData(prev => ({
                       ...prev,
-                      photoURL: reader.result,
+                      photoURL: reader.result
                     }));
 
                   reader.readAsDataURL(file);
@@ -212,18 +229,18 @@ export default function Profile() {
               {data.photoURL && (
                 <img
                   src={data.photoURL}
-                  alt="profile preview"
+                  alt="preview"
                   style={{
                     width: 90,
                     height: 90,
                     borderRadius: "50%",
-                    marginTop: 10,
+                    marginTop: 10
                   }}
                 />
               )}
             </div>
 
-            {/* SCHOOL SETTINGS (MASTER ONLY) */}
+            {/* MASTER SETTINGS */}
             {role === "master" && (
               <>
                 <input
@@ -256,7 +273,7 @@ export default function Profile() {
                         width: 90,
                         height: 90,
                         borderRadius: "50%",
-                        marginTop: 10,
+                        marginTop: 10
                       }}
                     />
                   )}
@@ -276,6 +293,7 @@ export default function Profile() {
                 Cancel
               </button>
             </div>
+
           </div>
         )}
       </div>

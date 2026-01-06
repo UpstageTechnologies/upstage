@@ -1,16 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import {
-  collectionGroup,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore";
+import { collectionGroup, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../services/firebase";
 
 import logo from "../../assets/logo.jpeg";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import "../styles/Login.css"; // 👈 SAME CSS
+import "../styles/Login.css";
 
 const ParentLogin = () => {
   const [parentId, setParentId] = useState("");
@@ -18,13 +13,12 @@ const ParentLogin = () => {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
 
-
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     if (loading) return;
-  
+
     setLoading(true);
 
     if (!parentId || !password) {
@@ -33,7 +27,6 @@ const ParentLogin = () => {
     }
 
     try {
-      // 🔥 SAME METHOD AS TEACHER LOGIN
       const snap = await getDocs(
         query(
           collectionGroup(db, "parents"),
@@ -50,26 +43,21 @@ const ParentLogin = () => {
       const docSnap = snap.docs[0];
       const parent = docSnap.data();
 
-      // 🔑 SAME LOGIC
       const adminUid = docSnap.ref.parent.parent.id;
 
-      const parentData = docSnap.data();
+      // ⭐ REAL FIRESTORE DOC ID
+      localStorage.setItem("parentDocId", docSnap.id);
 
-      localStorage.setItem("parentId", parentData.parentId);
-      localStorage.setItem("parentName", parentData.parentName || "");
-      localStorage.setItem("email", parentData.email || "");
-      localStorage.setItem("profilePhoto", parentData.photoURL || "");
-      
+      // ⭐ PROFILE DATA
+      localStorage.setItem("parentId", parent.parentId);
+      localStorage.setItem("parentName", parent.parentName || "");
+      localStorage.setItem("email", parent.email || "");
+      localStorage.setItem("profilePhoto", parent.photoURL || "");
 
-      // ✅ SESSION SAVE
+      // ⭐ SESSION
       localStorage.setItem("role", "parent");
       localStorage.setItem("adminUid", adminUid);
-      localStorage.setItem("parentId", parent.parentId);
-      localStorage.setItem("parentName", parent.name);
-      localStorage.setItem("studentId", parent.studentId);
-      localStorage.setItem("studentName", parent.studentName);
 
-      // 🚀 DASHBOARD
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
@@ -78,12 +66,8 @@ const ParentLogin = () => {
   };
 
   return (
-    <>
-      
-
-      <div className="wrapper">
+    <div className="wrapper">
       <nav className="nav-bar">
-        
         <img src={logo} alt="Company Logo" className="logo" />
         <div className="nav-links">
           <a href="/">Home</a>
@@ -91,45 +75,42 @@ const ParentLogin = () => {
           <Link to="/choose-login" className="start-btn">School Login</Link>
         </div>
       </nav>
-        <div className="log">
-          <h2>Login</h2>
 
-          <form onSubmit={handleLogin}>
+      <div className="log">
+        <h2>Login</h2>
+
+        <form onSubmit={handleLogin}>
+          <input
+            placeholder="Parent ID"
+            value={parentId}
+            onChange={(e) => setParentId(e.target.value)}
+            required
+          />
+
+          <div className="password-wrapper">
             <input
-              placeholder="Parent ID"
-              value={parentId}
-              onChange={(e) => setParentId(e.target.value)}
+              type={showPass ? "text" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
 
-            <div className="password-wrapper">
-              <input
-                type={showPass ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <span
-                className="eye"
-                onClick={() => setShowPass(!showPass)}
-              >
-                {showPass ? <FaEyeSlash /> : <FaEye />}
-              </span>
-            </div>
+            <span className="eye" onClick={() => setShowPass(!showPass)}>
+              {showPass ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
 
-            <button className="log-btn" type="submit" disabled={loading}>
-             {loading ? "Loading..." : "Login"}
-            </button>
+          <button className="log-btn" type="submit" disabled={loading}>
+            {loading ? "Loading..." : "Login"}
+          </button>
+        </form>
 
-          </form>
-
-          <p style={{ marginTop: "15px" }}>
+        <p style={{ marginTop: "15px" }}>
           *Only registered parent can login.
-          </p>
-        </div>
+        </p>
       </div>
-    </>
+    </div>
   );
 };
 
