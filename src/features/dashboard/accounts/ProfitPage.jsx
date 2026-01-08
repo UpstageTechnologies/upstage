@@ -251,30 +251,36 @@ await updateDoc(
 
   const saveOldAdmission = async ()=>{
     const stu = students.find(s=>s.id===oldStudent);
-    if(!stu||!oldPayType||!entryDate) return alert("Fill all fields");
-
+    if(!stu || !oldPayType || !entryDate) return alert("Fill all fields");
+  
     let final = 0;
-    if(oldPayType==="full") final = oldTotal-oldTotal*0.05;
+    if(oldPayType==="full") final = oldTotal - oldTotal * 0.05;
     else{
       if(!oldPayAmount) return alert("Enter partial amount");
       final = Number(oldPayAmount);
     }
-
+  
     await addDoc(incomesRef,{
-      studentId:stu.id,
-      studentName:stu.name,
-      parentName:stu.parentName,
-      className:stu.className,
-      totalFees:oldTotal,
-      type:oldPayType,
-      paidAmount:final,
-      date:entryDate,
-      createdAt:new Date()
+      studentId: stu.id,
+      studentName: stu.studentName,   // ✅ FIX
+      parentName: stu.parentName || "",
+      className: stu.class,            // ✅ FIX
+      totalFees: oldTotal,
+      type: oldPayType,
+      paidAmount: final,
+      date: entryDate,
+      createdAt: new Date()
     });
-
-    setOldClass("");setOldStudent("");setOldParent("");
-    setOldPayType("");setOldPayAmount("");setOldTotal(0);
+  
+    setOldClass("");
+    setOldStudent("");
+    setOldParent("");
+    setOldPayType("");
+    setOldPayAmount("");
+    setOldTotal(0);
   };
+  
+
 
   /* ---------- EXPENSE: OTHERS ---------- */
   const navigate = useNavigate();
