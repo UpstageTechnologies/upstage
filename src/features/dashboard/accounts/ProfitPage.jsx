@@ -1,19 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { collection, onSnapshot, addDoc } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, updateDoc, doc } from "firebase/firestore";
 import { db } from "../../../services/firebase";
 import "../../dashboard_styles/Accounts.css";
+import "../../dashboard_styles/studentSearch.css";
 import { useNavigate } from "react-router-dom";
+
+
 
 
 export default function ProfitPage({ adminUid, setActivePage }) {
 
   const [incomeList, setIncomeList] = useState([]);
   const [expenseList, setExpenseList] = useState([]);
+  
 
   const [entryType, setEntryType] = useState("");
+  const [feesMaster, setFeesMaster] = useState([]);
 
-  // ⭐ GLOBAL ENTRY DATE
-  const [entryDate, setEntryDate] = useState("");
+
+  const [entryDate, setEntryDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split("T")[0]; // yyyy-mm-dd
+  });
+  
 
   // INCOME
   const [incomeMode, setIncomeMode] = useState("");
@@ -25,7 +34,7 @@ export default function ProfitPage({ adminUid, setActivePage }) {
 
   // students / fees
   const [students, setStudents] = useState([]);
-  const [feesMaster, setFeesMaster] = useState([]);
+  
 
   const [newName, setNewName] = useState("");
   const [newParent, setNewParent] = useState("");
@@ -54,26 +63,53 @@ export default function ProfitPage({ adminUid, setActivePage }) {
   const [exName, setExName] = useState("");
   const [exAmt, setExAmt] = useState("");
 
-  // FEE MASTER
-  const [feeClass, setFeeClass] = useState("");
-  const [feeName, setFeeName] = useState("");
-  
-  const [feeAmount, setFeeAmount] = useState("");
+  const [studentSearch, setStudentSearch] = useState("");
+  const [selectedStudentName, setSelectedStudentName] = useState("");
 
+
+  
+
+
+  
   const incomesRef  = collection(db,"users",adminUid,"Account","accounts","Income");
   const expensesRef = collection(db,"users",adminUid,"Account","accounts","Expenses");
-  const studentsRef = collection(db,"users",adminUid,"Account","accounts","Students");
+  const studentsRef = collection(db, "users", adminUid, "students");
   const feesRef     = collection(db,"users",adminUid,"Account","accounts","FeesMaster");
+
+  const studentsMainRef = collection(db, "users", adminUid, "students");
+const parentsRef = collection(db, "users", adminUid, "parents");
+
+
+
 
   useEffect(()=>{
 
     if(!adminUid) return;
+  
+    onSnapshot(incomesRef, s =>
+      setIncomeList(s.docs.map(d=>({id:d.id,...d.data()})))
+    );
+  
+    onSnapshot(expensesRef, s =>
+      setExpenseList(s.docs.map(d=>({id:d.id,...d.data()})))
+    );
+  
+    onSnapshot(studentsRef, s =>
+      setStudents(s.docs.map(d=>({id:d.id,...d.data()})))
+    );
+  
 
-    onSnapshot(incomesRef, s=>setIncomeList(s.docs.map(d=>({id:d.id,...d.data()}))));
-    onSnapshot(expensesRef,s=>setExpenseList(s.docs.map(d=>({id:d.id,...d.data()}))));
-    onSnapshot(studentsRef,s=>setStudents(s.docs.map(d=>({id:d.id,...d.data()}))));
-    onSnapshot(feesRef,   s=>setFeesMaster(s.docs.map(d=>({id:d.id,...d.data()}))));
+    onSnapshot(feesRef, s =>
+      setFeesMaster(s.docs.map(d=>({id:d.id,...d.data()})))
+    );
+  
   },[adminUid]);
+  
+  const filteredStudents = students.filter(s =>
+    String(s.class) === String(oldClass) &&
+    s.studentName?.toLowerCase().includes(studentSearch.toLowerCase())
+  );
+  
 
   const getClassTotal = cls =>
     feesMaster.filter(f=>f.className===cls).reduce((t,f)=>t+(f.amount||0),0);
@@ -93,40 +129,112 @@ export default function ProfitPage({ adminUid, setActivePage }) {
     setSrcName(""); setSrcAmt("");
   };
 
-  /* ---------- INCOME: NEW ADMISSION ---------- */
-  const saveNewAdmission = async ()=>{
-    if(!newName||!newParent||!newClass||!newPayType||!entryDate)
-      return alert("Fill all fields");
 
-    const total = getClassTotal(newClass);
-    setNewTotal(total);
+/* ---------- INCOME: NEW ADMISSION ---------- */
+const saveNewAdmission = async () => {
+  if (!newName || !newParent || !newClass || !newPayType || !entryDate)
+    return alert("Fill all fields");
 
-    let final = 0;
-    if(newPayType==="full") final = total - total*0.05;
-    else{
-      if(!newPayAmount) return alert("Enter partial amount");
-      final = Number(newPayAmount);
+  const total = getClassTotal(newClass);
+
+  let final = 0;
+  if (newPayType === "full") {
+    final = total - total * 0.05;
+  } else {
+    if (!newPayAmount) return alert("Enter partial amount");
+    final = Number(newPayAmount);
+  }
+
+/* 1️⃣ CREATE PARENT */
+const parentDocRef = await addDoc(
+  collection(db, "users", adminUid, "parents"),
+  {
+    parentName: newParent,
+    parentId: `P-${Date.now()}`,
+    studentsCount: 1,
+    students: [
+      {
+        studentName: newName,
+        studentId: "TEMP",   // replace after student create
+        class: newClass,
+        section: ""
+      }
+    ],
+    createdAt: new Date()
+  }
+);
+
+
+/* 2️⃣ CREATE STUDENT */
+const studentDocRef = await addDoc(
+  collection(db, "users", adminUid, "students"),
+  {
+    studentName: newName,
+    studentId: `S-${Date.now()}`,
+    parentId: parentDocRef.id,
+    parentName: newParent,
+    class: newClass,
+    section: "",
+    createdAt: new Date()
+  }
+);
+
+/* 3️⃣ UPDATE parent.students[] with REAL studentId */
+await updateDoc(
+  doc(db, "users", adminUid, "parents", parentDocRef.id),
+  {
+    students: [
+      {
+        studentId: studentDocRef.id,
+        studentName: newName,
+        class: newClass,
+        section: ""
+      }
+    ]
+  }
+);
+
+
+  /* 3️⃣ ✅ UPDATE PARENT WITH STUDENT LINK (CORRECT WAY) */
+  await updateDoc(
+    doc(db, "users", adminUid, "parents", parentDocRef.id),
+    {
+      students: [
+        {
+          studentDocId: studentDocRef.id,
+          studentName: newName,
+          class: newClass,
+          section: ""
+        }
+      ]
     }
+  );
 
-    const st = await addDoc(studentsRef,{
-      name:newName,parentName:newParent,className:newClass,createdAt:new Date()
-    });
+  /* 4️⃣ CREATE INCOME */
+  await addDoc(incomesRef, {
+    studentId: studentDocRef.id,
+    studentName: newName,
+    parentId: parentDocRef.id,
+    parentName: newParent,
+    className: newClass,
+    totalFees: total,
+    type: newPayType,
+    paidAmount: final,
+    date: entryDate,
+    createdAt: new Date()
+  });
 
-    await addDoc(incomesRef,{
-      studentId:st.id,
-      studentName:newName,
-      parentName:newParent,
-      className:newClass,
-      totalFees:total,
-      type:newPayType,
-      paidAmount:final,
-      date:entryDate,
-      createdAt:new Date()
-    });
+  /* RESET */
+  setNewName("");
+  setNewParent("");
+  setNewClass("");
+  setNewPayType("");
+  setNewPayAmount("");
+  setNewTotal(0);
+};
 
-    setNewName("");setNewParent("");setNewClass("");
-    setNewPayType("");setNewPayAmount("");setNewTotal(0);
-  };
+  
+  
 
   /* ---------- INCOME: OLD ADMISSION ---------- */
   const selectOldClass = cls=>{
@@ -215,7 +323,7 @@ export default function ProfitPage({ adminUid, setActivePage }) {
       createdAt:new Date()
     });
 
-    setFeeClass("");setFeeName("");setFeeAmount("");
+   
   };
 
   const totalIncome = incomeList.reduce((t,x)=>t+(x.paidAmount||0),0);
@@ -272,105 +380,211 @@ export default function ProfitPage({ adminUid, setActivePage }) {
           <option value="">Choose</option>
           <option value="income">Income</option>
           <option value="expense">Expense</option>
-          <option value="fees">Set Fees</option>
+          
         </select>
 
-        {/* ================= INCOME ================= */}
-        {entryType==="income" && (
-          <>
-            <div style={{marginTop:10}}>
-              <select value={incomeMode} onChange={e=>setIncomeMode(e.target.value)}>
-                <option value="">Select</option>
-                <option value="source">Source</option>
-                <option value="student">Student</option>
-              </select>
-            </div>
+       {/* ================= INCOME ================= */}
+{entryType === "income" && (
+  <>
+    {/* 🔹 MODE SELECT (Student / Source + New/Old side by side) */}
+    <div className="form-grid two-col" style={{ marginTop: 12 }}>
 
-            {/* SOURCE */}
-            {incomeMode==="source" && (
-              <div className="form-grid">
-                <input placeholder="Source name" value={srcName} onChange={e=>setSrcName(e.target.value)} />
-                <input type="number" placeholder="Amount" value={srcAmt} onChange={e=>setSrcAmt(e.target.value)} />
-                <button className="primary-btn glow" onClick={saveSourceIncome}>Save</button>
-              </div>
-            )}
+      <select
+        value={incomeMode}
+        onChange={e => {
+          setIncomeMode(e.target.value);
+          setStudentMode("");
+        }}
+      >
+        <option value="">Select</option>
+        <option value="source">Source</option>
+        <option value="student">Student</option>
+      </select>
 
-            {/* STUDENT */}
-            {incomeMode==="student" && (
-              <>
-                <select value={studentMode} onChange={e=>setStudentMode(e.target.value)} style={{marginTop:10}}>
-                  <option value="">Select</option>
-                  <option value="new">New Admission</option>
-                  <option value="old">Old Admission</option>
-                </select>
+      {incomeMode === "student" && (
+        <select
+          value={studentMode}
+          onChange={e => setStudentMode(e.target.value)}
+        >
+          <option value="">Select</option>
+          <option value="new">New Admission</option>
+          <option value="old">Old Admission</option>
+        </select>
+      )}
 
-                {/* NEW */}
-                {studentMode==="new" && (
-                  <div className="form-grid">
-                  
-                    <input placeholder="Student Name" value={newName} onChange={e=>setNewName(e.target.value)} />
-                    <input placeholder="Parent Name" value={newParent} onChange={e=>setNewParent(e.target.value)} />
-                  
-                    <select value={newClass} onChange={e=>{setNewClass(e.target.value);setNewTotal(getClassTotal(e.target.value));}}>
-                      <option value="">Class</option>
-                      {["PreKG","LKG","UKG","1","2","3","4","5","6","7","8","9","10","11","12"].map(c=><option key={c}>{c}</option>)}
-                    </select>
-                  
-                    <input readOnly value={newTotal?`Total ₹${newTotal}`:""} />
+    </div>
 
-                    <select value={newPayType} onChange={e=>setNewPayType(e.target.value)}>
-                      <option value="">Payment Type</option>
-                      <option value="full">Full (5% OFF)</option>
-                      <option value="partial">Partial</option>
-                    </select>
+    {/* 🔹 SOURCE INCOME */}
+    {incomeMode === "source" && (
+      <div className="form-grid" style={{ marginTop: 10 }}>
+        <input
+          placeholder="Source name"
+          value={srcName}
+          onChange={e => setSrcName(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Amount"
+          value={srcAmt}
+          onChange={e => setSrcAmt(e.target.value)}
+        />
+        <button className="primary-btn glow" onClick={saveSourceIncome}>
+          Save
+        </button>
+      </div>
+    )}
 
-                    {newPayType==="full" &&
-                      <input readOnly value={`Payable ₹${(newTotal-newTotal*0.05).toFixed(0)}`} />}
+    {/* 🔹 NEW ADMISSION */}
+    {incomeMode === "student" && studentMode === "new" && (
+      <div className="form-grid income-grid">
 
-                    {newPayType==="partial" &&
-                      <input type="number" placeholder="Enter Amount" value={newPayAmount} onChange={e=>setNewPayAmount(e.target.value)} />}
 
-                    <button className="primary-btn glow" onClick={saveNewAdmission}>Save</button>
-                  </div>
-                )}
+        <input
+          placeholder="Student Name"
+          value={newName}
+          onChange={e => setNewName(e.target.value)}
+        />
+        <input
+          placeholder="Parent Name"
+          value={newParent}
+          onChange={e => setNewParent(e.target.value)}
+        />
 
-                {/* OLD */}
-                {studentMode==="old" && (
-                  <div className="form-grid">
-                    
-                    <select value={oldClass} onChange={e=>selectOldClass(e.target.value)}>
-                      <option value="">Class</option>
-                      {["PreKG","LKG","UKG","1","2","3","4","5","6","7","8","9","10","11","12"].map(c=><option key={c}>{c}</option>)}
-                    </select>
+        <select
+          value={newClass}
+          onChange={e => {
+            setNewClass(e.target.value);
+            setNewTotal(getClassTotal(e.target.value));
+          }}
+        >
+          <option value="">Class</option>
+          {["PreKG","LKG","UKG","1","2","3","4","5","6","7","8","9","10","11","12"]
+            .map(c => <option key={c}>{c}</option>)}
+        </select>
 
-                    <select value={oldStudent} onChange={e=>selectOldStudent(e.target.value)}>
-                      <option value="">Student</option>
-                      {students.filter(s=>s.className===oldClass).map(s=>(
-                        <option key={s.id} value={s.id}>{s.name}</option>
-                      ))}
-                    </select>
+        <input readOnly value={newTotal ? `Total ₹${newTotal}` : ""} />
 
-                    <input readOnly value={oldParent?`Parent: ${oldParent}`:""} />
-                    <input readOnly value={oldTotal?`Total ₹${oldTotal}`:""} />
-                    <select value={oldPayType} onChange={e=>setOldPayType(e.target.value)}>
-                      <option value="">Payment Type</option>
-                      <option value="full">Full (5% OFF)</option>
-                      <option value="partial">Partial</option>
-                    </select>
+        <select value={newPayType} onChange={e => setNewPayType(e.target.value)}>
+          <option value="">Payment Type</option>
+          <option value="full">Full (5% OFF)</option>
+          <option value="partial">Partial</option>
+        </select>
 
-                    {oldPayType==="full" &&
-                      <input readOnly value={`Payable ₹${(oldTotal-oldTotal*0.05).toFixed(0)}`} />}
-
-                    {oldPayType==="partial" &&
-                      <input type="number" placeholder="Enter Amount" value={oldPayAmount} onChange={e=>setOldPayAmount(e.target.value)} />}
-
-                    <button className="primary-btn glow" onClick={saveOldAdmission}>Save</button>
-                  </div>
-                )}
-              </>
-            )}
-          </>
+        {newPayType === "full" && (
+          <input
+            readOnly
+            value={`Payable ₹${(newTotal - newTotal * 0.05).toFixed(0)}`}
+          />
         )}
+
+        {newPayType === "partial" && (
+          <input
+            type="number"
+            placeholder="Enter Amount"
+            value={newPayAmount}
+            onChange={e => setNewPayAmount(e.target.value)}
+          />
+        )}
+
+        <button className="primary-btn glow" onClick={saveNewAdmission}>
+          Save
+        </button>
+      </div>
+    )}
+
+    {/* 🔹 OLD ADMISSION */}
+ {/* 🔹 OLD ADMISSION */}
+{incomeMode === "student" && studentMode === "old" && (
+  <div className="form-grid income-grid">
+
+
+    {/* CLASS */}
+    <select value={oldClass} onChange={e => selectOldClass(e.target.value)}>
+      <option value="">Class</option>
+      {["PreKG","LKG","UKG","1","2","3","4","5","6","7","8","9","10","11","12"]
+        .map(c => <option key={c}>{c}</option>)}
+    </select>
+
+    {/* 🔍 STUDENT SEARCH */}
+    <div className="student-search-wrapper">
+
+    <input
+  placeholder="Search Student"
+  value={studentSearch || selectedStudentName}
+  onChange={e => {
+    setStudentSearch(e.target.value);
+    setSelectedStudentName("");
+  }}
+  onBlur={() => setTimeout(() => setStudentSearch(""), 150)}
+/>
+
+
+      {studentSearch && (
+        <div className="student-search-list">
+          {filteredStudents.map(s => (
+            <div
+              key={s.id}
+              className="student-search-item"
+              onClick={() => {
+                setOldStudent(s.id);
+                setSelectedStudentName(s.studentName); // 👈 NOW THIS WILL WORK
+                setOldParent(s.parentName || "");
+                setStudentSearch("");
+              }}
+              
+              
+              
+            >
+              {s.studentName}
+            </div>
+          ))}
+
+          {filteredStudents.length === 0 && (
+            <div className="student-search-item muted">
+              No students found
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+
+    {/* PARENT + TOTAL */}
+    <input readOnly value={oldParent ? `Parent: ${oldParent}` : ""} />
+    <input readOnly value={oldTotal ? `Total ₹${oldTotal}` : ""} />
+
+    {/* PAYMENT TYPE */}
+    <select value={oldPayType} onChange={e => setOldPayType(e.target.value)}>
+      <option value="">Payment Type</option>
+      <option value="full">Full (5% OFF)</option>
+      <option value="partial">Partial</option>
+    </select>
+
+    {oldPayType === "full" && (
+      <input
+        readOnly
+        value={`Payable ₹${(oldTotal - oldTotal * 0.05).toFixed(0)}`}
+      />
+    )}
+
+    {oldPayType === "partial" && (
+      <input
+        type="number"
+        placeholder="Enter Amount"
+        value={oldPayAmount}
+        onChange={e => setOldPayAmount(e.target.value)}
+      />
+    )}
+
+    <button className="primary-btn glow" onClick={saveOldAdmission}>
+      Save
+    </button>
+
+  </div>
+)}
+
+  </>
+)}
+
 
         {/* ================= EXPENSE ================= */}
         {entryType==="expense" && (
@@ -467,69 +681,101 @@ export default function ProfitPage({ adminUid, setActivePage }) {
             <input type="number" placeholder="Amount" value={feeAmount} onChange={e=>setFeeAmount(e.target.value)} />
             <button className="primary-btn glow" onClick={saveFee}>Save Fee</button>
           </div>
-        )}
+        )} 
 
       </div>
 
         <div className="nice-table-wrapper">
-          <table className="nice-table">
-            <thead><tr><th>Name / Source</th><th>Type</th><th>Amount</th></tr></thead>
-            <tbody>
-  {(() => {
+          <table className="nice-table1">
+          <thead>
+  <tr>
+    <th>Discription</th>
+    <th>Income</th>
+    <th>Expense</th>
+  </tr>
+</thead>
 
-    // 1️⃣ MERGE BOTH LISTS
+<tbody>
+  {(() => {
     const all = [
       ...incomeList.map(i => ({
         id: i.id,
         date: i.date,
         source: i.studentName || i.name || "Income",
-        type: "Income",
-        amount: i.paidAmount || 0
+        income: i.paidAmount || 0,
+        expense: 0
       })),
-
+    
       ...expenseList.map(e => ({
         id: e.id,
         date: e.date,
         source: e.name,
-        type: "Expense",
-        amount: e.amount || 0
+        income: 0,
+        expense: e.amount || 0
       }))
     ];
-
-    // 2️⃣ SORT BY DATE
-    all.sort((a,b) => (a.date > b.date ? -1 : 1));
-
-    // 3️⃣ GROUP + DISPLAY
+    
+    // sort by date (latest first)
+    all.sort((a, b) => (a.date > b.date ? -1 : 1));
+    
     let lastDate = null;
+    let dateIncomeTotal = 0;
+    let dateExpenseTotal = 0;
 
-    return all.map(row => (
-      <React.Fragment key={row.id}>
+    return all.map((row, index) => {
+      const nextRow = all[index + 1];
+      const isLastOfDate = !nextRow || nextRow.date !== row.date;
 
-        {/* DATE HEADING */}
-        {lastDate !== row.date && (
-          <>
+      // totals add
+      dateIncomeTotal += row.income;
+      dateExpenseTotal += row.expense;
+
+      return (
+        <React.Fragment key={row.id}>
+
+          {/* DATE */}
+          {lastDate !== row.date && (
             <tr className="date-heading">
-              <td data-label="Date"colSpan={4} style={{fontWeight:"bold", background:"#f3f3f3"}}>
+              <td colSpan={3} style={{ fontWeight: "bold", background: "#f3f3f3" }}>
                 {lastDate = row.date}
               </td>
             </tr>
-            
-          </>
-        )}
+          )}
 
-        {/* ROW */}
-        <tr>
-          <td data-label="Name/Source">{row.source}</td>
-          <td data-label="Type">{row.type}</td>
-          <td data-label="Amount">₹{row.amount}</td>
-         
-        </tr>
+          {/* DATA ROW */}
+          <tr>
+            <td>{row.source}</td>
 
-      </React.Fragment>
-    ));
+            <td style={{ color: "green" }}>
+              {row.income ? `₹${row.income}` : ""}
+            </td>
 
+            <td style={{ color: "red" }}>
+              {row.expense ? `₹${row.expense}` : ""}
+            </td>
+          </tr>
+
+          {/* TOTAL ROW */}
+          {isLastOfDate && (
+            <tr style={{ fontWeight: "bold", background: "#fafafa" }}>
+              <td>TOTAL</td>
+              <td style={{ color: "green" }}>₹{dateIncomeTotal}</td>
+              <td style={{ color: "red" }}>₹{dateExpenseTotal}</td>
+            </tr>
+          )}
+
+          {/* RESET */}
+          {isLastOfDate && (() => {
+            dateIncomeTotal = 0;
+            dateExpenseTotal = 0;
+          })()}
+
+        </React.Fragment>
+      );
+    });
   })()}
 </tbody>
+
 
           </table>
         </div>

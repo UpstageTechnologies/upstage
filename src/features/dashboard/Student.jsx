@@ -27,6 +27,8 @@ const Student = () => {
   const [search, setSearch] = useState("");
   const [students, setStudents] = useState([]);
   const [editId, setEditId] = useState(null);
+  const [viewStudent, setViewStudent] = useState(null);
+
 
   const [form, setForm] = useState({
     studentName: "",
@@ -263,28 +265,90 @@ const Student = () => {
                 <td data-label="Section">{s.section}</td>
 
                 <td className="action-cell">
-                  <button
-                    className="edit-btn"
-                    onClick={() => {
-                      setForm({ ...s });
-                      setEditId(s.id);
-                      setShowModal(true);
-                    }}
-                  >
-                    <FaEdit /> Edit
-                  </button>
+  
 
-                  <button
-                    className="delete-btn"
-                    onClick={() => handleDeleteStudent(s.id)}
-                  >
-                    <FaTrash /> Delete
-                  </button>
-                </td>
+  <button
+    className="edit-btn"
+    onClick={() => {
+      setForm({ ...s });
+      setEditId(s.id);
+      setShowModal(true);
+    }}
+  >
+    <FaEdit /> Edit
+  </button>
+
+  <button
+    className="delete-btn"
+    onClick={() => handleDeleteStudent(s.id)}
+  >
+    <FaTrash /> Delete
+  </button>
+  <button
+    className="view-btn"
+    onClick={() => setViewStudent(s)}
+  >
+    View
+  </button>
+</td>
+
               </tr>
             ))}
         </tbody>
       </table>
+      {viewStudent && (
+  <div className="modal-overlay">
+    <div className="modal">
+      <h3>Student Details</h3>
+
+      <div style={{ textAlign: "center", marginBottom: 15 }}>
+        {viewStudent.photoURL ? (
+          <img
+            src={viewStudent.photoURL}
+            alt=""
+            style={{
+              width: 90,
+              height: 90,
+              borderRadius: "50%",
+              objectFit: "cover"
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: 90,
+              height: 90,
+              borderRadius: "50%",
+              background: "#e5e7eb",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 32
+            }}
+          >
+            {viewStudent.studentName?.charAt(0)}
+          </div>
+        )}
+      </div>
+
+      <p><b>Name:</b> {viewStudent.studentName}</p>
+      <p><b>Student ID:</b> {viewStudent.studentId}</p>
+      <p><b>Parent:</b> {viewStudent.parentName}</p>
+      <p><b>Parent ID:</b> {viewStudent.parentId}</p>
+      <p><b>Class:</b> {viewStudent.class}</p>
+      <p><b>Section:</b> {viewStudent.section}</p>
+      <p><b>Phone:</b> {viewStudent.phone || "-"}</p>
+      <p><b>Address:</b> {viewStudent.address || "-"}</p>
+
+      <div className="modal-actions">
+        <button className="cancel" onClick={() => setViewStudent(null)}>
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       {showModal && (
         <div className="modal-overlay">

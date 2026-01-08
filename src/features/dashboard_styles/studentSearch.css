@@ -1,0 +1,203 @@
+/* ===== STUDENT SEARCH (ISOLATED FIX) ===== */
+
+/* ================== TABLE (FULL GRID – PROFESSIONAL) ================== */
+
+.nice-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;   /* outer border */
+  }
+  
+  .nice-table {
+    width: 100%;
+    border-collapse: collapse;  /* IMPORTANT for full grid */
+    font-size: 14px;
+  }
+  
+  /* ---------- HEADER ---------- */
+  .nice-table thead tr {
+    background: #f6f7fc;
+  }
+  
+  .nice-table th {
+    padding: 14px 16px;
+    text-align: center;
+    font-weight: 600;
+    color: #111827;
+    border: 1px solid #d1d5db;  /* column + row border */
+  }
+  
+  /* ---------- BODY CELLS ---------- */
+  .nice-table td {
+    padding: 12px 16px;
+    text-align: center;
+    border: 1px solid #e5e7eb;  /* FULL GRID LINES */
+    background: #ffffff;
+  }
+  
+  /* LEFT ALIGN DESCRIPTION */
+  .nice-table td:first-child {
+    text-align: left;
+    color: #374151;
+    font-weight: 500;
+  }
+  
+  /* ---------- DATE HEADING ---------- */
+  .date-heading td {
+    font-size: 15px;
+    background: #eef0ff;
+    font-weight: 600;
+    border: 1px solid #c7d2fe;
+  }
+  
+  /* ---------- TOTAL ROW ---------- */
+  .nice-table tr[style*="font-weight: bold"] td {
+    background: #fafafa;
+    font-weight: 600;
+    border-top: 2px solid #cbd5f5;
+  }
+  
+  /* ---------- INCOME ---------- */
+  .nice-table td[style*="green"] {
+    color: #166534 !important;
+    font-weight: 600;
+  }
+  
+  /* ---------- EXPENSE ---------- */
+  .nice-table td[style*="red"] {
+    color: #9f1239 !important;
+    font-weight: 600;
+  }
+  
+  /* ---------- HOVER ---------- */
+  .nice-table tbody tr:hover td {
+    background: #f9fafb;
+  }
+  
+  /* ================= MOBILE CARD MODE ================= */
+  
+  @media (max-width: 620px) {
+  
+    .nice-table,
+    .nice-table tbody,
+    .nice-table tr {
+      display: block;
+      width: 100%;
+    }
+  
+    .nice-table tr {
+      margin-bottom: 10px;
+      padding: 10px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+  
+    .nice-table td {
+      display: flex;
+      justify-content: space-between;
+      border: none;   /* mobile card – no grid */
+      padding: 6px 4px;
+      font-size: 13px;
+    }
+  
+    .nice-table td::before {
+      content: attr(data-label);
+      font-weight: 600;
+      color: #555;
+    }
+  }
+  
+  
+.student-search-wrapper {
+    position: relative;
+    width: 100%;
+    grid-column: span 1;
+  }
+  
+  /* dropdown overlay – layout affect aagadhu */
+  .student-search-list {
+    position: absolute;
+    top: calc(100% + 4px);   /* input keezha */
+    left: 0;
+    right: 0;
+  
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+  
+    max-height: 180px;
+    overflow-y: auto;
+  
+    z-index: 9999;           /* ellathukkum mela */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  }
+  
+  /* each row */
+  .student-search-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1.4;
+    background: #fff;
+  }
+  
+  .student-search-item:hover {
+    background: #f1f5ff;
+  }
+  
+  /* no result */
+  .student-search-item.muted {
+    color: #9ca3af;
+    cursor: default;
+  }
+  
+  /* =====================================================
+   INCOME / OLD ADMISSION – ISOLATED GRID (NO MIX)
+   ===================================================== */
+
+.income-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    align-items: center;
+  }
+  
+  .entries-card .income-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+  
+  .income-grid input,
+  .income-grid select {
+    width: 100%;
+  }
+  
+  .income-grid input[readonly] {
+    background: #f3f5ff;
+    font-weight: 500;
+  }
+  
+  .income-grid .student-search-wrapper {
+    width: 100%;
+  }
+  
+  .income-grid button {
+    grid-column: 1 / -1;
+    height: 46px;
+    margin-top: 6px;
+  }
+  
+  @media (max-width: 1024px) {
+    .income-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+  }
+  
+  @media (max-width: 620px) {
+    .income-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+  

@@ -37,6 +37,8 @@
 import FeesPage from "./accounts/FeesPage";
 import ExpensesPage from "./accounts/ExpensesPage";
 import ProfitPage from "./accounts/ProfitPage";
+import Inventory from "./accounts/Inventory";
+
 
 
 
@@ -274,7 +276,7 @@ import ProfitPage from "./accounts/ProfitPage";
 <li
   
   onClick={() => {
-    setActivePage("expenses");     
+    setActivePage("accounts");     
     setAccountsSubMenuOpen(false);
   }}
 >
@@ -447,15 +449,27 @@ import ProfitPage from "./accounts/ProfitPage";
 {isAdminOrSubAdmin && activePage === "fees" && (
   <FeesPage adminUid={adminUid} />
 )}
-
-{isAdminOrSubAdmin && activePage === "expenses" && (
-  <ExpensesPage adminUid={adminUid}
-  setActivePage={setActivePage}/>
+{activePage === "income" && (
+  <FeesPage adminUid={adminUid} mode="income" />
 )}
+
+{activePage === "expenses" && (
+  <FeesPage adminUid={adminUid} mode="expenses" />
+)}
+
+{isAdminOrSubAdmin && activePage === "accounts" && (
+  <ExpensesPage
+    adminUid={adminUid}
+    setActivePage={setActivePage}
+  />
+)}
+
 
 {isAdminOrSubAdmin && activePage === "profit" && (
   <ProfitPage adminUid={adminUid} />
- 
+)}
+{isAdminOrSubAdmin && activePage === "inventory" && (
+  <Inventory adminUid={adminUid} />
 )}
 
 {/* rest of the pages go here… */}
