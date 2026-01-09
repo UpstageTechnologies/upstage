@@ -9,6 +9,9 @@ export default function ExpensesPage({ adminUid, setActivePage }) {
   const [totalExpense, setTotalExpense] = useState(0);
 
   const profit = totalIncome - totalExpense;
+  const role = localStorage.getItem("role");
+const isOfficeStaff = role === "office_staff";
+
 
   /* ----------- LOAD TOTAL INCOME ----------- */
   useEffect(() => {
@@ -59,82 +62,106 @@ export default function ExpensesPage({ adminUid, setActivePage }) {
   }, [adminUid]);
 
   return (
+    
     <div className="accounts-wrapper fade-in">
+      
+      {!isOfficeStaff && (
+  <div>
+    {/* ================= TOP SUMMARY ================= */}
+    <h2 className="page-title">Accounts Dashboard</h2>
 
-      {/* ================= TOP SUMMARY ================= */}
-      <h2 className="page-title">Accounts Dashboard</h2>
+    <div className="stats-grid">
 
-      <div className="stats-grid">
-
-        <div className="info-card1">
-          <div className="label">Total Income</div>
-          <div className="value">
-            ₹{totalIncome.toLocaleString("en-IN")}
-          </div>
+      <div className="info-card1">
+        <div className="label">Total Income</div>
+        <div className="value">
+          ₹{totalIncome.toLocaleString("en-IN")}
         </div>
-
-        <div className="info-card2">
-          <div className="label">Total Expenses</div>
-          <div className="value">
-            ₹{totalExpense.toLocaleString("en-IN")}
-          </div>
-        </div>
-
-        <div className="info-card3">
-          <div className="label">Profit</div>
-          <div
-            className="value"
-            style={{ color: profit >= 0 ? "green" : "red" }}
-          >
-            ₹{profit.toLocaleString("en-IN")}
-          </div>
-        </div>
-
       </div>
 
-      {/* ================= NAVIGATION BOXES ================= */}
-      <div className="accounts-grid">
-
-        {/* JOURNAL ENTRY */}
-        <div
-          className="accounts-card"
-          onClick={() => setActivePage("profit")}
-        >
-          <h3>📒 Journal Entry</h3>
-          <p>Add / View Income & Expenses</p>
+      <div className="info-card2">
+        <div className="label">Total Expenses</div>
+        <div className="value">
+          ₹{totalExpense.toLocaleString("en-IN")}
         </div>
+      </div>
 
-      
-
-        {/* INVENTORY */}
+      <div className="info-card3">
+        <div className="label">Profit</div>
         <div
-          className="accounts-card"
-          onClick={() => setActivePage("inventory")}
+          className="value"
+          style={{ color: profit >= 0 ? "green" : "red" }}
         >
-          <h3>📦 Inventory</h3>
-          <p>Fees Master</p>
+          ₹{profit.toLocaleString("en-IN")}
         </div>
-
-        {/* 🆕 INCOME */}
-        <div
-          className="accounts-card"
-          onClick={() => setActivePage("income")}
-        >
-          <h3>💵 Income</h3>
-          <p>View All Income Records</p>
-        </div>
-
-        {/* 🆕 EXPENSE */}
-        <div
-          className="accounts-card"
-          onClick={() => setActivePage("expenses")}
-        >
-          <h3>💸 Expenses</h3>
-          <p>View All Expense Records</p>
-        </div>
-
       </div>
 
     </div>
+  </div>
+)}
+
+
+<div className="accounts-grid">
+
+{isOfficeStaff && (
+  <>
+    <div
+      className="accounts-card"
+      onClick={() => setActivePage("profit")}
+    >
+      <h3>📒 Journal Entry</h3>
+      <p>Add / View Income & Expenses</p>
+    </div>
+
+    <div
+      className="accounts-card"
+      onClick={() => setActivePage("inventory")}
+    >
+      <h3>📦 Inventory</h3>
+      <p>Fees Master</p>
+    </div>
+  </>
+)}
+
+
+{/* 👑 ADMIN / MASTER → FULL ACCESS */}
+{!isOfficeStaff && (
+  <>
+    <div
+      className="accounts-card"
+      onClick={() => setActivePage("profit")}
+    >
+      <h3>📒 Journal Entry</h3>
+      <p>Add / View Income & Expenses</p>
+    </div>
+
+    <div
+      className="accounts-card"
+      onClick={() => setActivePage("inventory")}
+    >
+      <h3>📦 Inventory</h3>
+      <p>Fees Master</p>
+    </div>
+
+    <div
+      className="accounts-card"
+      onClick={() => setActivePage("income")}
+    >
+      <h3>💵 Income</h3>
+      <p>View All Income Records</p>
+    </div>
+
+    <div
+      className="accounts-card"
+      onClick={() => setActivePage("expenses")}
+    >
+      <h3>💸 Expenses</h3>
+      <p>View All Expense Records</p>
+    </div>
+  </>
+)}
+
+</div>
+</div>
   );
 }

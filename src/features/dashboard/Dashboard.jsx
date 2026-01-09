@@ -1,4 +1,4 @@
-  import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
   import { auth } from "../../services/firebase";
   import { onAuthStateChanged, signOut } from "firebase/auth";
   import { doc, getDoc } from "firebase/firestore";
@@ -23,6 +23,8 @@
   import Parent from "./Parent";
   import Student from "./Student";
   import Admin from "./Admin";
+  import OfficeStaff from "./OfficeStaff";
+
   import StudentDetails from "./StudentDetails";
   import AdminTimetable from "./AdminTimetable";
   import TeacherTimetable from "./TeacherTimetable";
@@ -38,6 +40,7 @@ import FeesPage from "./accounts/FeesPage";
 import ExpensesPage from "./accounts/ExpensesPage";
 import ProfitPage from "./accounts/ProfitPage";
 import Inventory from "./accounts/Inventory";
+
 
 
 
@@ -68,15 +71,26 @@ import Inventory from "./accounts/Inventory";
     const [homeStats, setHomeStats] = useState(null);
     const [logo, setLogo] = useState(""); 
     const [accountsSubMenuOpen, setAccountsSubMenuOpen] = useState(false);
+    const viewParentId = localStorage.getItem("viewParentId");
+
+   
+    
 
 
     
 
+    
+
+
+    
+    
 
 
     const navigate = useNavigate();
 
     const isAdminOrSubAdmin = role === "master" || role === "admin";
+    const isOfficeStaff = role === "office_staff"; 
+    
 
     const formatDate = (timestamp) => {
       if (!timestamp) return "No Expiry";
@@ -86,7 +100,7 @@ import Inventory from "./accounts/Inventory";
         year: "numeric"
       });
     };
-
+    
     /* ================= AUTH + ROLE ================= */
     useEffect(() => {
       const storedRole = localStorage.getItem("role");
@@ -95,17 +109,21 @@ import Inventory from "./accounts/Inventory";
       if (
         storedRole === "teacher" ||
         storedRole === "parent" ||
-        storedRole === "admin"
-      ) {
+        storedRole === "admin" ||
+        storedRole === "office_staff" 
+      ) 
+       {
         setRole(storedRole);
         setUser({
           displayName:
+            localStorage.getItem("staffName") ||
             localStorage.getItem("adminName") ||
             localStorage.getItem("teacherName") ||
             localStorage.getItem("parentName") ||
             "User",
           email: localStorage.getItem("email") || ""
         });
+        
         return;
       }
 
@@ -200,6 +218,20 @@ import Inventory from "./accounts/Inventory";
     
       loadSchool();
     }, [role]);
+
+    useEffect(() => {
+  const handler = () => {
+    setActivePage("teacher-dashboard");
+  };
+
+  window.addEventListener("open-teacher-dashboard", handler);
+
+  return () =>
+    window.removeEventListener("open-teacher-dashboard", handler);
+}, []);
+const viewAs = localStorage.getItem("viewAs"); // "teacher" | null
+const viewTeacherId = localStorage.getItem("viewTeacherId");
+
     
     
 
@@ -221,87 +253,93 @@ import Inventory from "./accounts/Inventory";
       <div className="dashboard-container">
         {/* ================= SIDEBAR ================= */}
         <div className={`sidebar ${menuOpen ? "sidebar-open" : "sidebar-close"}`}>
-          <ul>
-            <li onClick={() => setActivePage("home")}>
-              <FaHome /> Home
-            </li>
+        <ul>
+  {/* ================= OFFICE STAFF ================= */}
+  {isOfficeStaff && (
+    <li onClick={() => setActivePage("accounts")}>
+      <FaMoneyBillWave /> Accounts
+    </li>
+  )}
 
+  {/* ================= MASTER / ADMIN ================= */}
+  {!isOfficeStaff && (
+    <>
+      <li onClick={() => setActivePage("home")}>
+        <FaHome /> Home
+      </li>
 
+      {role === "master" && (
+        <li onClick={() => navigate("/payment")}>
+          <FaSignOutAlt /> Upgrade
+        </li>
+      )}
 
-            {role === "master" && (
-              <li onClick={() => navigate("/payment")}>
-                <FaSignOutAlt /> Upgrade
-                  
-              </li>
-            )}
+      {role === "master" && (
+        <li className={`plan-info ${plan}`}>
+          <div className="plan-row">
+            Plan: <strong>{plan.toUpperCase()}</strong>
+          </div>
+          {plan !== "basic" && (
+            <div className="plan-row">
+              Expiry: <strong>{formatDate(planExpiry)}</strong>
+            </div>
+          )}
+        </li>
+      )}
 
-            {role === "master" && (
-              <li className={`plan-info ${plan}`}>
-                <div className="plan-row">
-                  Plan: <strong>{plan.toUpperCase()}</strong>
-                </div>
-                {plan !== "basic" && (
-                  <div className="plan-row">
-                    Expiry: <strong>{formatDate(planExpiry)}</strong>
-                  </div>
-                )}
-              </li>
-            )}
+      {(
+        (role === "master" &&
+          (plan === "premium" || plan === "lifetime")) ||
+        role === "admin"
+      ) && (
+        <>
+          <li
+            className="account-main"
+            onClick={() => setAccountMenuOpen(!accountMenuOpen)}
+          >
+            <FaUserCircle /> Account Creation
+            {accountMenuOpen ? <FaChevronUp /> : <FaChevronDown />}
+          </li>
 
-            {/* 🔑 ADMIN + SUB_ADMIN */}
-            {(
-              (role === "master" &&
-                (plan === "premium" || plan === "lifetime")) ||
-              role === "admin"
-            ) && (
-              <>
-
-                <li
-                  className="account-main"
-                  onClick={() => setAccountMenuOpen(!accountMenuOpen)}
-                >
-                  <FaUserCircle /> Account Creation
-                  {accountMenuOpen ? <FaChevronUp /> : <FaChevronDown />}
+          {accountMenuOpen && (
+            <ul className="account-submenu">
+              {role === "master" && (
+                <li onClick={() => { setActivePage("admin"); setAccountMenuOpen(false); }}>
+                  Admin
                 </li>
+              )}
+              <li onClick={() => { setActivePage("teacher"); setAccountMenuOpen(false); }}>
+                Teacher
+              </li>
+              <li onClick={() => { setActivePage("parent"); setAccountMenuOpen(false); }}>
+                Parent
+              </li>
+              <li onClick={() => { setActivePage("student"); setAccountMenuOpen(false); }}>
+                Student
+              </li>
+              <li onClick={() => { setActivePage("office_staff"); setAccountMenuOpen(false); }}>
+                Staff
+              </li>
+            </ul>
+          )}
 
-                {accountMenuOpen && (
-                  <ul className="account-submenu">
-                    {role === "master" && (
-                    <li onClick={() => {setActivePage("admin");setAccountMenuOpen(false);}}>Admin</li>)}
-                    <li onClick={() => {setActivePage("teacher");setAccountMenuOpen(false);}}>Teacher</li>
-                    <li onClick={() => {setActivePage("parent");setAccountMenuOpen(false);}}>Parent</li>
-                    <li onClick={() => {setActivePage("student");setAccountMenuOpen(false);}}>Student</li>
-                  </ul>
-                )}
-<li
-  
-  onClick={() => {
-    setActivePage("accounts");     
-    setAccountsSubMenuOpen(false);
-  }}
->
-<FaMoneyBillWave/>Accounts
-</li>
-              
-                
+          <li onClick={() => setActivePage("accounts")}>
+            <FaMoneyBillWave /> Accounts
+          </li>
 
-                <li onClick={() => setActivePage("timetable")}>
-                <FaCalendarAlt />Timetable
-                </li>
-                
-                
-              
-          
+          <li onClick={() => setActivePage("timetable")}>
+            <FaCalendarAlt /> Timetable
+          </li>
+
           {role === "admin" && (
-          <li onClick={() => setActivePage("attendance")}>
-            <FaUserCheck/> Teacher's Attendance
+            <li onClick={() => setActivePage("attendance")}>
+              <FaUserCheck /> Teacher Attendance
             </li>
           )}
-              
-              </>
-            )}
+        </>
+      )}
+                {(role === "teacher" || role === "parent" || viewAs === "parent") && (
 
-            {(role === "teacher" || role === "parent") && (
               <>
               <li onClick={() => setActivePage("studentDetails")}>
                 <FaUserGraduate /> Student Details
@@ -314,30 +352,48 @@ import Inventory from "./accounts/Inventory";
             </li>
             </>
             )}
-            
-              {role === "master" && (
-            <li onClick={() => setActivePage("approvals")}>
-            <FaClipboardCheck/>Approvals
-            </li>
-            
-            )}
-            <li onClick={() => setActivePage("courses")}>
-            <FaBookOpen /> Courses
-            </li>
-           
-            {role === "master" && (
-              <li onClick={() => setActivePage("applications")}>
-                <FaWpforms /> Applications
-                </li>
-            )}
+            {viewAs === "teacher" && (
+  <button
+    onClick={() => {
+      localStorage.removeItem("viewAs");
+      localStorage.removeItem("viewTeacherId");
+      localStorage.removeItem("teacherName");
+      window.location.reload();
+    }}
+    style={{
+      background: "#2563eb",
+      color: "#fff",
+      padding: "6px 12px",
+      borderRadius: 6,
+      border: "none",
+      marginRight: 10,
+      cursor: "pointer"
+    }}
+  >
+    Exit Teacher View
+  </button>
+)}
 
 
-        
+      {role === "master" && (
+        <li onClick={() => setActivePage("approvals")}>
+          <FaClipboardCheck /> Approvals
+        </li>
+      )}
 
+      <li onClick={() => setActivePage("courses")}>
+        <FaBookOpen /> Courses
+      </li>
 
+      {role === "master" && (
+        <li onClick={() => setActivePage("applications")}>
+          <FaWpforms /> Applications
+        </li>
+      )}
+    </>
+  )}
+</ul>
 
-          
-          </ul>
         </div>
 
         {/* ================= MAIN ================= */}
@@ -363,6 +419,31 @@ import Inventory from "./accounts/Inventory";
 
 
             </div>
+            {/* 🔴 EXIT PARENT VIEW BUTTON */}
+{viewAs === "parent" && (
+  <button
+    onClick={() => {
+      localStorage.removeItem("viewAs");
+      localStorage.removeItem("viewParentId");
+      localStorage.removeItem("parentName");
+      window.location.reload();
+    }}
+    style={{
+      background: "#ef4444",
+      color: "#fff",
+      padding: "6px 12px",
+      borderRadius: 6,
+      border: "none",
+      marginRight: 10,
+      cursor: "pointer"
+    }}
+  >
+    Exit Parent View
+  </button>
+)}
+
+
+
 
         <div
     className="user-info"
@@ -447,17 +528,17 @@ import Inventory from "./accounts/Inventory";
 )}
 
 {isAdminOrSubAdmin && activePage === "fees" && (
-  <FeesPage adminUid={adminUid} />
+  <FeesPage adminUid={adminUid} setActivePage={setActivePage}/>
 )}
 {activePage === "income" && (
-  <FeesPage adminUid={adminUid} mode="income" />
+  <FeesPage adminUid={adminUid} mode="income" setActivePage={setActivePage}/>
 )}
 
 {activePage === "expenses" && (
-  <FeesPage adminUid={adminUid} mode="expenses" />
+  <FeesPage adminUid={adminUid} mode="expenses" setActivePage={setActivePage}/>
 )}
 
-{isAdminOrSubAdmin && activePage === "accounts" && (
+{(isAdminOrSubAdmin || isOfficeStaff) && activePage === "accounts" && (
   <ExpensesPage
     adminUid={adminUid}
     setActivePage={setActivePage}
@@ -465,11 +546,19 @@ import Inventory from "./accounts/Inventory";
 )}
 
 
-{isAdminOrSubAdmin && activePage === "profit" && (
-  <ProfitPage adminUid={adminUid} />
+
+{(isAdminOrSubAdmin || isOfficeStaff) &&
+ (activePage === "profit" || activePage.startsWith("bill_")) && (
+  <ProfitPage
+    adminUid={adminUid}
+    setActivePage={setActivePage}
+    activePage={activePage}
+  />
 )}
+
+
 {isAdminOrSubAdmin && activePage === "inventory" && (
-  <Inventory adminUid={adminUid} />
+  <Inventory adminUid={adminUid} setActivePage={setActivePage} />
 )}
 
 {/* rest of the pages go here… */}
@@ -484,13 +573,18 @@ import Inventory from "./accounts/Inventory";
               <Teacher adminUid={adminUid} />
             )}
 
-            {isAdminOrSubAdmin && activePage === "parent" && (
-              <Parent adminUid={adminUid} />
-            )}
+{(isAdminOrSubAdmin || viewAs === "parent") && activePage === "parent" && (
+  <Parent adminUid={adminUid} />
+)}
+
 
             {isAdminOrSubAdmin && activePage === "student" && (
               <Student adminUid={adminUid} />
             )}
+              {isAdminOrSubAdmin && activePage === "office_staff" && (
+  <OfficeStaff adminUid={adminUid} />
+)}
+
 
             {(role === "teacher" || role === "parent") &&
               activePage === "studentDetails" && <StudentDetails />}
@@ -502,9 +596,12 @@ import Inventory from "./accounts/Inventory";
             {(role === "master") && activePage === "admin" && <Admin />}
 
             {activePage === "approvals" && role === "master" && <Approvals />}
-            {role === "teacher" && activePage === "teacher-timetable" && (
-            <TeacherTimetable />
-            )}
+            {(role === "teacher" || viewAs === "teacher") &&
+  activePage === "teacher-timetable" && (
+    <TeacherTimetable teacherId={viewTeacherId} />
+)}
+
+            
           {isAdminOrSubAdmin && activePage === "attendance" && (
               <Attendance adminUid={adminUid} />
               )}
@@ -514,9 +611,12 @@ import Inventory from "./accounts/Inventory";
             {isAdminOrSubAdmin && activePage === "courses" && (
             <Courses />
             )}
-            {role === "teacher" && activePage === "teacher-attendance" && (
-            <TeacherAttendance />
-            )}
+           {(role === "teacher" || viewAs === "teacher") &&
+  activePage === "teacher-attendance" && (
+    <TeacherAttendance teacherId={viewTeacherId} />
+)}
+
+            
             {isAdminOrSubAdmin && activePage === "teacher-absents" && (
               <ShowTodaysTeacherAbsent adminUid={adminUid} setActivePage={setActivePage} />
             )}

@@ -29,6 +29,10 @@ const ChooseLogin = () => {
             Parent
             <span>Student progress</span>
           </Link>
+          <Link to="/office-staff-login" className="role-card staff">
+            Office Staff
+            <span>Office & administration</span>
+          </Link>
         </div>
       </div>
     </div>

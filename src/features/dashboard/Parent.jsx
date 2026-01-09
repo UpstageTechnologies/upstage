@@ -13,6 +13,16 @@ import { auth, db } from "../../services/firebase";
 import "../dashboard_styles/Teacher.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
+
+const handleViewParent = (p) => {
+  localStorage.setItem("viewAs", "parent");
+  localStorage.setItem("viewParentId", p.parentId);
+  localStorage.setItem("parentName", p.parentName);
+
+  window.open("/dashboard", "_blank");   // 👈 new tab
+};
+
+
 const Parent = () => {
   /* ================= BASIC ================= */
   const adminUid =
@@ -469,20 +479,24 @@ if (editId) {
         <td data-label="Address">{p.address}</td>
 
         <td className="action-cell">
-          <button
-            className="edit-btn"
-            onClick={() => handleEdit(p)}
-          >
-            <FaEdit /> Edit
-          </button>
 
-          <button
-            className="delete-btn"
-            onClick={() => handleDelete(p.id)}
-          >
-            <FaTrash /> Delete
-          </button>
-        </td>
+{/* 👁 VIEW AS PARENT */}
+<button
+  className="view-btn"
+  onClick={() => handleViewParent(p)}
+>
+  <FaEye /> View
+</button>
+
+<button className="edit-btn" onClick={() => handleEdit(p)}>
+  <FaEdit /> Edit
+</button>
+
+<button className="delete-btn" onClick={() => handleDelete(p.id)}>
+  <FaTrash /> Delete
+</button>
+</td>
+
       </tr>
     ))}
 </tbody>

@@ -1,14 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { collection, onSnapshot, addDoc, updateDoc, doc } from "firebase/firestore";
-import { db } from "../../../services/firebase";
+  import { db } from "../../../services/firebase";
 import "../../dashboard_styles/Accounts.css";
 import "../../dashboard_styles/studentSearch.css";
 import { useNavigate } from "react-router-dom";
+import OfficeStaff from "../OfficeStaff";
+import BillPage from "./BillPage";   
 
 
 
 
-export default function ProfitPage({ adminUid, setActivePage }) {
+
+export default function ProfitPage({ adminUid, setActivePage, activePage = "" }) {
+
+
+  const role = localStorage.getItem("role");
+const isOfficeStaff = role === "office_staff";
+
 
   const [incomeList, setIncomeList] = useState([]);
   const [expenseList, setExpenseList] = useState([]);
@@ -78,6 +86,8 @@ export default function ProfitPage({ adminUid, setActivePage }) {
 
   const studentsMainRef = collection(db, "users", adminUid, "students");
 const parentsRef = collection(db, "users", adminUid, "parents");
+
+
 
 
 
@@ -335,42 +345,73 @@ await updateDoc(
   const totalIncome = incomeList.reduce((t,x)=>t+(x.paidAmount||0),0);
   const totalExpense= expenseList.reduce((t,x)=>t+(x.amount||0),0);
   const profit = totalIncome-totalExpense;
+  // 🔥 SHOW ONLY BILL PAGE
+if (activePage && activePage.startsWith("bill_")) {
+  return (
+    <BillPage
+      adminUid={adminUid}
+      billStudentId={activePage.split("_")[1]}
+      billDate={activePage.split("_")[2]}
+      setActivePage={setActivePage}
+    />
+  );
+}
+
 
   return (
     
+    
     <div className="accounts-wrapper fade-in">
+       <span
+        style={{ color: "#2140df", cursor: "pointer", fontWeight: 600 }}
+        onClick={() => setActivePage("accounts")}
+      >
+        ← Back
+      </span>
       
       <div className="accounts-wrapper fade-in">
 
-  <div className="stats-grid">
+      {!isOfficeStaff && (
+  <div>
+    {/* ================= TOP SUMMARY ================= */}
+    <h2 className="page-title">Accounts Dashboard</h2>
 
-    <div className="info-card1">
-      <div className="label">Total Income</div>
-      <div className="value">₹{totalIncome}</div>
-    </div>
+    <div className="stats-grid">
 
-    <div className="info-card2">
-      <div className="label">Total Expenses</div>
-      <div className="value">₹{totalExpense}</div>
-    </div>
-
-    <div className="info-card3">
-      <div className="label">Profit</div>
-      <div
-        className="value"
-        style={{ color: profit >= 0 ? "green" : "red" }}
-      >
-        ₹{profit}
+      <div className="info-card1">
+        <div className="label">Total Income</div>
+        <div className="value">
+          ₹{totalIncome.toLocaleString("en-IN")}
+        </div>
       </div>
-    </div>
 
+      <div className="info-card2">
+        <div className="label">Total Expenses</div>
+        <div className="value">
+          ₹{totalExpense.toLocaleString("en-IN")}
+        </div>
+      </div>
+
+      <div className="info-card3">
+        <div className="label">Profit</div>
+        <div
+          className="value"
+          style={{ color: profit >= 0 ? "green" : "red" }}
+        >
+          ₹{profit.toLocaleString("en-IN")}
+        </div>
+      </div>
+
+    </div>
   </div>
+)}
 
 </div>
 
 
 
       <div className="section-card pop entries-card">
+   
   <h3 className="section-title">Entries</h3>
 
 
@@ -417,6 +458,8 @@ await updateDoc(
           <option value="old">Old Admission</option>
         </select>
       )}
+     
+
 
     </div>
 
@@ -592,6 +635,8 @@ await updateDoc(
 )}
 
 
+
+
         {/* ================= EXPENSE ================= */}
         {entryType==="expense" && (
           <>
@@ -691,13 +736,19 @@ await updateDoc(
 
       </div>
 
-        <div className="nice-table-wrapper">
-          <table className="nice-table1">
+        
+      <div className="nice-table-wrapper">
+
+
+
+<table className="nice-table1">
+
           <thead>
   <tr>
     <th>Discription</th>
     <th>Income</th>
     <th>Expense</th>
+    <th>Bill</th>
   </tr>
 </thead>
 
@@ -708,18 +759,21 @@ await updateDoc(
         id: i.id,
         date: i.date,
         source: i.studentName || i.name || "Income",
-        income: i.paidAmount || 0,
-        expense: 0
+        income: isOfficeStaff ? "***" : (i.paidAmount || 0),
+        expense: "",
+        studentId: i.studentId || null
       })),
     
       ...expenseList.map(e => ({
         id: e.id,
         date: e.date,
         source: e.name,
-        income: 0,
-        expense: e.amount || 0
+        income: "",
+        expense: isOfficeStaff ? "***" : (e.amount || 0),
+        studentId: null
       }))
     ];
+    
     
     // sort by date (latest first)
     all.sort((a, b) => (a.date > b.date ? -1 : 1));
@@ -733,16 +787,16 @@ await updateDoc(
       const isLastOfDate = !nextRow || nextRow.date !== row.date;
 
       // totals add
-      dateIncomeTotal += row.income;
-      dateExpenseTotal += row.expense;
-
+      dateIncomeTotal += Number(row.income) || 0;
+      dateExpenseTotal += Number(row.expense) || 0;
+      
       return (
         <React.Fragment key={row.id}>
 
           {/* DATE */}
           {lastDate !== row.date && (
             <tr className="date-heading">
-              <td colSpan={3} style={{ fontWeight: "bold", background: "#f3f3f3" }}>
+              <td colSpan={4} style={{ fontWeight: "bold", background: "#f3f3f3" }}>
                 {lastDate = row.date}
               </td>
             </tr>
@@ -753,12 +807,27 @@ await updateDoc(
             <td>{row.source}</td>
 
             <td style={{ color: "green" }}>
-              {row.income ? `₹${row.income}` : ""}
-            </td>
+  {row.income === "***" ? "***" : row.income ? `₹${row.income}` : ""}
+</td>
 
-            <td style={{ color: "red" }}>
-              {row.expense ? `₹${row.expense}` : ""}
-            </td>
+<td style={{ color: "red" }}>
+  {row.expense === "***" ? "***" : row.expense ? `₹${row.expense}` : ""}
+</td>
+<td style={{ textAlign: "center" }}>
+  {row.studentId && (
+    <span
+      style={{ cursor: "pointer", color: "#2140df", fontSize: 18 }}
+      title="View Bill"
+      onClick={() =>
+        setActivePage(`bill_${row.studentId}_${row.date}`)
+      }
+    >
+      🧾
+    </span>
+  )}
+</td>
+
+
           </tr>
 
           {/* TOTAL ROW */}

@@ -9,7 +9,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 14px;
- 
+  color: black;
   margin-bottom: 16px;  
 }
 
@@ -43,17 +43,20 @@
   font-size: 14px;
   opacity: 0.7;
   margin-bottom: 6px;
+  color: black;
 }
 
 .info-card .value {
   font-size: 22px;
   font-weight: 800;
+  color: black;
 }
 
 .page-title {
   font-size: 26px;
   font-weight: 700;
   margin-bottom: 18px;
+  color: black;
 }
 
 .section-card {
@@ -63,6 +66,7 @@
   margin-bottom: 16px;
   box-shadow: 0 12px 28px rgba(0,0,0,.08);
   transition: .25s ease;
+  color: black;
 }
 
 
@@ -70,6 +74,7 @@
 .section-title {
   font-weight: 700;
   margin-bottom: 10px;
+  color: black;
 }
 
 /* ================== FORMS ================== */
@@ -79,6 +84,7 @@
   grid-template-columns: repeat(4, minmax(180px, 1fr));
   gap: 14px;
   align-items: center;
+  color: black;
 }
 
 
@@ -87,11 +93,13 @@ select {
   padding: 9px 10px;
   border-radius: 10px;
   border: 1px solid #dcdcdc;
+  color: black;
 }
 
 /* remove ugly mobile select styling */
 select {
   appearance: none;
+  color: black;
 }
 
 /* ================== BUTTONS ================== */
@@ -127,6 +135,7 @@ select {
   min-height: 100vh;
   font-family: Inter, system-ui, Arial;
   background: #f5f7fb;
+  color: black;
 }
 
 /* ---------- SIDEBAR ---------- */
@@ -139,6 +148,7 @@ select {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  color: black;
 }
 
 .menu-btn {
@@ -147,6 +157,7 @@ select {
   border: 1px solid transparent;
   background: transparent;
   cursor: pointer;
+  
 }
 
 .menu-btn:hover {
@@ -158,6 +169,7 @@ select {
 .dash-main {
   flex: 1;
   padding: 30px;
+  color: black;
 }
 
 /* ================== TABLE ================== */
@@ -167,12 +179,14 @@ select {
   overflow-x: auto;
   border-radius: 14px;
   background: #ffffff;
+  color: black;
 }
 
 .nice-table1 {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
+  color: black;
 }
 
 .nice-table1 thead tr { background: #f6f7fc; }
@@ -180,10 +194,12 @@ select {
 .nice-table1 th,
 .nice-table1 td {
   padding: 14px 16px;
+  color: black;
 }
 
 .nice-table1 tbody tr + tr td {
   border-top: 1px solid #f0f0f0;
+  color: black;
 }
 
 /* ================== RESPONSIVE ================== */
@@ -479,6 +495,133 @@ select {
     grid-template-columns: 1fr;
   }
 }
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.report-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+}
+/* ================= PRINT ONLY REPORT ================= */
+@media print {
+
+  body * {
+    visibility: hidden;
+  }
+
+  .report-print-area,
+  .report-print-area * {
+    visibility: visible;
+  }
+
+  .report-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white;
+    padding: 20px;
+  }
+}
+.bill-page {
+  padding: 20px;
+}
+
+.invoice {
+  background: white;
+  max-width: 700px;
+  margin: auto;
+  padding: 30px;
+  border: 1px solid #ddd;
+  box-shadow: 0 0 20px rgba(0,0,0,0.08);
+  font-family: Arial, sans-serif;
+}
+
+.invoice-header {
+  text-align: center;
+}
+
+.invoice-header h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.invoice-header p {
+  margin: 4px 0;
+  font-size: 16px;
+}
+
+.invoice-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 15px 0;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoice-table th,
+.invoice-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.invoice-table th {
+  background: #f5f5f5;
+}
+
+.invoice-summary {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.invoice-amount {
+  font-size: 20px;
+  font-weight: bold;
+  color: green;
+}
+
+.invoice-actions {
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* PRINT STYLE */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .invoice, .invoice * {
+    visibility: visible;
+  }
+  .invoice {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    box-shadow: none;
+    border: none;
+  }
+  button {
+    display: none;
+  }
+}
+
+
+
 
 
 

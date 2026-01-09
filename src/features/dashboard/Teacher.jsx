@@ -16,6 +16,14 @@ import {
 import { auth, db } from "../../services/firebase";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
+const handleViewTeacher = (t) => {
+  localStorage.setItem("viewAs", "teacher");
+  localStorage.setItem("viewTeacherId", t.teacherId);
+  localStorage.setItem("teacherName", t.teacherName);
+
+  window.open("/dashboard", "_blank");   // 👈 new tab
+};
+
 
 
 
@@ -364,6 +372,22 @@ if (!/^\d{10}$/.test(phoneClean)) {
   >
     <FaTrash /> Delete
   </button>
+  <button
+  className="view-btn"
+  onClick={() => {
+    localStorage.setItem("viewAs", "teacher");
+    localStorage.setItem("viewTeacherId", t.id);
+    localStorage.setItem("viewTeacherName", t.name);
+
+    // 🔥 dashboard page switch
+    window.dispatchEvent(
+      new CustomEvent("open-teacher-dashboard")
+    );
+  }}
+>
+  👁 View
+</button>
+
 </td>
 
 

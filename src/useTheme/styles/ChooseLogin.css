@@ -15,6 +15,10 @@
   margin-top: 20px;
 
 }
+.role-card.staff {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+}
+
 
 .role-box {
   background: rgba(255, 255, 255, 0.15);

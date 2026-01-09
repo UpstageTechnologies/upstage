@@ -9,6 +9,8 @@ import Logout from "./useTheme/pages/Logout";
 import ChooseLogin from "./useTheme/pages/ChooseLogin";
 import TeacherLogin from "./useTheme/pages/TeacherLogin";
 import ParentLogin from "./useTheme/pages/ParentLogin";
+import OfficeStaffLogin from "./useTheme/pages/OfficeStaffLogin";
+
 import AdminLogin from "./useTheme/pages/AdminLogin";
 import CalendarPage from "./useTheme/pages/CalendarPage";
 import Attendance from "./features/dashboard/Attendance";
@@ -35,6 +37,7 @@ function App() {
         <Route path="/teacher-login" element={<TeacherLogin />} />
         <Route path="/parent-login" element={<ParentLogin />} />
         <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/office-staff-login" element={<OfficeStaffLogin />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="attendance" element={<Attendance />} />
         <Route path="/todays-absent" element={<ShowTodaysAbsent />} />
@@ -45,6 +48,7 @@ function App() {
         <Route path="/admin/applications" element={<ApplicationList />} />
         <Route path="Accounts" element={<Accounts/>}/>
         <Route path="FeesPage" element={<FeesPage />} />
+        
 
       </Routes>
     </Router>
