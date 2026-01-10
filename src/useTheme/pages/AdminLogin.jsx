@@ -88,7 +88,7 @@ localStorage.setItem("adminName", adminData.name || "Admin");
   return (
     <>
       
-
+      <div class="login-page">
       <div className="wrapper">
       <nav className="nav-bar">
         
@@ -136,7 +136,7 @@ localStorage.setItem("adminName", adminData.name || "Admin");
             *Only registered sub-admins can login.
           </p>
         </div>
-      </div>
+      </div></div>
     </>
   );
 };

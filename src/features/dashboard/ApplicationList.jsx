@@ -15,7 +15,7 @@ import "../dashboard_styles/ApplicationList.css";
 import { FaSearch } from "react-icons/fa";
 
 
-export default function ApplicationList() {
+export default function ApplicationList({ requirePremium }) {
 
   const adminUid =
     auth.currentUser?.uid || localStorage.getItem("adminUid");
@@ -139,11 +139,11 @@ export default function ApplicationList() {
             </div>
 
             <div style={{ marginTop: 10, display: "flex", gap: 10 }}>
-              <button className="approve-btn" onClick={() => handleSelect(app)}>
+              <button className="approve-btn" onClick={() => requirePremium(() => handleSelect(app))}>
                 Selected
               </button>
 
-              <button className="reject-btn" onClick={() => handleReject(app)}>
+              <button className="reject-btn" onClick={() => requirePremium(() =>handleReject(app))}>
                 Rejected
               </button>
             </div>

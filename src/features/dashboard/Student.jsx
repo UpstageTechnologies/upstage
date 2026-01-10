@@ -17,7 +17,7 @@ const sections = Array.from({ length: 26 }, (_, i) =>
   String.fromCharCode(65 + i)
 );
 
-const Student = () => {
+const Student = ({ requirePremium }) => {
   const adminUid =
     auth.currentUser?.uid || localStorage.getItem("adminUid");
 
@@ -269,18 +269,18 @@ const Student = () => {
 
   <button
     className="edit-btn"
-    onClick={() => {
+    onClick={() => requirePremium(() => {
       setForm({ ...s });
       setEditId(s.id);
       setShowModal(true);
-    }}
+    })}
   >
     <FaEdit /> Edit
   </button>
 
   <button
     className="delete-btn"
-    onClick={() => handleDeleteStudent(s.id)}
+    onClick={() => requirePremium(() => handleDeleteStudent(s.id))}
   >
     <FaTrash /> Delete
   </button>
@@ -459,7 +459,7 @@ const Student = () => {
             </select>
 
             <div className="modal-actions">
-              <button className="save" onClick={handleSaveStudent}>
+              <button className="save" onClick={() => requirePremium(handleSaveStudent)}>
                 Save
               </button>
               <button className="cancel" onClick={resetForm}>

@@ -13,10 +13,12 @@ import {
   FaChalkboardTeacher,
   FaUserCheck
 } from "react-icons/fa";
+import UpgradePopup from "../../components/UpgradePopup";
+
 
 const today = new Date().toLocaleDateString("en-CA");
 
-export default function Home({ adminUid, setActivePage }) {
+export default function Home({ adminUid, setActivePage,plan }) {
   const [stats, setStats] = useState({
     studentPresent: 0,
     studentAbsent: 0,
@@ -25,6 +27,15 @@ export default function Home({ adminUid, setActivePage }) {
   });
 
   const [loading, setLoading] = useState(true);
+
+  const [showUpgrade, setShowUpgrade] = useState(false);
+
+  const userPlan = (plan || "basic").toLowerCase();
+  const isPremium = userPlan === "premium" || userPlan === "lifetime";
+
+  console.log("USER PLAN =", plan, "isPremium =", isPremium);
+
+
 
   useEffect(() => {
     if (!adminUid) return;
@@ -128,13 +139,20 @@ export default function Home({ adminUid, setActivePage }) {
           <br />
 
           <button
-            onClick={e => {
-              e.stopPropagation();
-              setActivePage("todays-absent");
-            }}
-          >
-            Absent list
-          </button>
+  onClick={e => {
+    e.stopPropagation();
+
+    if (!isPremium) {
+      setShowUpgrade(true);
+      return;
+    }
+
+    setActivePage("todays-absent");
+  }}
+>
+  Absent list
+</button>
+
         </div>
 
         {/* TEACHERS */}
@@ -156,15 +174,31 @@ export default function Home({ adminUid, setActivePage }) {
           <br />
 
           <button
-            onClick={e => {
-              e.stopPropagation();
-              setActivePage("teacher-absents");
-            }}
-          >
-            Absent list
-          </button>
+  onClick={e => {
+    e.stopPropagation();
+
+    if (!isPremium) {
+      setShowUpgrade(true);
+      return;
+    }
+
+    setActivePage("teacher-absents");
+  }}
+>
+  Absent list
+</button>
+
         </div>
       </div>
+      {showUpgrade && (
+  <UpgradePopup
+    onClose={() => setShowUpgrade(false)}
+    onUpgrade={() => {
+      window.location.href = "/payment";
+    }}
+  />
+)}
+
     </div>
   );
 }

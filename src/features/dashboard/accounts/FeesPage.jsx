@@ -38,7 +38,7 @@ const generateReport = () => {
     data = data.filter(d => d.date.startsWith(year));
   }
 
-  if (reportType === "custom") {
+  if (reportType === "custome") {
     data = data.filter(d => d.date >= fromDate && d.date <= toDate);
   }
 

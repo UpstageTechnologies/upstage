@@ -74,7 +74,7 @@ const TeacherLogin = () => {
   return (
     <>
       
-
+      <div class="login-page">
       <div className="wrapper">
       <nav className="nav-bar">
         
@@ -121,7 +121,7 @@ const TeacherLogin = () => {
             *Only registered teachers can login.
           </p>
         </div>
-      </div>
+      </div></div>
     </>
   );
 };

@@ -114,7 +114,7 @@ localStorage.setItem("adminUid", user.uid);
     <>
       
       
-
+      <div class="login-page">
       <div className="wrapper">
       <nav className="nav-bar">
         
@@ -179,6 +179,7 @@ localStorage.setItem("adminUid", user.uid);
             
           
         </div>
+      </div>
       </div>
     </>
   );

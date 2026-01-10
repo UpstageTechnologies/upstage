@@ -72,6 +72,7 @@ const OfficeStaffLogin = () => {
 
   return (
     <>
+    <div class="login-page">
       <div className="wrapper">
         <nav className="nav-bar">
           <img src={logo} alt="Company Logo" className="logo" />
@@ -119,7 +120,7 @@ const OfficeStaffLogin = () => {
             *Only registered office staff can login.
           </p>
         </div>
-      </div>
+      </div></div>
     </>
   );
 };

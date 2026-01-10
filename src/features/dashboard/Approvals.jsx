@@ -10,7 +10,7 @@ import {
 } from "firebase/firestore";
 import { db, auth } from "../../services/firebase";
 
-const Approvals = () => {
+const Approvals = ({requirePremium }) => {
   const adminUid =
     auth.currentUser?.uid || localStorage.getItem("adminUid");
 
@@ -202,7 +202,7 @@ if (r.module === "student") {
 
           <div style={{ marginTop: 10 }}>
             <button
-              onClick={() => approveRequest(r)}
+              onClick={() => requirePremium(() => approveRequest(r))}
               style={{
                 background: "green",
                 color: "#fff",
@@ -217,7 +217,7 @@ if (r.module === "student") {
             </button>
 
             <button
-              onClick={() => rejectRequest(r.id)}
+               onClick={() => requirePremium(() => rejectRequest(r.id))}
               style={{
                 background: "red",
                 color: "#fff",

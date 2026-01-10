@@ -11,7 +11,7 @@ import BillPage from "./BillPage";
 
 
 
-export default function ProfitPage({ adminUid, setActivePage, activePage = "" }) {
+export default function ProfitPage({ adminUid, setActivePage, activePage = "",requirePremium }) {
 
 
   const role = localStorage.getItem("role");
@@ -74,10 +74,40 @@ const isOfficeStaff = role === "office_staff";
   const [studentSearch, setStudentSearch] = useState("");
   const [selectedStudentName, setSelectedStudentName] = useState("");
 
+  const allDates = [
+    ...new Set([
+      ...incomeList.map(i => i.date),
+      ...expenseList.map(e => e.date)
+    ])
+  ].sort();   // ascending order
+ 
+ 
+  const currentPageIndex = allDates.indexOf(entryDate);
+  const totalPages = allDates.length;
 
+  const maxVisiblePages = 5;
+
+const getVisiblePages = () => {
+  let start = Math.max(0, currentPageIndex - Math.floor(maxVisiblePages / 2));
+  let end = start + maxVisiblePages;
+
+  if (end > totalPages) {
+    end = totalPages;
+    start = Math.max(0, end - maxVisiblePages);
+  }
+
+  return allDates.slice(start, end).map((d, i) => start + i);
+};
+
+
+  const goToPage = (index) => {
+    if (index < 0 || index >= totalPages) return;
+    setEntryDate(allDates[index]);
+  };
   
-
-
+  const prevPage = () => goToPage(currentPageIndex - 1);
+  const nextPage = () => goToPage(currentPageIndex + 1);
+  
   
   const incomesRef  = collection(db,"users",adminUid,"Account","accounts","Income");
   const expensesRef = collection(db,"users",adminUid,"Account","accounts","Expenses");
@@ -353,6 +383,7 @@ if (activePage && activePage.startsWith("bill_")) {
       billStudentId={activePage.split("_")[1]}
       billDate={activePage.split("_")[2]}
       setActivePage={setActivePage}
+      requirePremium={requirePremium}
     />
   );
 }
@@ -477,7 +508,7 @@ if (activePage && activePage.startsWith("bill_")) {
           value={srcAmt}
           onChange={e => setSrcAmt(e.target.value)}
         />
-        <button className="primary-btn glow" onClick={saveSourceIncome}>
+        <button className="primary-btn glow" onClick={() => requirePremium(saveSourceIncome)}>
           Save
         </button>
       </div>
@@ -535,7 +566,7 @@ if (activePage && activePage.startsWith("bill_")) {
           />
         )}
 
-        <button className="primary-btn glow" onClick={saveNewAdmission}>
+        <button className="primary-btn glow" onClick={() => requirePremium(saveNewAdmission)}>
           Save
         </button>
       </div>
@@ -624,7 +655,7 @@ if (activePage && activePage.startsWith("bill_")) {
       />
     )}
 
-    <button className="primary-btn glow" onClick={saveOldAdmission}>
+    <button className="primary-btn glow" onClick={() => requirePremium(saveOldAdmission)}>
       Save
     </button>
 
@@ -703,7 +734,7 @@ if (activePage && activePage.startsWith("bill_")) {
                     onChange={e=>setManualSalary(e.target.value)}
                   />
 
-                  <button className="primary-btn glow" onClick={saveSalary}>Save Salary</button>
+                  <button className="primary-btn glow" onClick={() => requirePremium(saveSalary)}>Save Salary</button>
                 </div>
               </>
             )}
@@ -713,7 +744,7 @@ if (activePage && activePage.startsWith("bill_")) {
               <div className="form-grid">
                 <input placeholder="Expense name" value={exName} onChange={e=>setExName(e.target.value)} />
                 <input type="number" placeholder="Amount" value={exAmt} onChange={e=>setExAmt(e.target.value)} />
-                <button className="primary-btn glow" onClick={saveExpense}>Save Expense</button>
+                <button className="primary-btn glow" onClick={() => requirePremium(saveExpense)}>Save Expense</button>
               </div>
             )}
           </>
@@ -730,7 +761,7 @@ if (activePage && activePage.startsWith("bill_")) {
 
             <input placeholder="Fee Name" value={feeName} onChange={e=>setFeeName(e.target.value)} />
             <input type="number" placeholder="Amount" value={feeAmount} onChange={e=>setFeeAmount(e.target.value)} />
-            <button className="primary-btn glow" onClick={saveFee}>Save Fee</button>
+            <button className="primary-btn glow" onClick={() => requirePremium(saveFee)}>Save Fee</button>
           </div>
         )} 
 
@@ -754,8 +785,10 @@ if (activePage && activePage.startsWith("bill_")) {
 
 <tbody>
   {(() => {
-    const all = [
-      ...incomeList.map(i => ({
+   const all = [
+    ...incomeList
+      .filter(i => i.date === entryDate)
+      .map(i => ({
         id: i.id,
         date: i.date,
         source: i.studentName || i.name || "Income",
@@ -763,8 +796,10 @@ if (activePage && activePage.startsWith("bill_")) {
         expense: "",
         studentId: i.studentId || null
       })),
-    
-      ...expenseList.map(e => ({
+  
+    ...expenseList
+      .filter(e => e.date === entryDate)
+      .map(e => ({
         id: e.id,
         date: e.date,
         source: e.name,
@@ -772,7 +807,8 @@ if (activePage && activePage.startsWith("bill_")) {
         expense: isOfficeStaff ? "***" : (e.amount || 0),
         studentId: null
       }))
-    ];
+  ];
+  
     
     
     // sort by date (latest first)
@@ -822,7 +858,7 @@ if (activePage && activePage.startsWith("bill_")) {
         setActivePage(`bill_${row.studentId}_${row.date}`)
       }
     >
-      🧾
+      invoice
     </span>
   )}
 </td>
@@ -833,10 +869,20 @@ if (activePage && activePage.startsWith("bill_")) {
           {/* TOTAL ROW */}
           {isLastOfDate && (
             <tr style={{ fontWeight: "bold", background: "#fafafa" }}>
-              <td>TOTAL</td>
-              <td style={{ color: "green" }}>₹{dateIncomeTotal}</td>
-              <td style={{ color: "red" }}>₹{dateExpenseTotal}</td>
+              <td style={{ border: "1px solid #e5e7eb" }}>TOTAL</td>
+
+              <td style={{ color: "green", border: "1px solid #e5e7eb" }}>
+              ₹{dateIncomeTotal}
+              </td>
+
+              <td style={{ color: "red", border: "1px solid #e5e7eb" }}>
+              ₹{dateExpenseTotal}
+              </td>
+
+              {/* Bill column empty but border needed */}
+              <td style={{ border: "1px solid #e5e7eb" }}></td>
             </tr>
+
           )}
 
           {/* RESET */}
@@ -853,6 +899,41 @@ if (activePage && activePage.startsWith("bill_")) {
 
 
           </table>
+          <div className="pagination-bar">
+  <div className="tab-buttons">
+
+    <button
+      className="tab-btn"
+      disabled={currentPageIndex === 0}
+      onClick={prevPage}
+    >
+      Previous
+    </button>
+
+    {getVisiblePages().map(i => (
+  <button
+    key={i}
+    className={`tab-btn ${i === currentPageIndex ? "active" : ""}`}
+    onClick={() => goToPage(i)}
+  >
+    {i + 1}
+  </button>
+))}
+
+
+    <button
+      className="tab-btn"
+      disabled={currentPageIndex === totalPages - 1}
+      onClick={nextPage}
+    >
+      Next
+    </button>
+
+  </div>
+</div>
+
+
+
         </div>
       </div>
   );

@@ -66,6 +66,7 @@ const ParentLogin = () => {
   };
 
   return (
+    <div class="login-page">
     <div className="wrapper">
       <nav className="nav-bar">
         <img src={logo} alt="Company Logo" className="logo" />
@@ -110,7 +111,7 @@ const ParentLogin = () => {
           *Only registered parent can login.
         </p>
       </div>
-    </div>
+    </div></div>
   );
 };
 

@@ -23,7 +23,7 @@ const handleViewParent = (p) => {
 };
 
 
-const Parent = () => {
+const Parent = ({requirePremium }) => {
   /* ================= BASIC ================= */
   const adminUid =
     auth.currentUser?.uid || localStorage.getItem("adminUid");
@@ -488,11 +488,11 @@ if (editId) {
   <FaEye /> View
 </button>
 
-<button className="edit-btn" onClick={() => handleEdit(p)}>
+<button className="edit-btn" onClick={() => requirePremium(() => handleEdit(p))}>
   <FaEdit /> Edit
 </button>
 
-<button className="delete-btn" onClick={() => handleDelete(p.id)}>
+<button className="delete-btn" onClick={() => requirePremium(() => handleDelete(p.id))}>
   <FaTrash /> Delete
 </button>
 </td>
@@ -631,7 +631,7 @@ if (editId) {
             ))}
 
            {students.map((s, i) => (
-            <>
+            <React.Fragment key={i}>
                <div key={i} style={{ display: "flex", gap: 8 }}>
                  <input
                    placeholder={`Student ${i + 1} ID`}
@@ -664,14 +664,14 @@ if (editId) {
                   />
      
                </div>
-               </>
+               </React.Fragment>
              ))}
 
 
           
 
             <div className="modal-actions">
-              <button className="save" onClick={handleSave}>
+              <button className="save" onClick={() => requirePremium(handleSave)}>
                 Save
               </button>
               <button className="cancel" onClick={resetForm}>

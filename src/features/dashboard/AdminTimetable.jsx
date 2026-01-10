@@ -3,9 +3,9 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../../services/firebase";
 import "../dashboard_styles/AdminTimetable.css";
 import SchoolCalendar from "../../components/SchoolCalendar";
-
-/*  🔥 (ONLY ADDED) */
 import { addDoc, collection, Timestamp } from "firebase/firestore";
+import UpgradePopup from "../../components/UpgradePopup";
+
 
 // 👉 Classes BEFORE class-1 added here
 const CLASSES = [
@@ -23,11 +23,20 @@ const AdminTimetable = () => {
   const [selectedSection, setSelectedSection] = useState(null);
   const [selectedDay, setSelectedDay] = useState("Monday");
   const [table, setTable] = useState({});
+  const [showUpgrade, setShowUpgrade] = useState(false);
+
   
   const adminUid =
   auth.currentUser?.uid || localStorage.getItem("adminUid");
 
 const role = localStorage.getItem("role");
+
+const plan = localStorage.getItem("plan") || "basic";
+
+const isPremiumPlan = plan === "premium" || plan === "lifetime";
+const hasPremiumAccess = isPremiumPlan;
+
+
 
 
 
@@ -208,11 +217,27 @@ const role = localStorage.getItem("role");
 
             {/* ⭐ BUTTON LOGIC ONLY — SAVE CODE UNCHANGED ⭐ */}
             <button
-              className="save-btn"
-              onClick={role === "admin" ? requestTimetableApproval : saveTimetable}
-            >
-              Save Timetable
-            </button>
+  className="save-btn"
+  onClick={() => {
+    // 🔐 Block Basic Plan
+    if (!hasPremiumAccess) {
+      setShowUpgrade(true);
+      return;
+    }
+  
+    // Sub-admin → approval flow
+    if (role === "admin") {
+      requestTimetableApproval();
+    } else {
+      // Master → direct save
+      saveTimetable();
+    }
+  }}
+  
+>
+  Save Timetable
+</button>
+
 
            
           </div>
@@ -227,6 +252,15 @@ const role = localStorage.getItem("role");
 
         </div>
       )}
+      {showUpgrade && (
+  <UpgradePopup
+    onClose={() => setShowUpgrade(false)}
+    onUpgrade={() => {
+      window.location.href = "/payment";
+    }}
+  />
+)}
+
     </div>
   );
 };

@@ -511,26 +511,7 @@ select {
   cursor: pointer;
 }
 /* ================= PRINT ONLY REPORT ================= */
-@media print {
 
-  body * {
-    visibility: hidden;
-  }
-
-  .report-print-area,
-  .report-print-area * {
-    visibility: visible;
-  }
-
-  .report-print-area {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    background: white;
-    padding: 20px;
-  }
-}
 .bill-page {
   padding: 20px;
 }
@@ -601,29 +582,159 @@ select {
 
 /* PRINT STYLE */
 @media print {
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
   body * {
     visibility: hidden;
   }
-  .invoice, .invoice * {
+
+  .report-print-area,
+  .report-print-area * {
     visibility: visible;
   }
+
+  .report-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white;
+    padding: 20px;
+  }
+
+  /* Hide buttons in PDF */
+  button {
+    display: none !important;
+  }
+}
+
+/* Force our app to always be light */
+html, body {
+  background: #f5f7fb !important;
+  color: #000 !important;
+}
+
+/* Buttons always correct */
+button, .tab-btn, .report-btn, .primary-btn {
+  background-color: #2563eb;
+  color: #fff;
+  border: none;
+}
+
+
+/* Tab buttons */
+.tab-btn {
+  background: #fff;
+  color: #000;
+  border: 1px solid #d1d5db;
+}
+
+.tab-btn.active {
+  background: #4e73df;
+  color: #fff;
+  border-color: #4e73df;
+}
+
+/* Force dropdown (Daily / Monthly) to be white even in dark mode */
+select {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #d1d5db !important;
+}
+
+/* Dropdown options */
+select option {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* When opened */
+select:focus {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+/* Vertical + horizontal grid lines */
+.nice-table1 th,
+.nice-table1 td {
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Left border for first column */
+.nice-table1 th:first-child,
+.nice-table1 td:first-child {
+  border-left: 1px solid #e5e7eb;
+}
+
+/* Top border for header row */
+.nice-table1 thead tr:first-child th {
+  border-top: 1px solid #e5e7eb;
+}
+/* Force date inputs (Custom From / To) to stay white in dark mode */
+input[type="date"] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #d1d5db !important;
+}
+
+/* Calendar icon inside date input */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0) !important;
+}
+
+/* Firefox specific */
+@-moz-document url-prefix() {
+  input[type="date"] {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+}
+.pagination-bar {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.tab-buttons {
+  display: flex;
+  gap: 10px;
+}
+@media print {
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  /* Allow invoice */
+  .invoice,
+  .invoice * {
+    visibility: visible;
+  }
+
   .invoice {
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
-    box-shadow: none;
-    border: none;
+    background: white;
+    padding: 20px;
   }
+
+  /* Hide buttons */
   button {
-    display: none;
+    display: none !important;
   }
 }
-
-
-
-
-
 
 
 

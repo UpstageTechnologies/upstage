@@ -35,7 +35,7 @@ const sections = Array.from({ length: 26 }, (_, i) =>
   String.fromCharCode(65 + i)
 );
 
-const Teacher = () => {
+const Teacher = ({requirePremium}) => {
   /* ================= BASIC ================= */
   const adminUid =
     auth.currentUser?.uid || localStorage.getItem("adminUid");
@@ -356,19 +356,21 @@ if (!/^\d{10}$/.test(phoneClean)) {
                 <td>
   <button
     className="edit-btn"
-    onClick={() => {
+    onClick={() =>
+      requirePremium(() => {
       setForm({ ...t });
       setEditId(t.id);
       setPassword(t.password || "");
       setShowModal(true); // ✅ FIXED
-    }}
+    })
+  }
   >
     <FaEdit /> Edit
   </button>
 
   <button
     className="delete-btn"
-    onClick={() => handleDelete(t.id)}
+    onClick={() => requirePremium(() => handleDelete(t.id))}
   >
     <FaTrash /> Delete
   </button>
@@ -589,7 +591,7 @@ if (!/^\d{10}$/.test(phoneClean)) {
 
 
             <div className="modal-actions">
-              <button className="save" onClick={handleSaveTeacher}>
+              <button className="save" onClick={() => requirePremium(handleSaveTeacher)}>
                 Save
               </button>
               <button className="cancel" onClick={resetForm}>

@@ -219,3 +219,27 @@
   margin-bottom: 20px;
 }
 
+/* ================= LOGIN PAGE FIX ================= */
+
+.login-page input {
+  background: rgba(255,255,255,0.15) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.login-page input::placeholder {
+  color: #e0e0e0 !important;
+}
+
+/* Fix google button */
+.login-page .gbtn {
+  background: #f5f5f6 !important;
+  color: #444 !important;
+}
+
+/* Login button */
+.login-page .btn,
+.login-page .log-btn {
+  background: linear-gradient(135deg,#1a62e0,#1a62e0) !important;
+  color: #fff !important;
+}

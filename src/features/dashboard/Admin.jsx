@@ -20,7 +20,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 const role = localStorage.getItem("role");
 const isAdmin = role === "master";
 
-const Admin = () => {
+const Admin = ({ requirePremium }) => {
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
   const [admins, setAdmins] = useState([]);
@@ -277,7 +277,7 @@ if (!/^\d{10}$/.test(phoneClean)) {
 
           <button
             className="delete-btn"
-            onClick={() => handleDelete(a.id)}
+            onClick={() => requirePremium(() => handleDelete(a.id))}
           >
             <FaTrash /> Delete
           </button>
@@ -444,7 +444,7 @@ if (!/^\d{10}$/.test(phoneClean)) {
             />
 
             <div className="modal-actions">
-              <button className="save" onClick={handleSaveAdmin}>
+              <button className="save" onClick={() => requirePremium(handleSaveAdmin)}>
                 Save
               </button>
               <button className="cancel" onClick={resetForm}>

@@ -3,7 +3,7 @@ import { collection, addDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../../../services/firebase";
 import "../../dashboard_styles/Accounts.css";
 
-export default function Inventory({ adminUid ,setActivePage}) {
+export default function Inventory({ adminUid ,setActivePage ,requirePremium }) {
 
   /* ================= STATES ================= */
   const [feesMaster, setFeesMaster] = useState([]);
@@ -30,6 +30,8 @@ export default function Inventory({ adminUid ,setActivePage}) {
     "accounts",
     "FeesMaster"
   );
+
+  const safeRequirePremium = requirePremium || ((cb) => cb());
 
   /* ================= LOAD DATA ================= */
   useEffect(() => {
@@ -148,7 +150,7 @@ export default function Inventory({ adminUid ,setActivePage}) {
               style={{ width: 120 }}
             />
 
-            <button onClick={saveFee}>Save</button>
+            <button onClick={() => safeRequirePremium(saveFee)}>Save</button>
           </div>
         )}
 

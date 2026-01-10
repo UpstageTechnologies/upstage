@@ -14,11 +14,11 @@ import React, { useEffect, useState } from "react";
     FaHome,
     FaCog,FaUserCheck,
     FaSignOutAlt,
-    FaChevronDown,FaBookOpen,
+    FaChevronDown,FaBookOpen,FaSchool,
     FaChevronUp,FaCalendarAlt,FaClipboardCheck,FaWpforms,FaMoneyBillWave
   } from "react-icons/fa";
 
-  import schoolLogo from "../../assets/school-logo.png";
+  import schoolLogo from "../../assets/sch.jpg";
   import Teacher from "./Teacher";
   import Parent from "./Parent";
   import Student from "./Student";
@@ -40,6 +40,7 @@ import FeesPage from "./accounts/FeesPage";
 import ExpensesPage from "./accounts/ExpensesPage";
 import ProfitPage from "./accounts/ProfitPage";
 import Inventory from "./accounts/Inventory";
+import UpgradePopup from "../../components/UpgradePopup";
 
 
 
@@ -71,19 +72,14 @@ import Inventory from "./accounts/Inventory";
     const [homeStats, setHomeStats] = useState(null);
     const [logo, setLogo] = useState(""); 
     const [accountsSubMenuOpen, setAccountsSubMenuOpen] = useState(false);
+    const [showUpgrade, setShowUpgrade] = useState(false);
+
+
+    const isPremium = plan === "premium" || plan === "lifetime"; 
+
     const viewParentId = localStorage.getItem("viewParentId");
 
-   
-    
-
-
-    
-
-    
-
-
-    
-    
+      
 
 
     const navigate = useNavigate();
@@ -100,6 +96,15 @@ import Inventory from "./accounts/Inventory";
         year: "numeric"
       });
     };
+
+    const requirePremium = (callback) => {
+      if (plan === "premium" || plan === "lifetime") {
+        callback();
+      } else {
+        setShowUpgrade(true);
+      }
+    };
+    
     
     /* ================= AUTH + ROLE ================= */
     useEffect(() => {
@@ -127,6 +132,17 @@ import Inventory from "./accounts/Inventory";
         return;
       }
 
+      const isPremium = plan === "premium" || plan === "lifetime";
+
+const requirePremium = (page) => {
+  if (!isPremium) {
+    navigate("/payment");
+    return false;
+  }
+  setActivePage(page);
+  return true;
+};
+
       // 🔐 MASTER ADMIN
       const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
         if (!currentUser) {
@@ -152,7 +168,10 @@ import Inventory from "./accounts/Inventory";
         // ⭐ optional — future use
         localStorage.setItem("schoolLogo", data.schoolLogo || "");
         
-        setPlan(data.plan || "basic");
+        setPlan((data.plan || "basic").toLowerCase());
+        localStorage.setItem("plan", (data.plan || "basic").toLowerCase());
+
+
         setPlanExpiry(data.planExpiry || null);
         
         localStorage.setItem("adminName", data.username || "Admin");
@@ -289,7 +308,7 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
 
       {(
         (role === "master" &&
-          (plan === "premium" || plan === "lifetime")) ||
+          (plan === "premium" || plan === "lifetime" || plan === "basic")) ||
         role === "admin"
       ) && (
         <>
@@ -406,11 +425,18 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
               >
                 ☰
               </div>
-              <img
-    src={logo || localStorage.getItem("schoolLogo") || schoolLogo}
+              {(logo || localStorage.getItem("schoolLogo")) ? (
+  <img
+    src={logo || localStorage.getItem("schoolLogo")}
     alt="School"
     className="nav-school-logo"
   />
+) : (
+  <div className="default-school-icon">
+    <FaSchool />
+  </div>
+)}
+
 
 
   <span className="nav-school-name">
@@ -520,11 +546,11 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
 
 {activePage === "home" && (
   <Home
-    adminUid={adminUid}
-    setActivePage={setActivePage}
-    setHomeStats={setHomeStats}
-    homeStats={homeStats}
-  />
+  adminUid={adminUid}
+  setActivePage={setActivePage}
+  plan={plan}
+/>
+
 )}
 
 {isAdminOrSubAdmin && activePage === "fees" && (
@@ -553,12 +579,13 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
     adminUid={adminUid}
     setActivePage={setActivePage}
     activePage={activePage}
+    requirePremium={requirePremium} 
   />
 )}
 
 
 {isAdminOrSubAdmin && activePage === "inventory" && (
-  <Inventory adminUid={adminUid} setActivePage={setActivePage} />
+  <Inventory adminUid={adminUid} setActivePage={setActivePage} requirePremium={requirePremium}  />
 )}
 
 {/* rest of the pages go here… */}
@@ -570,19 +597,19 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
 
 
             {isAdminOrSubAdmin && activePage === "teacher" && (
-              <Teacher adminUid={adminUid} />
+              <Teacher adminUid={adminUid} requirePremium={requirePremium} />
             )}
 
 {(isAdminOrSubAdmin || viewAs === "parent") && activePage === "parent" && (
-  <Parent adminUid={adminUid} />
+  <Parent adminUid={adminUid} requirePremium={requirePremium} />
 )}
 
 
             {isAdminOrSubAdmin && activePage === "student" && (
-              <Student adminUid={adminUid} />
+              <Student adminUid={adminUid} requirePremium={requirePremium} />
             )}
               {isAdminOrSubAdmin && activePage === "office_staff" && (
-  <OfficeStaff adminUid={adminUid} />
+  <OfficeStaff adminUid={adminUid} requirePremium={requirePremium}/>
 )}
 
 
@@ -593,9 +620,12 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
               <AdminTimetable />
             )}
 
-            {(role === "master") && activePage === "admin" && <Admin />}
+{(role === "master") && activePage === "admin" && (
+  <Admin requirePremium={requirePremium} />
+)}
 
-            {activePage === "approvals" && role === "master" && <Approvals />}
+
+            {activePage === "approvals" && role === "master" && <Approvals requirePremium={requirePremium} />}
             {(role === "teacher" || viewAs === "teacher") &&
   activePage === "teacher-timetable" && (
     <TeacherTimetable teacherId={viewTeacherId} />
@@ -605,9 +635,15 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
           {isAdminOrSubAdmin && activePage === "attendance" && (
               <Attendance adminUid={adminUid} />
               )}
-            {isAdminOrSubAdmin && activePage === "todays-absent" && (
-              <ShowTodaysAbsent adminUid={adminUid} setActivePage={setActivePage} />
-            )}
+{isAdminOrSubAdmin && activePage === "todays-absent" && (
+  isPremium ? (
+    <ShowTodaysAbsent adminUid={adminUid} setActivePage={setActivePage} />
+  ) : (
+    <UpgradePopup onClose={() => setActivePage("home")} />
+  )
+)}
+
+
             {isAdminOrSubAdmin && activePage === "courses" && (
             <Courses />
             )}
@@ -617,11 +653,16 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
 )}
 
             
-            {isAdminOrSubAdmin && activePage === "teacher-absents" && (
-              <ShowTodaysTeacherAbsent adminUid={adminUid} setActivePage={setActivePage} />
-            )}
+{isAdminOrSubAdmin && activePage === "teacher-absents" && (
+  isPremium ? (
+    <ShowTodaysTeacherAbsent adminUid={adminUid} setActivePage={setActivePage} />
+  ) : (
+    <UpgradePopup onClose={() => setActivePage("home")} />
+  )
+)}
+
             {role === "master" && activePage === "applications" && (
-              <ApplicationList />
+              <ApplicationList requirePremium={requirePremium} />
               )}
               {activePage === "profile" && (
     <Profile />
@@ -633,6 +674,13 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
 
           </div>
         </div>
+        {showUpgrade && (
+  <UpgradePopup
+    onClose={() => setShowUpgrade(false)}
+    onUpgrade={() => navigate("/payment")}
+  />
+)}
+
       </div>
       </>
     );

@@ -270,7 +270,15 @@
   /* MODAL */
   .modal {
     width: 92%;
-    padding: 14px;
+    max-width: 340px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .modal-overlay {
+    align-items: center;
   }
 
   .modal h3 {
@@ -327,8 +335,11 @@
 
 /* stop page scroll when modal open (optional but good UX) */
 .modal {
-  overflow: hidden;
+  max-height: 85vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* smooth mobile scroll */
 }
+
 .view-btn {
   background: #3199df;
   color: #edf2f5;
@@ -338,7 +349,50 @@
   cursor: pointer;
   margin-right: 10px;
 }
+/* ============================================
+   FORCE LIGHT MODE FOR ALL INPUTS & SELECTS
+   (ignore browser dark mode)
+============================================ */
 
+input,
+select,
+textarea {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #d1d5db !important;
+}
+
+/* date inputs */
+input[type="date"] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  color-scheme: light !important;   /* 🔥 key fix */
+}
+
+/* dropdown arrow + calendar icon color */
+select,
+input[type="date"] {
+  color-scheme: light !important;
+}
+
+/* placeholder text */
+input::placeholder,
+textarea::placeholder {
+  color: #6b7280 !important;   /* gray like light mode */
+  opacity: 1;
+}
+
+/* password eye icon */
+input::-ms-reveal,
+input::-ms-clear {
+  filter: invert(0) !important;
+}
+
+/* Chrome / Edge autofill background fix */
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px white inset !important;
+  -webkit-text-fill-color: black !important;
+}
 
 
 
