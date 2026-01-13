@@ -6,6 +6,7 @@ import "../../dashboard_styles/studentSearch.css";
 import { useNavigate } from "react-router-dom";
 import OfficeStaff from "../OfficeStaff";
 import BillPage from "./BillPage";   
+import "../../dashboard_styles/IE.css";
 
 
 
@@ -23,6 +24,44 @@ const isOfficeStaff = role === "office_staff";
   const [expenseList, setExpenseList] = useState([]);
   const [incomeLoaded, setIncomeLoaded] = useState(false);
 const [expenseLoaded, setExpenseLoaded] = useState(false);
+const [showStudentDropdown, setShowStudentDropdown] = useState(false);
+const [showClassDropdown, setShowClassDropdown] = useState(false);
+const [showExpenseType, setShowExpenseType] = useState(false);
+const [showSalaryRole, setShowSalaryRole] = useState(false);
+const [showSalaryPosition, setShowSalaryPosition] = useState(false);
+
+const [newStudentSearch, setNewStudentSearch] = useState("");
+const [showNewStudentDropdown, setShowNewStudentDropdown] = useState(false);
+const [selectedNewStudent, setSelectedNewStudent] = useState(null);
+const [showSalaryCategory, setShowSalaryCategory] = useState(false);
+const [showSalaryPositionDD, setShowSalaryPositionDD] = useState(false);
+
+
+const [teachers, setTeachers] = useState([]);
+const [teacherSearch, setTeacherSearch] = useState("");
+const [showTeacherDropdown, setShowTeacherDropdown] = useState(false);
+
+const teachersRef = collection(db, "users", adminUid, "teachers");
+
+onSnapshot(teachersRef, snap => {
+  setTeachers(
+    snap.docs.map(d => ({
+      id: d.id,
+      ...d.data()
+    }))
+  );
+});
+
+
+
+
+const [showStudentType, setShowStudentType] = useState(false);
+
+
+
+
+
+
 
 const loaded = incomeLoaded && expenseLoaded;
 
@@ -31,6 +70,9 @@ const loaded = incomeLoaded && expenseLoaded;
 
   const [entryType, setEntryType] = useState("");
   const [feesMaster, setFeesMaster] = useState([]);
+  const [showIncomeType, setShowIncomeType] = useState(false);
+const [incomeType, setIncomeType] = useState("");
+
 
 
   const [entryDate, setEntryDate] = useState(() => {
@@ -42,6 +84,9 @@ const loaded = incomeLoaded && expenseLoaded;
   // INCOME
   const [incomeMode, setIncomeMode] = useState("");
   const [studentMode, setStudentMode] = useState("");
+
+  const [showEntryType, setShowEntryType] = useState(false);
+
   
 
 
@@ -51,14 +96,41 @@ const loaded = incomeLoaded && expenseLoaded;
 
   // students / fees
   const [students, setStudents] = useState([]);
+
+  
   
 
   const [newName, setNewName] = useState("");
   const [newParent, setNewParent] = useState("");
   const [newClass, setNewClass] = useState("");
   const [newPayType, setNewPayType] = useState("");
+
+  // ================= DERIVED VALUES =================
+
+
+
+
+
   const [newPayAmount, setNewPayAmount] = useState("");
   const [newTotal, setNewTotal] = useState(0);
+
+  const newAdmissionStudents = students.filter(s => {
+    const paid = incomeList.some(i =>
+      i.studentId === s.id && i.paymentStage === "Admission"
+    );
+  
+    return (
+      !paid &&
+      s.studentName?.toLowerCase().includes(newStudentSearch.toLowerCase())
+    );
+  });
+
+  const isFirstPayment =
+  selectedNewStudent &&
+  !incomeList.some(i => i.studentId === selectedNewStudent.id);
+
+const discount =
+  newPayType === "full" && isFirstPayment ? newTotal * 0.05 : 0;
 
   const [oldClass, setOldClass] = useState("");
   const [oldStudent, setOldStudent] = useState("");
@@ -89,7 +161,26 @@ const loaded = incomeLoaded && expenseLoaded;
       ...expenseList.map(e => e.date)
     ])
   ].sort();   // ascending order
- 
+  
+  const getClassTotal = (cls) =>
+  feesMaster.filter(f => f.className === cls)
+    .reduce((t, f) => t + (f.amount || 0), 0);
+
+const getStudentPaid = (studentId) =>
+  incomeList
+    .filter(i => i.studentId === studentId)
+    .reduce((t, i) => t + (i.paidAmount || 0), 0);
+
+const getStudentBalance = (studentId, className) => {
+  const total = getClassTotal(className);
+  const paid = getStudentPaid(studentId);
+  return total - paid;
+};
+
+
+  
+
+
  
   const currentPageIndex = allDates.indexOf(entryDate);
   const totalPages = allDates.length;
@@ -128,6 +219,9 @@ const parentsRef = collection(db, "users", adminUid, "parents");
 
 
 
+const filteredTeachers = teachers.filter(t =>
+  t.name?.toLowerCase().includes(teacherSearch.toLowerCase())
+);
 
 
 
@@ -160,8 +254,7 @@ const parentsRef = collection(db, "users", adminUid, "parents");
   );
   
 
-  const getClassTotal = cls =>
-    feesMaster.filter(f=>f.className===cls).reduce((t,f)=>t+(f.amount||0),0);
+  
 
   /* ---------- INCOME: SOURCE ---------- */
   const saveSourceIncome = async ()=>{
@@ -179,135 +272,123 @@ const parentsRef = collection(db, "users", adminUid, "parents");
   };
  
   
- const safeRequirePremium = (cb, type) => {
-  if (!loaded) return;   // ⛔ block until data is ready
-
-  if (plan !== "basic") {
-    cb();
-    return;
-  }
-
-  const incomeCount = incomeList.filter(i => i.date === entryDate).length;
-  const expenseCount = expenseList.filter(e => e.date === entryDate).length;
-
-  if (type === "income" && incomeCount >= 1) {
-    showUpgrade();
-    return;
-  }
-
-  if (type === "expense" && expenseCount >= 1) {
-    showUpgrade();
-    return;
-  }
-
-  cb();
-};
+  const safeRequirePremium = (cb, type) => {
+    if (!loaded && !isOfficeStaff) return;
 
   
-  
-/* ---------- INCOME: NEW ADMISSION ---------- */
-const saveNewAdmission = async () => {
-  if (!newName || !newParent || !newClass || !newPayType || !entryDate)
-    return alert("Fill all fields");
-
-  const total = getClassTotal(newClass);
-
-  let final = 0;
-  if (newPayType === "full") {
-    final = total - total * 0.05;
-  } else {
-    if (!newPayAmount) return alert("Enter partial amount");
-    final = Number(newPayAmount);
-  }
-
-/* 1️⃣ CREATE PARENT */
-const parentDocRef = await addDoc(
-  collection(db, "users", adminUid, "parents"),
-  {
-    parentName: newParent,
-    parentId: `P-${Date.now()}`,
-    studentsCount: 1,
-    students: [
-      {
-        studentName: newName,
-        studentId: "TEMP",   // replace after student create
-        class: newClass,
-        section: ""
-      }
-    ],
-    createdAt: new Date()
-  }
-);
-
-
-/* 2️⃣ CREATE STUDENT */
-const studentDocRef = await addDoc(
-  collection(db, "users", adminUid, "students"),
-  {
-    studentName: newName,
-    studentId: `S-${Date.now()}`,
-    parentId: parentDocRef.id,
-    parentName: newParent,
-    class: newClass,
-    section: "",
-    createdAt: new Date()
-  }
-);
-
-/* 3️⃣ UPDATE parent.students[] with REAL studentId */
-await updateDoc(
-  doc(db, "users", adminUid, "parents", parentDocRef.id),
-  {
-    students: [
-      {
-        studentId: studentDocRef.id,
-        studentName: newName,
-        class: newClass,
-        section: ""
-      }
-    ]
-  }
-);
-
-
-  /* 3️⃣ ✅ UPDATE PARENT WITH STUDENT LINK (CORRECT WAY) */
-  await updateDoc(
-    doc(db, "users", adminUid, "parents", parentDocRef.id),
-    {
-      students: [
-        {
-          studentDocId: studentDocRef.id,
-          studentName: newName,
-          class: newClass,
-          section: ""
-        }
-      ]
+    // 🔥 Office staff can always enter
+    if (isOfficeStaff) {
+      cb();
+      return;
     }
-  );
+  
+    // Paid admins
+    if (plan !== "basic") {
+      cb();
+      return;
+    }
+  
+    // Basic plan limits
+    const incomeCount = incomeList.filter(i => i.date === entryDate).length;
+    const expenseCount = expenseList.filter(e => e.date === entryDate).length;
+  
+    if (type === "income" && incomeCount >= 1) {
+      showUpgrade();
+      return;
+    }
+  
+    if (type === "expense" && expenseCount >= 1) {
+      showUpgrade();
+      return;
+    }
+  
+    cb();
+  };
+  
+  
+  const saveNewAdmission = async () => {
 
-  /* 4️⃣ CREATE INCOME */
-  await addDoc(incomesRef, {
-    studentId: studentDocRef.id,
-    studentName: newName,
-    parentId: parentDocRef.id,
-    parentName: newParent,
-    className: newClass,
-    totalFees: total,
-    type: newPayType,
-    paidAmount: final,
-    date: entryDate,
-    createdAt: new Date()
-  });
+    if (!selectedNewStudent)
+  return alert("Select student first");
 
-  /* RESET */
-  setNewName("");
-  setNewParent("");
-  setNewClass("");
-  setNewPayType("");
-  setNewPayAmount("");
-  setNewTotal(0);
-};
+const alreadyPaid = incomeList.some(i =>
+  i.studentId === selectedNewStudent.id &&
+  i.paymentStage === "Admission"
+);
 
+    
+    if (alreadyPaid) {
+      alert("Admission already paid for this student");
+      return;
+    }
+    
+    if (!newName || !newParent || !newClass || !newPayType || !entryDate)
+      return alert("Fill all fields");
+  
+    const total = getClassTotal(newClass);
+  
+    let discount = 0;
+  
+    // 5% discount only if FULL at first payment
+    if (newPayType === "full") {
+      discount = total * 0.05;
+    }
+  
+    const payable = total - discount;
+  
+    let final = 0;
+  
+    if (newPayType === "full") {
+      final = payable;          // pay full discounted amount
+    } else {
+      if (!newPayAmount) return alert("Enter amount");
+      final = Number(newPayAmount);
+    }
+  
+    if (final > payable) {
+      return alert("Cannot pay more than payable amount");
+    }
+  
+    const balanceAfter = payable - final;
+  
+    if (!selectedNewStudent)
+    return alert("Select student from applications list");
+  
+  const studentDocRef = { id: selectedNewStudent.id };
+  const parentName = selectedNewStudent.parentName || newParent;
+  const parentId = selectedNewStudent.parentId || null;
+  
+  
+    await addDoc(incomesRef, {
+      studentId: selectedNewStudent.id,
+      studentName: selectedNewStudent.studentName,
+      parentName,
+      parentId,
+      className: selectedNewStudent.class,
+    
+      totalFees: total,
+      discountApplied: discount,
+      payableAmount: payable,
+    
+      paidAmount: final,
+      balanceBefore: payable,
+      balanceAfter,
+    
+      paymentType: newPayType,
+      paymentStage: "Admission",
+    
+      date: entryDate,
+      createdAt: new Date()
+    });
+    
+  
+    setNewName("");
+    setNewParent("");
+    setNewClass("");
+    setNewPayType("");
+    setNewPayAmount("");
+    setNewTotal(0);
+  };
   
   
 
@@ -324,25 +405,54 @@ await updateDoc(
     if(s) setOldParent(s.parentName||"");
   };
 
-  const saveOldAdmission = async ()=>{
-    const stu = students.find(s=>s.id===oldStudent);
-    if(!stu || !oldPayType || !entryDate) return alert("Fill all fields");
+  const saveOldAdmission = async () => {
+    const stu = students.find(s => s.id === oldStudent);
+    if (!stu || !oldPayType || !entryDate) return alert("Fill all fields");
+  
+    const total = getClassTotal(stu.class);
+    const paidSoFar = getStudentPaid(stu.id);
+  
+    let discount = 0;
+  
+    // 5% discount ONLY if first payment and FULL
+    if (paidSoFar === 0 && oldPayType === "full") {
+      discount = total * 0.05;
+    }
+  
+    const payable = total - discount;              // 👈 after discount
+    const balanceBefore = payable - paidSoFar;     // 👈 true balance
   
     let final = 0;
-    if(oldPayType==="full") final = oldTotal - oldTotal * 0.05;
-    else{
-      if(!oldPayAmount) return alert("Enter partial amount");
+  
+    if (oldPayType === "full") {
+      final = balanceBefore;                       // only remaining
+    } else {
+      if (!oldPayAmount) return alert("Enter amount");
       final = Number(oldPayAmount);
     }
   
-    await addDoc(incomesRef,{
+    if (final > balanceBefore) {
+      return alert("Cannot pay more than balance");
+    }
+  
+    const balanceAfter = balanceBefore - final;    // 👈 correct
+  
+    await addDoc(incomesRef, {
       studentId: stu.id,
-      studentName: stu.studentName,   // ✅ FIX
-      parentName: stu.parentName || "",
-      className: stu.class,            // ✅ FIX
-      totalFees: oldTotal,
-      type: oldPayType,
+      studentName: stu.studentName,
+      className: stu.class,
+  
+      totalFees: total,
+      discountApplied: discount,
+      payableAmount: payable,
+  
       paidAmount: final,
+      balanceBefore,
+      balanceAfter,
+  
+      paymentType: oldPayType,
+      paymentStage: paidSoFar === 0 ? "Admission" : "Term",
+  
       date: entryDate,
       createdAt: new Date()
     });
@@ -354,6 +464,7 @@ await updateDoc(
     setOldPayAmount("");
     setOldTotal(0);
   };
+  
   
 
 
@@ -435,7 +546,7 @@ if (activePage && activePage.startsWith("bill_")) {
         ← Back
       </span>
       
-      <div className="accounts-wrapper fade-in">
+      
 
       {!isOfficeStaff && (
   <div>
@@ -472,13 +583,14 @@ if (activePage && activePage.startsWith("bill_")) {
   </div>
 )}
 
-</div>
+
 
 
 
       <div className="section-card pop entries-card">
    
   <h3 className="section-title">Entries</h3>
+  <div className="entries-box">
 
 
         {/* ⭐ GLOBAL DATE */}
@@ -489,49 +601,131 @@ if (activePage && activePage.startsWith("bill_")) {
           style={{marginBottom:12}}
         />
 
-        <select value={entryType} onChange={e=>setEntryType(e.target.value)}>
-          <option value="">Choose</option>
-          <option value="income">Income</option>
-          <option value="expense">Expense</option>
-          
-        </select>
+        {/* ===== CHOOSE : Income / Expense ===== */}
+<div className="popup-select">
+  <div
+    className="popup-input"
+    onClick={() => setShowEntryType(!showEntryType)}
+  >
+    {entryType === "income"
+      ? "Income"
+      : entryType === "expense"
+      ? "Expense"
+      : "Choose"}
+    <span>▾</span>
+  </div>
 
-       {/* ================= INCOME ================= */}
-{entryType === "income" && (
-  <>
-    {/* 🔹 MODE SELECT (Student / Source + New/Old side by side) */}
-    <div className="form-grid two-col" style={{ marginTop: 12 }}>
-
-      <select
-        value={incomeMode}
-        onChange={e => {
-          setIncomeMode(e.target.value);
-          setStudentMode("");
+  {showEntryType && (
+    <div className="popup-menu">
+      <div
+        onClick={() => {
+          setEntryType("income");
+          setShowEntryType(false);
         }}
       >
-        <option value="">Select</option>
-        <option value="source">Source</option>
-        <option value="student">Student</option>
-      </select>
+        Income
+      </div>
 
-      {incomeMode === "student" && (
-        <select
-          value={studentMode}
-          onChange={e => setStudentMode(e.target.value)}
+      <div
+        onClick={() => {
+          setEntryType("expense");
+          setShowEntryType(false);
+        }}
+      >
+        Expense
+      </div>
+    </div>
+  )}
+</div>
+
+
+       {/* ================= INCOME ================= */}
+       {entryType === "income" && (
+  <>
+    {/* ===== TOP ROW : SOURCE / STUDENT ===== */}
+    <div className="entry-row source">
+
+
+      {/* Popup Select : Source / Student */}
+      <div className="popup-select">
+        <div
+          className="popup-input"
+          onClick={() => setShowIncomeType(!showIncomeType)}
         >
-          <option value="">Select</option>
-          <option value="new">New Admission</option>
-          <option value="old">Old Admission</option>
-        </select>
+          {incomeType || "Select"}
+          <span>▾</span>
+        </div>
+
+        {showIncomeType && (
+          <div className="popup-menu">
+            <div
+              onClick={() => {
+                setIncomeType("Source");
+                setIncomeMode("source");
+                setStudentMode("");
+                setShowIncomeType(false);
+              }}
+            >
+              Source
+            </div>
+
+            <div
+              onClick={() => {
+                setIncomeType("Student");
+                setIncomeMode("student");
+                setShowIncomeType(false);
+              }}
+            >
+              Student
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Student Type */}
+      {incomeMode === "student" && (
+        <div className="popup-select">
+        <div
+          className="popup-input"
+          onClick={() => setShowStudentType(!showStudentType)}
+        >
+          {studentMode
+            ? studentMode === "new"
+              ? "New Admission"
+              : "Old Admission"
+            : "Type"}
+          <span>▾</span>
+        </div>
+    
+        {showStudentType && (
+          <div className="popup-menu">
+            <div
+              onClick={() => {
+                setStudentMode("new");
+                setShowStudentType(false);
+              }}
+            >
+              New Admission
+            </div>
+    
+            <div
+              onClick={() => {
+                setStudentMode("old");
+                setShowStudentType(false);
+              }}
+            >
+              Old Admission
+            </div>
+          </div>
+        )}
+      </div>
       )}
-     
-
-
     </div>
 
-    {/* 🔹 SOURCE INCOME */}
+    {/* ================= SOURCE ================= */}
     {incomeMode === "source" && (
-      <div className="form-grid" style={{ marginTop: 10 }}>
+      <div className="entry-row source">
+
         <input
           placeholder="Source name"
           value={srcName}
@@ -543,28 +737,55 @@ if (activePage && activePage.startsWith("bill_")) {
           value={srcAmt}
           onChange={e => setSrcAmt(e.target.value)}
         />
-       <button onClick={() => safeRequirePremium(saveSourceIncome, "income")}>
-
+        <button className="save-btn" onClick={() => safeRequirePremium(saveSourceIncome, "income")}>
           Save
         </button>
       </div>
     )}
 
-    {/* 🔹 NEW ADMISSION */}
+    {/* ================= NEW STUDENT ================= */}
     {incomeMode === "student" && studentMode === "new" && (
-      <div className="form-grid income-grid">
+    <div className="entry-row source">
 
+<div className="student-dropdown">
+  <input
+    placeholder="Search Student"
+    value={selectedNewStudent?.studentName || newStudentSearch}
+    onChange={e => {
+      setNewStudentSearch(e.target.value);
+      setSelectedNewStudent(null);
+      setShowNewStudentDropdown(true);
+    }}
+    onFocus={() => setShowNewStudentDropdown(true)}
+  />
 
-        <input
-          placeholder="Student Name"
-          value={newName}
-          onChange={e => setNewName(e.target.value)}
-        />
-        <input
-          placeholder="Parent Name"
-          value={newParent}
-          onChange={e => setNewParent(e.target.value)}
-        />
+  {showNewStudentDropdown && (
+    <div className="student-dropdown-list">
+      {newAdmissionStudents.map(s => (
+        <div
+          key={s.id}
+          className="student-option"
+          onClick={() => {
+            setSelectedNewStudent(s);
+            setNewName(s.studentName);
+            setNewParent(s.parentName || "");
+            setNewClass(s.class);
+            setNewTotal(getClassTotal(s.class));
+            setShowNewStudentDropdown(false);
+            setNewStudentSearch("");
+          }}
+        >
+          <strong>{s.studentName}</strong>
+          <span>Class {s.class} — {s.parentName}</span>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
+<input readOnly value={newParent ? `Parent: ${newParent}` : ""} />
+<input readOnly value={newClass ? `Class: ${newClass}` : ""} />
+
 
         <select
           value={newClass}
@@ -574,8 +795,9 @@ if (activePage && activePage.startsWith("bill_")) {
           }}
         >
           <option value="">Class</option>
-          {["PreKG","LKG","UKG","1","2","3","4","5","6","7","8","9","10","11","12"]
-            .map(c => <option key={c}>{c}</option>)}
+          {["PreKG","LKG","UKG","1","2","3","4","5","6","7","8","9","10","11","12"].map(c => (
+            <option key={c}>{c}</option>
+          ))}
         </select>
 
         <input readOnly value={newTotal ? `Total ₹${newTotal}` : ""} />
@@ -587,10 +809,7 @@ if (activePage && activePage.startsWith("bill_")) {
         </select>
 
         {newPayType === "full" && (
-          <input
-            readOnly
-            value={`Payable ₹${(newTotal - newTotal * 0.05).toFixed(0)}`}
-          />
+         <input readOnly value={`Payable ₹${newTotal - discount}`} />
         )}
 
         {newPayType === "partial" && (
@@ -602,75 +821,91 @@ if (activePage && activePage.startsWith("bill_")) {
           />
         )}
 
-<button onClick={() => safeRequirePremium(saveNewAdmission, "income")}>
-
-
+        <button className="save-btn" onClick={() => safeRequirePremium(saveNewAdmission, "income")}>
           Save
         </button>
       </div>
     )}
 
-    {/* 🔹 OLD ADMISSION */}
- {/* 🔹 OLD ADMISSION */}
 {incomeMode === "student" && studentMode === "old" && (
-  <div className="form-grid income-grid">
+  <div className="entry-row source">
+
+   {/* CLASS DROPDOWN */}
+<div className="student-dropdown">
+
+<input
+  placeholder="Select Class"
+  value={oldClass}
+  readOnly
+  onClick={() => setShowClassDropdown(!showClassDropdown)}
+/>
+
+{showClassDropdown && (
+  <div className="student-dropdown-list">
+    {["PreKG","LKG","UKG","1","2","3","4","5","6","7","8","9","10","11","12"].map(cls => (
+      <div
+        key={cls}
+        className="student-option"
+        onClick={() => {
+          selectOldClass(cls);
+          setShowClassDropdown(false);   // 🔥 close after select
+          setShowStudentDropdown(true); // auto open student dropdown
+        }}
+      >
+        Class {cls}
+      </div>
+    ))}
+  </div>
+)}
+</div>
 
 
-    {/* CLASS */}
-    <select value={oldClass} onChange={e => selectOldClass(e.target.value)}>
-      <option value="">Class</option>
-      {["PreKG","LKG","UKG","1","2","3","4","5","6","7","8","9","10","11","12"]
-        .map(c => <option key={c}>{c}</option>)}
-    </select>
-
-    {/* 🔍 STUDENT SEARCH */}
-    <div className="student-search-wrapper">
-
+    {/* Student Search */}
+    <div className="student-dropdown">
     <input
-  placeholder="Search Student"
-  value={studentSearch || selectedStudentName}
+  placeholder="Select Student"
+  value={selectedStudentName || studentSearch}
   onChange={e => {
     setStudentSearch(e.target.value);
     setSelectedStudentName("");
+    setShowStudentDropdown(true);
   }}
-  onBlur={() => setTimeout(() => setStudentSearch(""), 150)}
+  onFocus={() => setShowStudentDropdown(true)}
 />
 
 
-      {studentSearch && (
-        <div className="student-search-list">
-          {filteredStudents.map(s => (
-            <div
-              key={s.id}
-              className="student-search-item"
-              onClick={() => {
-                setOldStudent(s.id);
-                setSelectedStudentName(s.studentName); // 👈 NOW THIS WILL WORK
-                setOldParent(s.parentName || "");
-                setStudentSearch("");
-              }}
-              
-              
-              
-            >
-              {s.studentName}
-            </div>
-          ))}
+{showStudentDropdown && (
+  <div className="student-dropdown-list">
 
-          {filteredStudents.length === 0 && (
-            <div className="student-search-item muted">
-              No students found
-            </div>
-          )}
-        </div>
-      )}
+        {filteredStudents.length === 0 && (
+          <div className="student-option muted">No students</div>
+        )}
+
+        {filteredStudents.map(s => (
+          <div
+            key={s.id}
+            className="student-option"
+            onClick={() => {
+              setOldStudent(s.id);
+              setSelectedStudentName(s.studentName);
+              setOldParent(s.parentName || "");
+              setStudentSearch("");
+              setOldClass(s.class);              
+              setShowStudentDropdown(false);
+            }}
+          >
+            <strong>{s.studentName}</strong>
+            <span>Class {s.class}</span>
+          </div>
+        ))}
+      
+      </div>
+)}
     </div>
-
-    {/* PARENT + TOTAL */}
+    
     <input readOnly value={oldParent ? `Parent: ${oldParent}` : ""} />
     <input readOnly value={oldTotal ? `Total ₹${oldTotal}` : ""} />
 
-    {/* PAYMENT TYPE */}
     <select value={oldPayType} onChange={e => setOldPayType(e.target.value)}>
       <option value="">Payment Type</option>
       <option value="full">Full (5% OFF)</option>
@@ -678,10 +913,7 @@ if (activePage && activePage.startsWith("bill_")) {
     </select>
 
     {oldPayType === "full" && (
-      <input
-        readOnly
-        value={`Payable ₹${(oldTotal - oldTotal * 0.05).toFixed(0)}`}
-      />
+      <input readOnly value={`Payable ₹${(oldTotal - oldTotal * 0.05).toFixed(0)}`} />
     )}
 
     {oldPayType === "partial" && (
@@ -693,14 +925,33 @@ if (activePage && activePage.startsWith("bill_")) {
       />
     )}
 
-<button onClick={() => safeRequirePremium(saveOldAdmission, "income")}>
-
-
+    <button className="save-btn" onClick={() => safeRequirePremium(saveOldAdmission, "income")}>
       Save
     </button>
+    {oldStudent && (() => {
+  const balance = getStudentBalance(oldStudent, oldClass);
+  const term = Math.ceil(balance / 3);
+
+  return (
+    <>
+      <input readOnly value={`Balance ₹${balance}`} />
+      <input readOnly value={`Term 1 ₹${term}`} />
+      <input readOnly value={`Term 2 ₹${term}`} />
+      <input readOnly value={`Term 3 ₹${balance - term * 2}`} />
+    </>
+  );
+})()}
+
+
+
+
 
   </div>
+  
 )}
+ 
+
+
 
   </>
 )}
@@ -708,91 +959,188 @@ if (activePage && activePage.startsWith("bill_")) {
 
 
 
-        {/* ================= EXPENSE ================= */}
-        {entryType==="expense" && (
-          <>
-            <select style={{marginTop:10}} value={expenseMode} onChange={e=>setExpenseMode(e.target.value)}>
-              <option value="">Choose Expense</option>
-              <option value="salary">Salary</option>
-              <option value="others">Others</option>
-            </select>
+       {/* ================= EXPENSE ================= */}
+{entryType==="expense" && (
+<>
+  {/* Expense Type */}
+  <div className="popup-select">
+    <div className="popup-input" onClick={() => setShowExpenseType(!showExpenseType)}>
+      {expenseMode || "Choose Expense"}
+      <span>▾</span>
+    </div>
 
-            {/* SALARY */}
-            {expenseMode==="salary" && (
-              <>
-                <select
-                  style={{marginTop:10}}
-                  value={salaryRole}
-                  onChange={e=>{setSalaryRole(e.target.value);setSalaryPosition("");setSelName("");}}
-                >
-                  <option value="">Select Category</option>
-                  <option value="office">Office Staff</option>
-                  <option value="working">Working Staff</option>
-                </select>
+    {showExpenseType && (
+      <div className="popup-menu">
+        <div onClick={() => { setExpenseMode("salary"); setShowExpenseType(false); }}>
+          Salary
+        </div>
+        <div onClick={() => { setExpenseMode("others"); setShowExpenseType(false); }}>
+          Others
+        </div>
+      </div>
+    )}
+  </div>
 
-                <div className="form-grid">
+  {expenseMode === "salary" && (
+  <>
+    <div className="entry-row">
+    <div className="popup-select">
+  <div
+    className="popup-input"
+    onClick={() => setShowSalaryCategory(!showSalaryCategory)}
+  >
+    {salaryRole || "Category"}
+    <span>▾</span>
+  </div>
 
-                  {/* position dropdown */}
-                  <select
-                    value={salaryPosition}
-                    onChange={e=>setSalaryPosition(e.target.value)}
-                  >
-                    <option value="">Select Position</option>
+  {showSalaryCategory && (
+    <div className="popup-menu">
+      <div
+        onClick={() => {
+          setSalaryRole("office");
+          setSalaryPosition("");
+          setShowSalaryCategory(false);
+        }}
+      >
+        Office Staff
+      </div>
 
-                    {salaryRole==="office" && (
-                      <>
-                        <option value="Principal">Principal</option>
-                        <option value="Clerk">Clerk</option>
-                        <option value="Accountant">Accountant</option>
-                        <option value="Receptionist">Receptionist</option>
-                        <option value="Office Assistant">Office Assistant</option>
-                      </>
-                    )}
+      <div
+        onClick={() => {
+          setSalaryRole("working");
+          setSalaryPosition("");
+          setShowSalaryCategory(false);
+        }}
+      >
+        Working Staff
+      </div>
+    </div>
+  )}
+</div>
 
-                    {salaryRole==="working" && (
-                      <>
-                        <option value="Teacher">Teacher</option>
-                        <option value="Driver">Driver</option>
-                        <option value="Cleaner">Cleaner</option>
-                        <option value="Watchman">Watchman</option>
-                        <option value="Helper">Helper</option>
-                      </>
-                    )}
-                  </select>
 
-                  {/* name typing */}
-                  <input
-                    placeholder="Person Name"
-                    value={selName}
-                    onChange={e=>setSelName(e.target.value)}
-                  />
+      {/* Position */}
+      <div className="popup-select">
+  <div
+    className="popup-input"
+    onClick={() => salaryRole && setShowSalaryPositionDD(!showSalaryPositionDD)}
+  >
+    {salaryPosition || "Position"}
+    <span>▾</span>
+  </div>
 
-                  <input
-                    type="number"
-                    placeholder="Salary"
-                    value={manualSalary}
-                    onChange={e=>setManualSalary(e.target.value)}
-                  />
+  {showSalaryPositionDD && (
+    <div className="popup-menu">
 
-<button onClick={() => safeRequirePremium(saveSalary, "expense")}>
+      {salaryRole === "office" && (
+        <>
+          <div onClick={() => { setSalaryPosition("Principal"); setShowSalaryPositionDD(false); }}>Principal</div>
+          <div onClick={() => { setSalaryPosition("Clerk"); setShowSalaryPositionDD(false); }}>Clerk</div>
+          <div onClick={() => { setSalaryPosition("Accountant"); setShowSalaryPositionDD(false); }}>Accountant</div>
+          <div onClick={() => { setSalaryPosition("Receptionist"); setShowSalaryPositionDD(false); }}>Receptionist</div>
+          <div onClick={() => { setSalaryPosition("Office Assistant"); setShowSalaryPositionDD(false); }}>Office Assistant</div>
+        </>
+      )}
 
-Save Salary</button>
-                </div>
-              </>
-            )}
+      {salaryRole === "working" && (
+        <>
+          <div onClick={() => { setSalaryPosition("Teacher"); setShowSalaryPositionDD(false); }}>Teacher</div>
+          <div onClick={() => { setSalaryPosition("Driver"); setShowSalaryPositionDD(false); }}>Driver</div>
+          <div onClick={() => { setSalaryPosition("Cleaner"); setShowSalaryPositionDD(false); }}>Cleaner</div>
+          <div onClick={() => { setSalaryPosition("Watchman"); setShowSalaryPositionDD(false); }}>Watchman</div>
+          <div onClick={() => { setSalaryPosition("Helper"); setShowSalaryPositionDD(false); }}>Helper</div>
+        </>
+      )}
 
-            {/* OTHERS */}
-            {expenseMode==="others" && (
-              <div className="form-grid">
-                <input placeholder="Expense name" value={exName} onChange={e=>setExName(e.target.value)} />
-                <input type="number" placeholder="Amount" value={exAmt} onChange={e=>setExAmt(e.target.value)} />
-                <button onClick={() => safeRequirePremium(saveExpense, "expense")}>
+    </div>
+  )}
+</div>
 
-Save Expense</button>
-              </div>
-            )}
-          </>
+
+      {/* Name */}
+      {salaryRole === "working" && salaryPosition === "Teacher" && (
+  <div className="student-dropdown">
+    <input
+      placeholder="Select Teacher"
+      value={selName || teacherSearch}
+      onChange={e => {
+        setTeacherSearch(e.target.value);
+        setSelName("");
+        setShowTeacherDropdown(true);
+      }}
+      onFocus={() => setShowTeacherDropdown(true)}
+    />
+
+    {showTeacherDropdown && (
+      <div className="student-dropdown-list">
+        {filteredTeachers.map(t => (
+          <div
+            key={t.id}
+            className="student-option"
+            onClick={() => {
+              setSelName(t.name);
+              setTeacherSearch("");
+              setShowTeacherDropdown(false);
+            }}
+          >
+            <strong>{t.name}</strong>
+            <span>{t.teacherId}</span>
+          </div>
+        ))}
+
+        {filteredTeachers.length === 0 && (
+          <div className="student-option muted">No teachers found</div>
         )}
+      </div>
+    )}
+  </div>
+)}
+{!(salaryRole === "working" && salaryPosition === "Teacher") && (
+  <input
+    placeholder="Person Name"
+    value={selName}
+    onChange={e => setSelName(e.target.value)}
+  />
+)}
+
+
+
+      {/* Salary */}
+      <input
+        type="number"
+        placeholder="Salary"
+        value={manualSalary}
+        onChange={e => setManualSalary(e.target.value)}
+      />
+    </div>
+
+    {/* Save row */}
+    <div className="entry-row">
+      <button
+        className="save-btn"
+        style={{ gridColumn: "span 4" }}   // 🔥 full width
+        onClick={() => safeRequirePremium(saveSalary, "expense")}
+      >
+        Save
+      </button>
+    </div>
+  </>
+)}
+
+
+  {/* ========== OTHERS ========== */}
+  {expenseMode==="others" && (
+    <div className="entry-row">
+      <input placeholder="Expense name" value={exName} onChange={e=>setExName(e.target.value)} />
+      <input type="number" placeholder="Amount" value={exAmt} onChange={e=>setExAmt(e.target.value)} />
+      <button className="save-btn" onClick={() => safeRequirePremium(saveExpense,"expense")}>
+        Save
+      </button>
+    </div>
+  )}
+</>
+)}
+
 
         {/* SET FEES */}
         {entryType==="fees" && (
@@ -977,9 +1325,7 @@ Save Fee</button>
 
   </div>
 </div>
-
-
-
+        </div>
         </div>
       </div>
   );

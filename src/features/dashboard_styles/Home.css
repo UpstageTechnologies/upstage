@@ -1,160 +1,453 @@
-.cards-row {
-    margin-top: 20px;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
-    margin-left: 20px;
-  }
-  
-  /* ⭐ Card Style + Animation */
-  .home-card {
-    padding: 18px;
-    border-radius: 16px;
-    color: #fff;
-    box-shadow: 0 14px 22px rgba(0,0,0,.12);
-    position: relative;
-  
-    /* smooth animation */
-    transition: transform .25s ease, box-shadow .25s ease;
-    animation: cardFadeIn .45s ease forwards;
-    opacity: 0;
-  }
-  
-  /* fade + slide effect when loading */
-  @keyframes cardFadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(12px) scale(.97);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-  
-  /* hover effect */
-  .home-card:hover {
-    transform: translateY(-6px) scale(1.02);
-    box-shadow: 0 18px 30px rgba(0,0,0,.18);
-  }
-  
-
- 
-  
-  /* text */
-  .home-card h4 {
-    margin: 0 0 6px;
-    font-weight: 600;
-    letter-spacing: .3px;
-  }
-  
-  .home-card h1 {
-    margin: 0;
-    font-size: 36px;
-  }
-  
-  .home-card p {
-    margin-top: 4px;
-    opacity: .9;
-  }
-  
-  /* gradients */
-  .home-card.green  { background: linear-gradient(135deg,#4caf50,#66bb6a); }
-  
-  .home-card.blue   { background: linear-gradient(135deg,#3498db,#5dade2); }
-
-  
-  
-/* ---------- MOBILE CARD SIZE ---------- */
-
-@media (max-width: 900px) {
-  .cards-row { 
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-    margin-left: 10px;
-  }
-
-  .home-card {
-    padding: 14px;
-    border-radius: 14px;
-  }
-
-  .home-card h1 {
-    font-size: 26px;
-  }
-
-  .home-card h4 {
-    font-size: 14px;
-  }
-
-  .home-card button {
-    padding: 6px 10px;
-    font-size: 12px;
-  }
-
-  .icon-box {
-    width: 44px;
-    height: 44px;
-    font-size: 18px;
-  }
+/* ========== RESET ========== */
+* {
+  box-sizing: border-box;
 }
 
-/* small phones */
-@media (max-width: 600px) {
-  .cards-row { 
-    grid-template-columns: 1fr;
-    margin-left: 0;
-  }
-
-  .home-card {
-    padding: 12px;
-    border-radius: 12px;
-  }
-
-  .home-card h1 {
-    font-size: 22px;
-  }
-
-  .home-card h4 {
-    font-size: 13px;
-  }
-
-  .icon-box {
-    width: 40px;
-    height: 40px;
-  }
+/* ========== PERSONAL HEADER ========== */
+.student-header {
+  display: flex;
+  justify-content: space-between;
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.05);
+  margin-bottom: 25px;
 }
 
-.card-inner {
+.student-left {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.student-avatar img {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.student-info {
+  display: flex;
+  gap: 40px;
+}
+
+.student-info div {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+/* ========== SUMMARY LAYOUT ========== */
+.summary-layout {
+  display: flex;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+/* LEFT BOX */
+.summary-left {
+  flex: 1;
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.05);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Class days + rate */
+.attendance-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.attendance-panel h2 {
+  margin-top: 8px;
+  font-size: 28px;
+}
+
+/* Monthly flow */
+.monthly-flow {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 15px;
+  margin-top: auto;
 }
 
-/* circle icon box */
-.icon-box {
-  width: 54px;
-  height: 54px;
+.month {
+  padding: 14px 22px;
   border-radius: 14px;
-  background: transparent;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.month.blue   { background:#3399ff; }
+.month.orange { background:#ffb84d; }
+.month.green  { background:#7bcf00; }
+
+/* ========== RIGHT BOX (PILLS) ========== */
+.summary2-wrapper {
+  flex: 1.2;
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.05);
+  display: flex;
+  justify-content: space-between;
+  gap: 25px;
+    flex-direction: column;      /* IMPORTANT */
+  align-items: center;    
+}
+
+/* Pill */
+.summary2-card {
+  position: relative;
+  width: 120px;
+  height: 280px;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #eaf2fb;
+}
+
+/* top number */
+.summary2-top {
+  height: 35%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 32px;
+  font-weight: bold;
+  background: #eaf2fb;
+  z-index: 5;
+  position: relative;
+}
+
+/* fill */
+.summary2-fill {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  transition: height .4s ease;
+}
+
+.fill-blue   { background: #3a9df5; }
+.fill-yellow { background: #fbbf24; }
+.fill-red    { background: #fb5a5a; }
+
+/* icon + label */
+.summary2-content {
+  position: absolute;
+  bottom: 35px;
+  width: 100%;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.summary2-content i {
+  font-size: 28px;
+}
+
+/* ========== HOME CARDS (BOTTOM) ========== */
+.cards-row {
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.home-card {
+  padding: 18px;
+  border-radius: 16px;
   color: #fff;
-  box-shadow: inset 0 2px 6px rgba(0,0,0,.15);
+  box-shadow: 0 14px 22px rgba(0,0,0,.12);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.home-card.green { background: linear-gradient(135deg,#4caf50,#66bb6a); }
+.home-card.blue  { background: linear-gradient(135deg,#3498db,#5dade2); }
+
+.home-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 18px 30px rgba(0,0,0,.18);
+}
+
+.home-card h1 {
+  font-size: 36px;
 }
 
 .home-card button {
+  margin-top: 10px;
   padding: 8px 14px;
   border-radius: 8px;
   border: none;
   background: #fff;
-  color: #040506;
   font-weight: 600;
   cursor: pointer;
 }
 
-.home-card button:hover {
-  background: #f3f5ff;
+/* ========== MOBILE ========== */
+@media (max-width: 900px) {
+  .summary-layout {
+    flex-direction: column;
+  }
+
+  .summary2-wrapper {
+    justify-content: space-around;
+  }
+
+  .cards-row {
+    grid-template-columns: repeat(2,1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .cards-row {
+    grid-template-columns: 1fr;
+  }
+}
+/* Title inside right box */
+.summary-title {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: left;  
+  margin-bottom: 10px;
+}
+
+/* Pills row */
+.summary2-cards {
+  width: 100%;
+  display: flex;
+  justify-content: center;     /* center pills */
+  gap: 25px;
+} 
+/* ---------- Monthly Step Flow ---------- */
+.monthly-flow2 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  margin-top: 30px;
+}
+
+
+
+.monthly-flow2 {
+  position: relative;
+  height: 160px;
+  margin-top: 40px;
+}
+
+/* SVG zigzag line */
+.trend-line {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Floating month cards */
+.flow-item {
+  position: absolute;
+  width: 150px;
+  padding: 18px;
+  border-radius: 16px;
+  text-align: center;
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 10px 20px rgba(0,0,0,.12);
+}
+
+.flow-item:nth-child(2) { left: 0; }
+.flow-item:nth-child(3) { left: 35%; }
+.flow-item:nth-child(4) { right: 0; }
+
+.flow-item small {
+  display: block;
+  font-size: 13px;
+  opacity: .9;
+}
+
+.flow-item.blue   { background:#3399ff; }
+.flow-item.orange { background:#ffb84d; }
+.flow-item.green  { background:#7bcf00; }
+/* =========================================
+   MOBILE FIX PACK (360px – 600px)
+========================================= */
+@media (max-width: 600px) {
+
+  /* -------- HEADER -------- */
+  .student-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .student-left {
+    gap: 10px;
+  }
+
+  .student-avatar img {
+    width: 42px;
+    height: 42px;
+  }
+
+  .student-info {
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  /* -------- MAIN LAYOUT -------- */
+  .summary-layout {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .summary-left,
+  .summary2-wrapper {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  /* -------- CLASS DAYS / RATE -------- */
+  .attendance-panel {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .attendance-panel h4 {
+    font-size: 13px;
+  }
+
+  .attendance-panel h2 {
+    font-size: 20px;
+  }
+
+  .attendance-panel h1 {
+    font-size: 34px;
+  }
+
+  /* -------- MONTHLY TREND -------- */
+  .monthly-flow2 {
+    height: 140px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 12px;
+  }
+
+  .trend-line {
+    width: 800px;
+    height: 120px;
+  }
+
+  .flow-item {
+    width: 120px;
+    padding: 12px;
+    font-size: 13px;
+    border-radius: 12px;
+  }
+
+  .flow-item small {
+    font-size: 11px;
+  }
+
+  /* -------- TODAY ATTENDANCE -------- */
+  .summary-title {
+    text-align: center;
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .summary2-cards {
+    overflow-x: auto;
+    justify-content: flex-start;
+    gap: 14px;
+    padding-bottom: 10px;
+  }
+
+  .summary2-card {
+    min-width: 90px;
+    height: 200px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+
+  .summary2-top {
+    font-size: 22px;
+  }
+
+  .summary2-content {
+    bottom: 22px;
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .summary2-content i {
+    font-size: 18px;
+  }
+
+  /* -------- HOME CARDS -------- */
+  .cards-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .home-card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .home-card h1 {
+    font-size: 24px;
+  }
+}
+
+
+/* =========================================
+   EXTRA SMALL DEVICES (≤ 360px)
+========================================= */
+@media (max-width: 360px) {
+
+  .student-header {
+    padding: 10px;
+  }
+
+  .student-avatar img {
+    width: 38px;
+    height: 38px;
+  }
+
+  .attendance-panel h1 {
+    font-size: 30px;
+  }
+
+  .flow-item {
+    width: 105px;
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .summary2-card {
+    min-width: 85px;
+    height: 185px;
+  }
+
+  .summary2-top {
+    font-size: 20px;
+  }
+
+  .summary2-content {
+    font-size: 11px;
+  }
 }

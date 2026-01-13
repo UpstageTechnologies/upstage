@@ -1,306 +1,306 @@
 .tt-container {
-    padding: 20px;
-    background: #f4f7fc;
-    min-height: 100vh;
-  }
-  
-  .tt-title {
-    font-size: 22px;
-    font-weight: 800;
-    margin-bottom: 12px;
-  }
-  
-  .tt-sub {
-    font-size: 18px;
-    font-weight: 700;
-    margin: 14px 0;
-  }
-  
-  /* CLASS GRID */
-  .class-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 16px;
-  }
-  
-  
-  .class-card {
-    background: #2140df;
-    color: #fff;
-    border-radius: 14px;
-    padding: 14px 10px;
-  
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  
-    height: 70px;          /* 🔥 same size */
-    font-size: 15px;
-    font-weight: 700;
-  
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  
-  .class-card:hover {
-    transform: translateY(-2px);
-  }
-  
-  /* SECTION */
-  .section-row {
-    display: flex;
-    gap: 16px;
-    margin: 20px 0;
-  }
-  
-  .section-btn {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: #2140df;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    cursor: pointer;
-  }
-  
-  /* DAYS */
-  .day-row {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    margin-bottom: 12px;
-  }
-  
-  .day-btn {
-    padding: 8px 14px;
-    border-radius: 20px;
-    border: none;
-    background: #eee;
-    cursor: pointer;
-  }
-  
-  .day-btn.active {
-    background: #2140df;
-    color: #fff;
-  }
-  
-  /* PERIOD */
-  .period-row {
-    background: #fff;
-    padding: 12px;
-    border-radius: 12px;
-    margin-bottom: 10px;
-  }
-  
-  .period-row label {
-    display: block;
-    font-weight: 700;
-    margin-bottom: 6px;
-  }
-  
-  .period-row input {
-    width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-  }
-  
-  /* SAVE */
-  .save-btn {
-    width: 100%;
-    padding: 14px;
-    background: #2140df;
-    color: #fff;
-    font-weight: 800;
-    border: none;
-    border-radius: 14px;
-    margin-top: 12px;
-    cursor: pointer;
-  }
-  
-  /* BACK */
-  .back {
-    text-align: center;
-    color: #2140df;
-    font-weight: 700;
-    margin-top: 12px;
-    cursor: pointer;
-  }
- /* =========================================================
-   🔥 HARD MOBILE FORCE FIT (Dashboard unchangeable)
+  padding: 20px;
+  background: #f4f7fc;
+  min-height: 100vh;
+}
+
+.tt-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.tt-sub {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 14px 0;
+}
+
+/* CLASS GRID */
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 16px;
+}
+
+
+.class-card {
+  background: #2140df;
+  color: #fff;
+  border-radius: 14px;
+  padding: 14px 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 70px;          /* 🔥 same size */
+  font-size: 15px;
+  font-weight: 700;
+
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.class-card:hover {
+  transform: translateY(-2px);
+}
+
+/* SECTION */
+.section-row {
+  display: flex;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.section-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #2140df;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* DAYS */
+.day-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-bottom: 12px;
+}
+
+.day-btn {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: none;
+  background: #eee;
+  cursor: pointer;
+}
+
+.day-btn.active {
+  background: #2140df;
+  color: #fff;
+}
+
+/* PERIOD */
+.period-row {
+  background: #fff;
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.period-row label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.period-row input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+/* SAVE */
+.save-btn {
+  width: 100%;
+  padding: 14px;
+  background: #2140df;
+  color: #fff;
+  font-weight: 800;
+  border: none;
+  border-radius: 14px;
+  margin-top: 12px;
+  cursor: pointer;
+}
+
+/* BACK */
+.back {
+  text-align: center;
+  color: #2140df;
+  font-weight: 700;
+  margin-top: 12px;
+  cursor: pointer;
+}
+/* =========================================================
+ 🔥 HARD MOBILE FORCE FIT (Dashboard unchangeable)
 ========================================================= */
 @media (max-width: 480px) {
 
-  /* Force timetable to usable width */
-  .tt-container {
-    width: 100%;
-    max-width: 280px;       /* 🔥 important */
-    margin: 0 auto;
-    padding: 8px;
-    overflow-x: hidden;
-  }
+/* Force timetable to usable width */
+.tt-container {
+  width: 100%;
+  max-width: 280px;       /* 🔥 important */
+  margin: 0 auto;
+  padding: 8px;
+  overflow-x: hidden;
+}
 
-  .tt-title {
-    font-size: 16px;
-    text-align: center;
-  }
+.tt-title {
+  font-size: 16px;
+  text-align: center;
+}
 
-  .tt-sub {
-    font-size: 14px;
-    text-align: center;
-  }
+.tt-sub {
+  font-size: 14px;
+  text-align: center;
+}
 
-  /* ===== DAYS ===== */
-  .day-row {
-    justify-content: flex-start;
-    gap: 6px;
-  }
+/* ===== DAYS ===== */
+.day-row {
+  justify-content: flex-start;
+  gap: 6px;
+}
 
-  .day-btn {
-    font-size: 11px;
-    padding: 5px 10px;
-    border-radius: 14px;
-  }
+.day-btn {
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 14px;
+}
 
-  /* ===== PERIOD CARDS ===== */
-  .period-row {
-    padding: 8px;
-    border-radius: 10px;
-  }
+/* ===== PERIOD CARDS ===== */
+.period-row {
+  padding: 8px;
+  border-radius: 10px;
+}
 
-  .period-row label {
-    font-size: 12px;
-    margin-bottom: 4px;
-  }
+.period-row label {
+  font-size: 12px;
+  margin-bottom: 4px;
+}
 
-  .period-row input {
-    font-size: 12px;
-    padding: 6px;
-    border-radius: 6px;
-  }
+.period-row input {
+  font-size: 12px;
+  padding: 6px;
+  border-radius: 6px;
+}
 
-  /* ===== SAVE BUTTON ===== */
-  .save-btn {
-    font-size: 14px;
-    padding: 10px;
-    border-radius: 10px;
-  }
+/* ===== SAVE BUTTON ===== */
+.save-btn {
+  font-size: 14px;
+  padding: 10px;
+  border-radius: 10px;
+}
 
-  .back {
-    font-size: 13px;
-  }
+.back {
+  font-size: 13px;
+}
 }
 
 /* =========================================================
-   EXTRA TINY DEVICES (320px)
+ EXTRA TINY DEVICES (320px)
 ========================================================= */
 @media (max-width: 480px) {
-  .class-grid {
-    grid-template-columns: repeat(2, 1fr);   /* ⭐ Stay 2 columns */
-  }
+.class-grid {
+  grid-template-columns: repeat(2, 1fr);   /* ⭐ Stay 2 columns */
+}
 
-  .class-card {
-    height: 76px;     /* slightly smaller */
-  }
+.class-card {
+  height: 76px;     /* slightly smaller */
+}
 }
 
 /* -------- VERY SMALL PHONES (<360) — 1 COL -------- */
 @media (max-width: 360px) {
-  .class-grid {
-    grid-template-columns: repeat(1, 1fr);
-  }
+.class-grid {
+  grid-template-columns: repeat(1, 1fr);
+}
 
-  .class-card {
-    height: 72px;
-  }
+.class-card {
+  height: 72px;
+}
 }
 /* =========================================================
-   ONLY TIMETABLE FORM AREA – DESKTOP WIDTH CONTROL
+ ONLY TIMETABLE FORM AREA – DESKTOP WIDTH CONTROL
 ========================================================= */
 
 @media (min-width: 1024px) {
 
-  /* shrink only timetable form area */
-  .tt-sub,
-  .day-row,
-  .period-row,
-  .save-btn,
-  .back {
-    max-width: 60%;
-  }
+/* shrink only timetable form area */
+.tt-sub,
+.day-row,
+.period-row,
+.save-btn,
+.back {
+  max-width: 60%;
+}
 
-  /* align nicely from left */
-  .tt-sub,
-  .day-row,
-  .period-row,
-  .save-btn,
-  .back {
-    margin-left: 0;
-    margin-right: auto;
-  }
+/* align nicely from left */
+.tt-sub,
+.day-row,
+.period-row,
+.save-btn,
+.back {
+  margin-left: 0;
+  margin-right: auto;
+}
 }
 @media (max-width: 768px) {
-  .tt-sub,
-  .day-row,
-  .period-row,
-  .save-btn,
-  .back {
-    max-width: 100%;
-  }
+.tt-sub,
+.day-row,
+.period-row,
+.save-btn,
+.back {
+  max-width: 100%;
+}
 }
 .tt-layout {
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
+display: flex;
+gap: 24px;
+align-items: flex-start;
 }
 
 /* Left timetable smaller */
 .tt-left {
-  width: 65%;
+width: 65%;
 }
 
 /* Right calendar */
 .tt-right {
-  width: 35%;
-  position: sticky;
-  top: 90px;
+width: 35%;
+position: sticky;
+top: 90px;
 }
 /* =========================================================
-   📱 MOBILE: CALENDAR FIRST → TIMETABLE BELOW
+ 📱 MOBILE: CALENDAR FIRST → TIMETABLE BELOW
 ========================================================= */
 @media (max-width: 768px) {
 
-  /* Stack layout vertically */
-  .tt-layout {
-    display: flex;
-    flex-direction: column;
-  }
+/* Stack layout vertically */
+.tt-layout {
+  display: flex;
+  flex-direction: column;
+}
 
-  /* Calendar comes FIRST */
-  .tt-right {
-    order: -1;
-    width: 100%;
-    position: static;     /* remove sticky on mobile */
-    margin-bottom: 16px;
-  }
+/* Calendar comes FIRST */
+.tt-right {
+  order: -1;
+  width: 100%;
+  position: static;     /* remove sticky on mobile */
+  margin-bottom: 16px;
+}
 
-  /* Timetable below calendar */
-  .tt-left {
-    order: 1;
-    width: 100%;
-  }
+/* Timetable below calendar */
+.tt-left {
+  order: 1;
+  width: 100%;
+}
 
-  /* Calendar full width */
-  .sc-calendar {
-    max-width: 100%;
-    margin: 0 auto;
-  }
+/* Calendar full width */
+.sc-calendar {
+  max-width: 100%;
+  margin: 0 auto;
+}
 }
 .back {
-  text-align: left !important;
-  width: fit-content;
-  margin-left: 0;
+text-align: left !important;
+width: fit-content;
+margin-left: 0;
 }

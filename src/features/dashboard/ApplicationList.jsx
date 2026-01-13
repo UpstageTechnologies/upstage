@@ -12,7 +12,9 @@ import {
 
 import { auth, db } from "../../services/firebase";
 import "../dashboard_styles/ApplicationList.css";
-import { FaSearch } from "react-icons/fa";
+import bookImg from "../../assets/book.png";
+
+import { FaCheckCircle ,FaTimesCircle} from "react-icons/fa";
 
 
 export default function ApplicationList({ requirePremium }) {
@@ -105,14 +107,18 @@ export default function ApplicationList({ requirePremium }) {
   return (
     <div className="appList-wrapper">
 
-      <h2 className="appList-title">Application Submissions</h2>
+<h2 className="teacher-header app-title-bar">
+  <span className="app-title-text">Application Submissions</span>
+  <img src={bookImg} style={{width:"100px"}}alt="Applications" className="header-book-img" />
+</h2>
+
    
 
 
       {/* ============ PENDING LIST ============ */}
       <div className="appList-grid">
         {pending.length === 0 && (
-          <p style={{ opacity: 0.6 }}>No pending applications</p>
+          <p style={{ opacity: 0.8 ,color:"#52c3f7"}}>No pending applications</p>
         )}
 
         {pending.map(app => (
@@ -153,9 +159,13 @@ export default function ApplicationList({ requirePremium }) {
       </div>
 
       {/* ============ SELECTED LIST ============ */}
-      <h3 style={{ marginTop: 30 }}>✅ Selected Applications</h3>
+      <h3 className="section-title">
+  <FaCheckCircle className="selected-icon" />
+  Selected Applications
+</h3>
 
-      <table className="appTable">
+
+      <table className="teacher-table">
         <thead>
           <tr>
             <th>Student</th>
@@ -186,9 +196,14 @@ export default function ApplicationList({ requirePremium }) {
       </table>
 
       {/* ============ REJECTED LIST ============ */}
-      <h3 style={{ marginTop: 30 }}>❌ Rejected Applications</h3>
+      <h3 className="section-title rejected-title">
+  <FaTimesCircle className="rejected-icon" />
+  Rejected Applications
+</h3>
 
-      <table className="appTable reject">
+
+      <table className="teacher-table rejected-table">
+
         <thead>
           <tr>
             <th>Student</th>

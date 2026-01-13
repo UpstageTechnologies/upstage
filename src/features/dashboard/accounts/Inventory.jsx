@@ -2,91 +2,67 @@ import React, { useEffect, useState } from "react";
 import { collection, addDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../../../services/firebase";
 import "../../dashboard_styles/Accounts.css";
-
-
+import "../../dashboard_styles/studentSearch.css";
 
 export default function Inventory({ adminUid, setActivePage, plan, showUpgrade }) {
-
 
   /* ================= STATES ================= */
   const [feesMaster, setFeesMaster] = useState([]);
   const [feesLoaded, setFeesLoaded] = useState(false);
 
+  const [teachers, setTeachers] = useState([]);
+  const [teacherSearch, setTeacherSearch] = useState("");
+  const [showTeacherDropdown, setShowTeacherDropdown] = useState(false);
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
 
   const [entryType, setEntryType] = useState(""); // fees | salary
-  const [activeSummary, setActiveSummary] = useState("fees"); // fees | salary
+  const [activeSummary, setActiveSummary] = useState("fees");
 
   const [feeClass, setFeeClass] = useState("");
   const [feeName, setFeeName] = useState("");
-  const [salaryName, setSalaryName] = useState("");
   const [feeAmount, setFeeAmount] = useState("");
-  const totalEntries = feesMaster.length;
 
+  const [salaryCategory, setSalaryCategory] = useState("");
+  const [salaryPosition, setSalaryPosition] = useState("");
 
-  const [date, setDate] = useState(() => {
-    const today = new Date();
-    return today.toISOString().split("T")[0];
-  });
+  const [showCategory, setShowCategory] = useState(false);
+  const [showPosition, setShowPosition] = useState(false);
 
-  /* ================= FIRESTORE REF ================= */
-  const feesRef = collection(
-    db,
-    "users",
-    adminUid,
-    "Account",
-    "accounts",
-    "FeesMaster"
-  );
+  const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
 
-  const safeRequirePremium = (cb, type) => {
-    if (!feesLoaded) {
-      cb();
-      return;
-    }
-  
-    const feesCount = feesMaster.filter(i => i.type === "fees").length;
-    const salaryCount = feesMaster.filter(i => i.type === "salary").length;
-  
-    if (plan === "basic") {
-      if (type === "fees" && feesCount >= 1) {
-        showUpgrade();
-        return;
-      }
-  
-      if (type === "salary" && salaryCount >= 1) {
-        showUpgrade();
-        return;
-      }
-    }
-  
-    cb();
-  };
-  
-  
-  
-  
+  /* ================= FIRESTORE ================= */
+  const feesRef = collection(db, "users", adminUid, "Account", "accounts", "FeesMaster");
+  const teachersRef = collection(db, "users", adminUid, "teachers");
 
-  /* ================= LOAD DATA ================= */
+  /* ================= LOAD ================= */
   useEffect(() => {
     if (!adminUid) return;
-  
-    const unsub = onSnapshot(feesRef, snap => {
+
+    const unsub1 = onSnapshot(feesRef, snap => {
       setFeesMaster(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-      setFeesLoaded(true);        // 👈 ADD THIS
+      setFeesLoaded(true);
     });
-  
-    return () => unsub();
+
+    const unsub2 = onSnapshot(teachersRef, snap => {
+      setTeachers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+
+    return () => {
+      unsub1();
+      unsub2();
+    };
   }, [adminUid]);
-  
+
+  const filteredTeachers = teachers.filter(t =>
+    t.name?.toLowerCase().includes(teacherSearch.toLowerCase())
+  );
 
   /* ================= SAVE ================= */
   const saveFee = async () => {
-    if (!entryType || !feeAmount || !date)
-      return alert("Fill all fields");
+    if (!entryType || !feeAmount || !date) return alert("Fill all fields");
 
     if (entryType === "fees") {
-      if (!feeClass || !feeName)
-        return alert("Select class & fee name");
+      if (!feeClass || !feeName) return alert("Select class & fee name");
 
       await addDoc(feesRef, {
         type: "fees",
@@ -99,12 +75,15 @@ export default function Inventory({ adminUid, setActivePage, plan, showUpgrade }
     }
 
     if (entryType === "salary") {
-      if (!salaryName)
-        return alert("Enter salary name");
+      if (!salaryCategory || !salaryPosition || !selectedTeacher)
+        return alert("Select Category, Position & Teacher");
 
       await addDoc(feesRef, {
         type: "salary",
-        name: salaryName,
+        category: salaryCategory,
+        position: salaryPosition,
+        teacherId: selectedTeacher.id,
+        name: selectedTeacher.name,
         amount: Number(feeAmount),
         date,
         createdAt: new Date()
@@ -115,17 +94,17 @@ export default function Inventory({ adminUid, setActivePage, plan, showUpgrade }
     setEntryType("");
     setFeeClass("");
     setFeeName("");
-    setSalaryName("");
     setFeeAmount("");
+    setSalaryCategory("");
+    setSalaryPosition("");
+    setSelectedTeacher(null);
+    setTeacherSearch("");
   };
-  
-  
 
-  /* ================= FILTER DATA ================= */
+  /* ================= DATA ================= */
   const feesData = feesMaster.filter(i => i.type === "fees");
   const salaryData = feesMaster.filter(i => i.type === "salary");
 
-  /* ================= GROUP FEES ================= */
   const groupedFees = feesData.reduce((acc, item) => {
     if (!acc[item.className]) acc[item.className] = [];
     acc[item.className].push(item);
@@ -135,21 +114,18 @@ export default function Inventory({ adminUid, setActivePage, plan, showUpgrade }
   /* ================= UI ================= */
   return (
     <div className="accounts-wrapper fade-in">
-       <span
-        style={{ color: "#2140df", cursor: "pointer", fontWeight: 600 }}
-        onClick={() => setActivePage("accounts")}
-      >
+
+      <span onClick={() => setActivePage("accounts")} style={{ color: "#2140df", cursor: "pointer", fontWeight: 600 }}>
         ← Back
       </span>
 
       <h2 className="page-title">Inventory</h2>
 
-      {/* ================= ADD ITEM ================= */}
       <div className="section-card entries-card">
         <h3 className="section-title">Add Item</h3>
 
         {!entryType && (
-          <div style={{ display: "flex", gap: 12 }}>
+          <div className="entries-box">
             <input type="date" value={date} onChange={e => setDate(e.target.value)} />
             <select value={entryType} onChange={e => setEntryType(e.target.value)}>
               <option value="">Select Type</option>
@@ -160,7 +136,7 @@ export default function Inventory({ adminUid, setActivePage, plan, showUpgrade }
         )}
 
         {entryType === "fees" && (
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <div className="entries-box">
             <input type="date" value={date} onChange={e => setDate(e.target.value)} />
             <select value={entryType} onChange={e => setEntryType(e.target.value)}>
               <option value="fees">Fees</option>
@@ -169,145 +145,125 @@ export default function Inventory({ adminUid, setActivePage, plan, showUpgrade }
 
             <select value={feeClass} onChange={e => setFeeClass(e.target.value)}>
               <option value="">Class</option>
-              {["PreKG","LKG","UKG","1","2","3","4","5","6","7","8","9","10","11","12"]
-                .map(c => <option key={c}>{c}</option>)}
+              {["PreKG","LKG","UKG","1","2","3","4","5","6","7","8","9","10","11","12"].map(c => <option key={c}>{c}</option>)}
             </select>
 
-            <input
-              placeholder="Fee Name"
-              value={feeName}
-              onChange={e => setFeeName(e.target.value)}
-            />
+            <input placeholder="Fee Name" value={feeName} onChange={e => setFeeName(e.target.value)} />
+            <input type="number" placeholder="Amount" value={feeAmount} onChange={e => setFeeAmount(e.target.value)} />
 
-            <input
-              type="number"
-              placeholder="Amount"
-              value={feeAmount}
-              onChange={e => setFeeAmount(e.target.value)}
-              style={{ width: 120 }}
-            />
-
-<button onClick={() => safeRequirePremium(saveFee, "fees")}>
-  Save
-</button>
-
+            <button className="save-btn" onClick={saveFee}>Save</button>
           </div>
         )}
 
         {entryType === "salary" && (
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <div className="entries-box">
+
             <input type="date" value={date} onChange={e => setDate(e.target.value)} />
-            <select value={entryType} onChange={e => setEntryType(e.target.value)}>
-              <option value="salary">Salary</option>
-              <option value="fees">Fees</option>
-            </select>
 
-            <input
-              placeholder="Salary Name"
-              value={salaryName}
-              onChange={e => setSalaryName(e.target.value)}
-            />
+            <div className="popup-select">
+              <div className="popup-input">Salary<span>▾</span></div>
+            </div>
 
-            <input
-              type="number"
-              placeholder="Amount"
-              value={feeAmount}
-              onChange={e => setFeeAmount(e.target.value)}
-              style={{ width: 120 }}
-            />
+            <div className="popup-select">
+              <div className="popup-input" onClick={() => setShowCategory(!showCategory)}>
+                {salaryCategory || "Category"} <span>▾</span>
+              </div>
+              {showCategory && (
+                <div className="popup-menu">
+                  <div onClick={() => { setSalaryCategory("Office Staff"); setShowCategory(false); }}>Office Staff</div>
+                  <div onClick={() => { setSalaryCategory("Working Staff"); setShowCategory(false); }}>Working Staff</div>
+                </div>
+              )}
+            </div>
 
-<button onClick={() => safeRequirePremium(saveFee, "salary")}>
+            <div className="popup-select">
+              <div className="popup-input" onClick={() => setShowPosition(!showPosition)}>
+                {salaryPosition || "Position"} <span>▾</span>
+              </div>
+              {showPosition && (
+                <div className="popup-menu">
+                  {salaryCategory === "Office Staff" && ["Principal","Clerk","Accountant","Receptionist"].map(p => (
+                    <div key={p} onClick={() => { setSalaryPosition(p); setShowPosition(false); }}>{p}</div>
+                  ))}
+                  {salaryCategory === "Working Staff" && ["Teacher","Driver","Cleaner","Watchman","Helper"].map(p => (
+                    <div key={p} onClick={() => { setSalaryPosition(p); setShowPosition(false); }}>{p}</div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-  Save
-</button>
-          
+            <div className="student-dropdown">
+              <input
+                placeholder="Search Teacher"
+                value={selectedTeacher?.name || teacherSearch}
+                onChange={e => {
+                  setTeacherSearch(e.target.value);
+                  setSelectedTeacher(null);
+                  setShowTeacherDropdown(true);
+                }}
+                onFocus={() => setShowTeacherDropdown(true)}
+              />
 
+              {showTeacherDropdown && (
+                <div className="student-dropdown-list">
+                  {filteredTeachers.map(t => (
+                    <div key={t.id} className="student-option" onClick={() => {
+                      setSelectedTeacher(t);
+                      setTeacherSearch("");
+                      setShowTeacherDropdown(false);
+                    }}>
+                      <strong>{t.name}</strong>
+                      <span>{t.teacherId}</span>
+                    </div>
+                  ))}
+                  {filteredTeachers.length === 0 && <div className="student-option muted">No teachers</div>}
+                </div>
+              )}
+            </div>
 
+            <input type="number" placeholder="Amount" value={feeAmount} onChange={e => setFeeAmount(e.target.value)} />
+
+            <button className="save-btn" onClick={saveFee}>Save</button>
           </div>
         )}
       </div>
 
-      {/* ================= SUMMARY BUTTONS ================= */}
+      {/* SUMMARY */}
       <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-        <button
-          onClick={() => setActiveSummary("fees")}
-          style={{
-            background: activeSummary === "fees" ? "#2563eb" : "#e5e7eb",
-            color: activeSummary === "fees" ? "#fff" : "#000",
-            padding: "6px 14px",
-            borderRadius: 6,
-            border: "none"
-          }}
-        >
-          Fees Summary
-        </button>
-
-        <button
-          onClick={() => setActiveSummary("salary")}
-          style={{
-            background: activeSummary === "salary" ? "#2563eb" : "#e5e7eb",
-            color: activeSummary === "salary" ? "#fff" : "#000",
-            padding: "6px 14px",
-            borderRadius: 6,
-            border: "none"
-          }}
-        >
-          Salary Summary
-        </button>
+        <button onClick={() => setActiveSummary("fees")}>Fees Summary</button>
+        <button onClick={() => setActiveSummary("salary")}>Salary Summary</button>
       </div>
 
-      {/* ================= FEES SUMMARY ================= */}
       {activeSummary === "fees" && (
-        <div className="section-card pop">
-          <h3 className="section-title">Fees Summary</h3>
-
-          <table className="nice-table">
-            <thead>
-              <tr>
-                <th>Class</th>
-                <th>Fee Name</th>
-                <th>Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(groupedFees).map(([cls, items]) =>
-                items.map((item, index) => (
-                  <tr key={item.id}>
-                    {index === 0 && <td rowSpan={items.length}>{cls}</td>}
-                    <td>{item.name}</td>
-                    <td>₹{item.amount}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <table className="nice-table">
+          <thead><tr><th>Class</th><th>Fee</th><th>Amount</th></tr></thead>
+          <tbody>
+            {Object.entries(groupedFees).map(([cls, items]) =>
+              items.map((i, idx) => (
+                <tr key={i.id}>
+                  {idx === 0 && <td rowSpan={items.length}>{cls}</td>}
+                  <td>{i.name}</td>
+                  <td>₹{i.amount}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       )}
 
-      {/* ================= SALARY SUMMARY ================= */}
       {activeSummary === "salary" && (
-        <div className="section-card pop">
-          <h3 className="section-title">Salary Summary</h3>
-
-          <table className="nice-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Amount</th>
-                <th>Date</th>
+        <table className="nice-table">
+          <thead><tr><th>Name</th><th>Amount</th><th>Date</th></tr></thead>
+          <tbody>
+            {salaryData.map(i => (
+              <tr key={i.id}>
+                <td>{i.name}</td>
+                <td>₹{i.amount}</td>
+                <td>{i.date}</td>
               </tr>
-            </thead>
-            <tbody>
-              {salaryData.map(item => (
-                <tr key={item.id}>
-                  <td>{item.name}</td>
-                  <td>₹{item.amount}</td>
-                  <td>{item.date}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       )}
 
     </div>
