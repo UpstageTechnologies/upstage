@@ -107,31 +107,18 @@ export default function ApplicationList({ requirePremium }) {
   return (
     <div className="appList-wrapper">
 
-<<<<<<< HEAD
 <h2 className="teacher-header app-title-bar">
   <span className="app-title-text">Application Submissions</span>
   <img src={bookImg} style={{width:"100px"}}alt="Applications" className="header-book-img" />
 </h2>
 
-=======
-      <h2 className="teacher-header">Application Submissions     <img
-      src={bookImg}
-      alt="Applications"
-      className="header-book-img"
-      style={{width:"100px"}}
-    /></h2>
->>>>>>> origin/main
    
 
 
       {/* ============ PENDING LIST ============ */}
       <div className="appList-grid">
         {pending.length === 0 && (
-<<<<<<< HEAD
           <p style={{ opacity: 0.8 ,color:"#52c3f7"}}>No pending applications</p>
-=======
-          <p style={{ opacity: 0.8 ,color:"#042cf8ff"}}>No pending applications</p>
->>>>>>> origin/main
         )}
 
         {pending.map(app => (
