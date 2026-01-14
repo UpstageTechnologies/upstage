@@ -29,6 +29,31 @@ const [showClassDropdown, setShowClassDropdown] = useState(false);
 const [showExpenseType, setShowExpenseType] = useState(false);
 const [showSalaryRole, setShowSalaryRole] = useState(false);
 const [showSalaryPosition, setShowSalaryPosition] = useState(false);
+// salary
+const [salaryRole, setSalaryRole] = useState("");          
+const [salaryPosition, setSalaryPosition] = useState("");
+
+
+// ===== Searchable dropdown =====
+const categories = ["Office Staff", "Working Staff"];
+
+const positions = {
+  "Office Staff": ["Principal","Clerk","Accountant","Receptionist","Office Assistant"],
+  "Working Staff": ["Teacher","Driver","Cleaner","Watchman","Helper"]
+};
+
+const [categorySearch, setCategorySearch] = useState("");
+const [positionSearch, setPositionSearch] = useState("");
+
+const filteredCategories = categories.filter(c =>
+  c.toLowerCase().includes(categorySearch.toLowerCase())
+);
+
+const filteredPositions = (positions[salaryRole] || []).filter(p =>
+  p.toLowerCase().includes(positionSearch.toLowerCase())
+);
+
+
 
 const [newStudentSearch, setNewStudentSearch] = useState("");
 const [showNewStudentDropdown, setShowNewStudentDropdown] = useState(false);
@@ -41,16 +66,23 @@ const [teachers, setTeachers] = useState([]);
 const [teacherSearch, setTeacherSearch] = useState("");
 const [showTeacherDropdown, setShowTeacherDropdown] = useState(false);
 
-const teachersRef = collection(db, "users", adminUid, "teachers");
+useEffect(() => {
+  if (!adminUid) return;
 
-onSnapshot(teachersRef, snap => {
-  setTeachers(
-    snap.docs.map(d => ({
-      id: d.id,
-      ...d.data()
-    }))
-  );
-});
+  const teachersRef = collection(db, "users", adminUid, "teachers");
+
+  const unsub = onSnapshot(teachersRef, snap => {
+    setTeachers(
+      snap.docs.map(d => ({
+        id: d.id,
+        ...d.data()
+      }))
+    );
+  });
+
+  return () => unsub();   // 🔥 very important
+}, [adminUid]);
+
 
 
 
@@ -129,8 +161,12 @@ const [incomeType, setIncomeType] = useState("");
   selectedNewStudent &&
   !incomeList.some(i => i.studentId === selectedNewStudent.id);
 
+// Full payment only (not Term1/2/3)
+const isFullPayment = newPayType === "full";
+
 const discount =
-  newPayType === "full" && isFirstPayment ? newTotal * 0.05 : 0;
+  isFullPayment && isFirstPayment ? newTotal * 0.05 : 0;
+
 
   const [oldClass, setOldClass] = useState("");
   const [oldStudent, setOldStudent] = useState("");
@@ -138,13 +174,21 @@ const discount =
   const [oldTotal, setOldTotal] = useState(0);
   const [oldPayType, setOldPayType] = useState("");
   const [oldPayAmount, setOldPayAmount] = useState("");
+  const paymentTypes = ["Full", "Partial", "Term 1", "Term 2", "Term 3"];
+
+const [paymentType, setPaymentType] = useState("");
+const [paymentSearch, setPaymentSearch] = useState("");
+const [showPaymentDD, setShowPaymentDD] = useState(false);
+
+const filteredPaymentTypes = paymentTypes.filter(p =>
+  p.toLowerCase().includes(paymentSearch.toLowerCase())
+);
+
 
   // EXPENSE
   const [expenseMode, setExpenseMode] = useState("");
 
-  // salary
-  const [salaryRole, setSalaryRole] = useState("");          // office | working
-  const [salaryPosition, setSalaryPosition] = useState("");  // Principal / Teacher …
+  
   const [selName, setSelName] = useState("");                // typed person name
   const [manualSalary, setManualSalary] = useState("");
 
@@ -222,29 +266,34 @@ const parentsRef = collection(db, "users", adminUid, "parents");
 const filteredTeachers = teachers.filter(t =>
   t.name?.toLowerCase().includes(teacherSearch.toLowerCase())
 );
-
-
-
-  useEffect(() => {
+useEffect(() => {
   if (!adminUid) return;
 
-  onSnapshot(incomesRef, s => {
+  const unsubIncome = onSnapshot(incomesRef, s => {
     setIncomeList(s.docs.map(d => ({ id: d.id, ...d.data() })));
     setIncomeLoaded(true);
   });
-  
-  onSnapshot(expensesRef, s => {
+
+  const unsubExpense = onSnapshot(expensesRef, s => {
     setExpenseList(s.docs.map(d => ({ id: d.id, ...d.data() })));
     setExpenseLoaded(true);
   });
 
-  onSnapshot(studentsRef, s =>
-    setStudents(s.docs.map(d => ({ id: d.id, ...d.data() })))
-  );
+  const unsubStudents = onSnapshot(studentsRef, s => {
+    setStudents(s.docs.map(d => ({ id: d.id, ...d.data() })));
+  });
 
-  onSnapshot(feesRef, s =>
-    setFeesMaster(s.docs.map(d => ({ id: d.id, ...d.data() })))
-  );
+  const unsubFees = onSnapshot(feesRef, s => {
+    setFeesMaster(s.docs.map(d => ({ id: d.id, ...d.data() })));
+  });
+
+  // 🔥 VERY IMPORTANT
+  return () => {
+    unsubIncome();
+    unsubExpense();
+    unsubStudents();
+    unsubFees();
+  };
 }, [adminUid]);
 
   
@@ -328,22 +377,37 @@ const alreadyPaid = incomeList.some(i =>
     const total = getClassTotal(newClass);
   
     let discount = 0;
-  
-    // 5% discount only if FULL at first payment
-    if (newPayType === "full") {
+
+    const isFirstPayment =
+      selectedNewStudent &&
+      !incomeList.some(i => i.studentId === selectedNewStudent.id);
+    
+    if (newPayType === "full" && isFirstPayment) {
       discount = total * 0.05;
     }
+    
   
     const payable = total - discount;
   
     let final = 0;
-  
+
+    const isPartialLike =
+      newPayType === "partial" ||
+      newPayType === "term1" ||
+      newPayType === "term2" ||
+      newPayType === "term3";
+    
+    // FULL payment
     if (newPayType === "full") {
-      final = payable;          // pay full discounted amount
-    } else {
+      final = payable;
+    }
+    
+    // PARTIAL / TERM1 / TERM2 / TERM3
+    if (isPartialLike) {
       if (!newPayAmount) return alert("Enter amount");
       final = Number(newPayAmount);
     }
+    
   
     if (final > payable) {
       return alert("Cannot pay more than payable amount");
@@ -463,7 +527,24 @@ const alreadyPaid = incomeList.some(i =>
     setOldPayType("");
     setOldPayAmount("");
     setOldTotal(0);
+    setPaymentType("");
+setPaymentSearch("");
+setShowPaymentDD(false);
+
   };
+  const selectedDate = entryDate;   // 👈 whatever date user selected
+
+const todayIncome = incomeList
+  .filter(i => i.date === selectedDate)
+  .reduce((t, i) => t + Number(i.paidAmount || 0), 0);
+
+const todayExpense = expenseList
+  .filter(e => e.date === selectedDate)
+  .reduce((t, e) => t + Number(e.amount || 0), 0);
+
+const todayProfit = todayIncome - todayExpense;
+
+
   
   
 
@@ -502,6 +583,7 @@ const alreadyPaid = incomeList.some(i =>
 
     setSalaryRole("");setSalaryPosition("");setSelName("");setManualSalary("");
   };
+  
 
   /* ---------- FEE MASTER ---------- */
   const saveFee = async ()=>{
@@ -538,7 +620,7 @@ if (activePage && activePage.startsWith("bill_")) {
   return (
     
     
-    <div className="accounts-wrapper fade-in">
+    <>
        <span
         style={{ color: "#2140df", cursor: "pointer", fontWeight: 600 }}
         onClick={() => setActivePage("accounts")}
@@ -548,47 +630,51 @@ if (activePage && activePage.startsWith("bill_")) {
       
       
 
-      {!isOfficeStaff && (
-  <div>
-    {/* ================= TOP SUMMARY ================= */}
-    <h2 className="page-title">Accounts Dashboard</h2>
+      
+      <h2 className="page-title">Accounts Dashboard</h2>
 
-    <div className="stats-grid">
+      <div className="today-summary">
 
-      <div className="info-card1">
-        <div className="label">Total Income</div>
-        <div className="value">
-          ₹{totalIncome.toLocaleString("en-IN")}
-        </div>
-      </div>
+      <div
+  className="today-card blue"
+  style={{ padding: "14px 20px", minHeight: "90px" }}
+>
 
-      <div className="info-card2">
-        <div className="label">Total Expenses</div>
-        <div className="value">
-          ₹{totalExpense.toLocaleString("en-IN")}
-        </div>
-      </div>
+    <span>Today Income</span>
+    <h2 style={{ fontSize: "22px", marginTop: "4px" }}>
+  ₹{todayIncome.toLocaleString("en-IN")}
+</h2>
 
-      <div className="info-card3">
-        <div className="label">Profit</div>
-        <div
-          className="value"
-          style={{ color: profit >= 0 ? "green" : "red" }}
-        >
-          ₹{profit.toLocaleString("en-IN")}
-        </div>
-      </div>
-
-    </div>
   </div>
-)}
+  <div
+  className="today-card yellow"
+  style={{ padding: "14px 20px", minHeight: "90px" }}
+> 
+
+    <span>Today Expense</span>
+    <h2>₹{todayExpense.toLocaleString("en-IN")}</h2>
+  </div>
+
+  <div
+  className="today-card green"
+  style={{ padding: "14px 20px", minHeight: "90px" }}
+>
+
+    <span>Today Profit</span>
+    <h2>₹{todayProfit.toLocaleString("en-IN")}</h2>
+  </div>
+
+</div>
+
+    
 
 
 
+<div 
+  className="section-card pop entries-card"
+  style={{ marginTop: "40px" }}   // 👈 gap
+>
 
-
-      <div className="section-card pop entries-card">
-   
   <h3 className="section-title">Entries</h3>
   <div className="entries-box">
 
@@ -709,10 +795,19 @@ if (activePage && activePage.startsWith("bill_")) {
             </div>
     
             <div
-              onClick={() => {
-                setStudentMode("old");
-                setShowStudentType(false);
-              }}
+             onClick={() => {
+              setStudentMode("old");
+              setShowStudentType(false);
+            
+              // 🔥 RESET old admission states
+              setOldPayType("");
+              setOldPayAmount("");
+              setOldClass("");
+              setOldStudent("");
+              setOldParent("");
+              setOldTotal(0);
+            }}
+            
             >
               Old Admission
             </div>
@@ -802,24 +897,56 @@ if (activePage && activePage.startsWith("bill_")) {
 
         <input readOnly value={newTotal ? `Total ₹${newTotal}` : ""} />
 
-        <select value={newPayType} onChange={e => setNewPayType(e.target.value)}>
-          <option value="">Payment Type</option>
-          <option value="full">Full (5% OFF)</option>
-          <option value="partial">Partial</option>
-        </select>
+        <div className="student-dropdown">
+  <input
+    placeholder="Select Payment Type"
+    value={paymentType || paymentSearch}
+    onChange={e => {
+      setPaymentSearch(e.target.value);
+      setPaymentType("");
+      setShowPaymentDD(true);
+    }}
+    onFocus={() => setShowPaymentDD(true)}
+  />
 
-        {newPayType === "full" && (
-         <input readOnly value={`Payable ₹${newTotal - discount}`} />
-        )}
+  {showPaymentDD && (
+    <div className="student-dropdown-list">
+      {filteredPaymentTypes.map(type => (
+        <div
+          key={type}
+          className="student-option"
+          onClick={() => {
+            setPaymentType(type);
+            setNewPayType(type.toLowerCase().replace(" ", "")); 
+            setPaymentSearch("");
+            setShowPaymentDD(false);
+          }}
+          
+        >
+          {type}
+        </div>
+      ))}
 
-        {newPayType === "partial" && (
-          <input
-            type="number"
-            placeholder="Enter Amount"
-            value={newPayAmount}
-            onChange={e => setNewPayAmount(e.target.value)}
-          />
-        )}
+      {filteredPaymentTypes.length === 0 && (
+        <div className="student-option muted">No result</div>
+      )}
+    </div>
+  )}
+</div>
+
+{isFullPayment && (
+  <input readOnly value={`Payable ₹${newTotal - discount}`} />
+)}
+
+{["partial","term1","term2","term3"].includes(newPayType) && (
+  <input
+    type="number"
+    placeholder="Enter Amount"
+    value={newPayAmount}
+    onChange={e => setNewPayAmount(e.target.value)}
+  />
+)}
+
 
         <button className="save-btn" onClick={() => safeRequirePremium(saveNewAdmission, "income")}>
           Save
@@ -890,9 +1017,10 @@ if (activePage && activePage.startsWith("bill_")) {
               setSelectedStudentName(s.studentName);
               setOldParent(s.parentName || "");
               setStudentSearch("");
-              setOldClass(s.class);              
+              setOldClass(s.class);
+              setOldTotal(getClassTotal(s.class));   // 🔥 THIS LINE
               setShowStudentDropdown(false);
-            }}
+            }}            
           >
             <strong>{s.studentName}</strong>
             <span>Class {s.class}</span>
@@ -906,11 +1034,40 @@ if (activePage && activePage.startsWith("bill_")) {
     <input readOnly value={oldParent ? `Parent: ${oldParent}` : ""} />
     <input readOnly value={oldTotal ? `Total ₹${oldTotal}` : ""} />
 
-    <select value={oldPayType} onChange={e => setOldPayType(e.target.value)}>
-      <option value="">Payment Type</option>
-      <option value="full">Full (5% OFF)</option>
-      <option value="partial">Partial</option>
-    </select>
+    <div className="student-dropdown">
+  <input
+    placeholder="Select Payment Type"
+    value={paymentType || paymentSearch}
+    onChange={e => {
+      setPaymentSearch(e.target.value);
+      setPaymentType("");
+      setShowPaymentDD(true);
+    }}
+    onFocus={() => setShowPaymentDD(true)}
+  />
+
+  {showPaymentDD && (
+    <div className="student-dropdown-list">
+      {["Full","Partial"].filter(p =>
+        p.toLowerCase().includes(paymentSearch.toLowerCase())
+      ).map(type => (
+        <div
+          key={type}
+          className="student-option"
+          onClick={() => {
+            setPaymentType(type);
+            setOldPayType(type.toLowerCase());
+            setPaymentSearch("");
+            setShowPaymentDD(false);
+          }}
+        >
+          {type}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
 
     {oldPayType === "full" && (
       <input readOnly value={`Payable ₹${(oldTotal - oldTotal * 0.05).toFixed(0)}`} />
@@ -935,9 +1092,7 @@ if (activePage && activePage.startsWith("bill_")) {
   return (
     <>
       <input readOnly value={`Balance ₹${balance}`} />
-      <input readOnly value={`Term 1 ₹${term}`} />
-      <input readOnly value={`Term 2 ₹${term}`} />
-      <input readOnly value={`Term 3 ₹${balance - term * 2}`} />
+    
     </>
   );
 })()}
@@ -984,77 +1139,81 @@ if (activePage && activePage.startsWith("bill_")) {
   {expenseMode === "salary" && (
   <>
     <div className="entry-row">
-    <div className="popup-select">
-  <div
-    className="popup-input"
-    onClick={() => setShowSalaryCategory(!showSalaryCategory)}
-  >
-    {salaryRole || "Category"}
-    <span>▾</span>
-  </div>
+  {/* CATEGORY */}
+<div className="student-dropdown">
+  <input
+    placeholder="Select Category"
+    value={salaryRole || categorySearch}
+    onChange={e=>{
+      setCategorySearch(e.target.value);
+      setSalaryRole("");
+      setShowSalaryCategory(true);
+    }}
+    onFocus={()=>setShowSalaryCategory(true)}
+  />
 
   {showSalaryCategory && (
-    <div className="popup-menu">
-      <div
-        onClick={() => {
-          setSalaryRole("office");
-          setSalaryPosition("");
-          setShowSalaryCategory(false);
-        }}
-      >
-        Office Staff
-      </div>
-
-      <div
-        onClick={() => {
-          setSalaryRole("working");
-          setSalaryPosition("");
-          setShowSalaryCategory(false);
-        }}
-      >
-        Working Staff
-      </div>
+    <div className="student-dropdown-list">
+      {filteredCategories.map(cat => (
+        <div
+          key={cat}
+          className="student-option"
+          onClick={()=>{
+            setSalaryRole(cat);
+            setCategorySearch("");
+            setShowSalaryCategory(false);
+            setSalaryPosition("");      // reset position
+            setPositionSearch("");
+          }}
+        >
+          {cat}
+        </div>
+      ))}
     </div>
   )}
 </div>
+
 
 
       {/* Position */}
-      <div className="popup-select">
-  <div
-    className="popup-input"
-    onClick={() => salaryRole && setShowSalaryPositionDD(!showSalaryPositionDD)}
-  >
-    {salaryPosition || "Position"}
-    <span>▾</span>
-  </div>
+      <div className="student-dropdown">
+  <input
+    placeholder="Select Position"
+    value={salaryPosition || positionSearch}
+    onChange={e => {
+      setPositionSearch(e.target.value);
+      setSalaryPosition("");
+      setShowSalaryPositionDD(true);
+    }}
+    onFocus={() => salaryRole && setShowSalaryPositionDD(true)}
+    disabled={!salaryRole}
+  />
 
   {showSalaryPositionDD && (
-    <div className="popup-menu">
+    <div className="student-dropdown-list">
+      {filteredPositions.map(pos => (
+        <div
+          key={pos}
+          className="student-option"
+          onClick={() => {
+            setSalaryPosition(pos);
+            setPositionSearch("");
+            setShowSalaryPositionDD(false);
+          }}
+        >
+          {pos}
+        </div>
+      ))}
 
-      {salaryRole === "office" && (
-        <>
-          <div onClick={() => { setSalaryPosition("Principal"); setShowSalaryPositionDD(false); }}>Principal</div>
-          <div onClick={() => { setSalaryPosition("Clerk"); setShowSalaryPositionDD(false); }}>Clerk</div>
-          <div onClick={() => { setSalaryPosition("Accountant"); setShowSalaryPositionDD(false); }}>Accountant</div>
-          <div onClick={() => { setSalaryPosition("Receptionist"); setShowSalaryPositionDD(false); }}>Receptionist</div>
-          <div onClick={() => { setSalaryPosition("Office Assistant"); setShowSalaryPositionDD(false); }}>Office Assistant</div>
-        </>
+      {filteredPositions.length === 0 && (
+        <div className="student-option muted">
+          No positions found
+        </div>
       )}
-
-      {salaryRole === "working" && (
-        <>
-          <div onClick={() => { setSalaryPosition("Teacher"); setShowSalaryPositionDD(false); }}>Teacher</div>
-          <div onClick={() => { setSalaryPosition("Driver"); setShowSalaryPositionDD(false); }}>Driver</div>
-          <div onClick={() => { setSalaryPosition("Cleaner"); setShowSalaryPositionDD(false); }}>Cleaner</div>
-          <div onClick={() => { setSalaryPosition("Watchman"); setShowSalaryPositionDD(false); }}>Watchman</div>
-          <div onClick={() => { setSalaryPosition("Helper"); setShowSalaryPositionDD(false); }}>Helper</div>
-        </>
-      )}
-
     </div>
   )}
 </div>
+
 
 
       {/* Name */}
@@ -1327,6 +1486,6 @@ Save Fee</button>
 </div>
         </div>
         </div>
-      </div>
+      </>
   );
 }

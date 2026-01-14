@@ -68,7 +68,7 @@ import UpgradePopup from "../../components/UpgradePopup";
     const [upgradeDisabled, setUpgradeDisabled] = useState(false);
 
 
-    const [menuOpen, setMenuOpen] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(true);
     const [accountMenuOpen, setAccountMenuOpen] = useState(false);
     const [activePage, setActivePage] = useState("home");
     const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -305,7 +305,7 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
         <ul>
   {/* ================= OFFICE STAFF ================= */}
   {isOfficeStaff && (
-    <li onClick={() => setActivePage("accounts")}>
+    <li className={activePage === "accounts" ? "active" : ""} onClick={() => setActivePage("accounts")}>
       <FaMoneyBillWave /> Accounts
     </li>
   )}
@@ -313,12 +313,12 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
   {/* ================= MASTER / ADMIN ================= */}
   {!isOfficeStaff && (
     <>
-      <li onClick={() => setActivePage("home")}>
+      <li className={activePage === "home" ? "active" : ""} onClick={() => setActivePage("home")}>
         <FaHome /> Home
       </li>
 
       {role === "master" && (
-        <li onClick={() => navigate("/payment")}>
+        <li className={activePage === "payment" ? "active" : ""}onClick={() => navigate("/payment")}>
           <FaSignOutAlt /> Upgrade
         </li>
       )}
@@ -342,7 +342,7 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
         role === "admin"
       ) && (
         <>
-          <li
+          <li 
             className="account-main"
             onClick={() => setAccountMenuOpen(!accountMenuOpen)}
           >
@@ -353,35 +353,35 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
           {accountMenuOpen && (
             <ul className="account-submenu">
               {role === "master" && (
-                <li onClick={() => { setActivePage("admin"); setAccountMenuOpen(false); }}>
+                <li onClick={() => { setActivePage("admin"); setAccountMenuOpen(false); }} className={activePage === "admin" ? "active" : ""}>
                   Admin
                 </li>
               )}
-              <li onClick={() => { setActivePage("teacher"); setAccountMenuOpen(false); }}>
+              <li onClick={() => { setActivePage("teacher"); setAccountMenuOpen(false); }}className={activePage === "teacher" ? "active" : ""}>
                 Teacher
               </li>
-              <li onClick={() => { setActivePage("parent"); setAccountMenuOpen(false); }}>
+              <li onClick={() => { setActivePage("parent"); setAccountMenuOpen(false); }}className={activePage === "parent" ? "active" : ""}>
                 Parent
               </li>
-              <li onClick={() => { setActivePage("student"); setAccountMenuOpen(false); }}>
+              <li onClick={() => { setActivePage("student"); setAccountMenuOpen(false); }}className={activePage === "student" ? "active" : ""}>
                 Student
               </li>
-              <li onClick={() => { setActivePage("office_staff"); setAccountMenuOpen(false); }}>
+              <li onClick={() => { setActivePage("office_staff"); setAccountMenuOpen(false); }}className={activePage === "office_staff" ? "active" : ""}>
                 Staff
               </li>
             </ul>
           )}
 
-          <li onClick={() => setActivePage("accounts")}>
+          <li className={activePage === "accounts" ? "active" : ""} onClick={() => setActivePage("accounts")}>
             <FaMoneyBillWave /> Accounts
           </li>
 
-          <li onClick={() => setActivePage("timetable")}>
+          <li className={activePage === "timetable" ? "active" : ""}onClick={() => setActivePage("timetable")}>
             <FaCalendarAlt /> Timetable
           </li>
 
           {role === "admin" && (
-            <li onClick={() => setActivePage("attendance")}>
+            <li className={activePage === "attendance" ? "active" : ""} onClick={() => setActivePage("attendance")}>
               <FaUserCheck /> Teacher Attendance
             </li>
           )}
@@ -390,13 +390,13 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
                 {(role === "teacher" || role === "parent" || viewAs === "parent") && (
 
               <>
-              <li onClick={() => setActivePage("studentDetails")}>
+              <li className={activePage === "studentDetails" ? "active" : ""}onClick={() => setActivePage("studentDetails")}>
                 <FaUserGraduate /> Student Details
               </li>
-              <li onClick={() => setActivePage("teacher-timetable")}>
+              <li className={activePage === "teacher-timetable" ? "active" : ""} onClick={() => setActivePage("teacher-timetable")}>
               <FaCalendarAlt/> Teacher Timetable
             </li>
-            <li onClick={() => setActivePage("teacher-attendance")}>
+            <li className={activePage === "teacher-attendance" ? "active" : ""}onClick={() => setActivePage("teacher-attendance")}>
             <FaUserCheck/>Teacher Timetable
             </li>
             </>
@@ -425,17 +425,17 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
 
 
       {role === "master" && (
-        <li onClick={() => setActivePage("approvals")}>
+        <li className={activePage === "approvals" ? "active" : ""} onClick={() => setActivePage("approvals")}>
           <FaClipboardCheck /> Approvals
         </li>
       )}
 
-      <li onClick={() => setActivePage("courses")}>
+      <li className={activePage === "courses" ? "active" : ""}onClick={() => setActivePage("courses")}>
         <FaBookOpen /> Courses
       </li>
 
       {role === "master" && (
-        <li onClick={() => setActivePage("applications")}>
+        <li className={activePage === "applications" ? "active" : ""}onClick={() => setActivePage("applications")}>
           <FaWpforms /> Applications
         </li>
       )}

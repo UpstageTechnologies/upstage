@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../../../services/firebase";
-import "../../dashboard_styles/Accounts.css";
+
 import "../../dashboard_styles/ac.css";
 
 export default function ExpensesPage({ adminUid, setActivePage }) {
@@ -12,6 +12,18 @@ export default function ExpensesPage({ adminUid, setActivePage }) {
   const today = new Date().toISOString().split("T")[0];
   const role = localStorage.getItem("role");
   const isOfficeStaff = role === "office_staff";
+  const normalizeDate = (d) => {
+    if (!d) return null;
+  
+    // Firestore Timestamp
+    if (d.toDate) {
+      return d.toDate().toISOString().slice(0, 10);
+    }
+  
+    // Already string
+    return d;
+  };
+  
 
   /* 🔥 FIREBASE */
   useEffect(() => {
@@ -29,50 +41,84 @@ export default function ExpensesPage({ adminUid, setActivePage }) {
       snap => setExpenseList(snap.docs.map(d => d.data()))
     );
   }, [adminUid]);
+  
+// FEES = student income only
+const totalFees = incomeList
+  .filter(i => i.studentId)
+  .reduce((s, i) => s + Number(i.paidAmount || 0), 0);
 
-  /* 🔢 TOTAL */
-  const totalIncome = incomeList.reduce((s, i) => s + Number(i.paidAmount || 0), 0);
-  const totalExpense = expenseList.reduce((s, e) => s + Number(e.amount || 0), 0);
-  const profit = totalIncome - totalExpense;
+// OTHER income (Source)
+const otherIncome = incomeList
+  .filter(i => !i.studentId)
+  .reduce((s, i) => s + Number(i.paidAmount || 0), 0);
 
-  /* 📅 TODAY */
-  const todayIncome = incomeList.filter(i => i.date === today).reduce((s, i) => s + Number(i.paidAmount || 0), 0);
-  const todayExpense = expenseList.filter(e => e.date === today).reduce((s, e) => s + Number(e.amount || 0), 0);
-  const todayProfit = todayIncome - todayExpense;
+// TOTAL income
+const totalIncome = totalFees + otherIncome;
+
+// TOTAL expense
+const totalExpense = expenseList.reduce(
+  (s, e) => s + Number(e.amount || 0), 0
+);
+
+// PROFIT
+const profit = totalIncome - totalExpense;
+
+
+
+
+
+
+  /// Today Income (fees + source)
+const todayIncome = incomeList
+.filter(i => i.date === today)
+.reduce((s, i) => s + Number(i.paidAmount || 0), 0);
+
+// Today Expense
+const todayExpense = expenseList
+.filter(e => e.date === today)
+.reduce((s, e) => s + Number(e.amount || 0), 0);
+
+// Today Profit
+const todayProfit = todayIncome - todayExpense;
+
 
   const max = Math.max(totalIncome, totalExpense, Math.abs(profit), 1);
 
-  /* 📊 MONTHLY PROFIT */
   const monthlyProfit = (() => {
     const map = {};
-
+  
     incomeList.forEach(i => {
       if (!i.date) return;
-      const m = i.date.slice(0, 7);
+      const m = i.date.slice(0,7);
       map[m] = map[m] || { income: 0, expense: 0 };
       map[m].income += Number(i.paidAmount || 0);
     });
-
+    
+    
+    
+    
+  
     expenseList.forEach(e => {
       if (!e.date) return;
       const m = e.date.slice(0, 7);
       map[m] = map[m] || { income: 0, expense: 0 };
       map[m].expense += Number(e.amount || 0);
     });
-
+  
     return Object.keys(map).sort().map(m => ({
       month: m,
       profit: map[m].income - map[m].expense
     }));
   })();
+  
 
   return (
-    <div className="accounts-wrapper">
-
+    <>
       {!isOfficeStaff && (
         <>
-        {/* ================= ACCOUNTS SUMMARY LAYOUT ================= */}
-<div className="summary-layout">
+  <div className="summary-scroll">
+  <div className="summary-layout">
+
 
 {/* ---------- LEFT SIDE : MONTHLY PROFIT FLOW ---------- */}
 <div className="summary-left">
@@ -127,6 +173,18 @@ export default function ExpensesPage({ adminUid, setActivePage }) {
   <div className="summary-title">Overall Accounts</div>
 
   <div className="summary2-cards">
+    {/* Fees Income */}
+<div className="summary2-card">
+  <div className="summary2-top">
+    ₹{totalFees.toLocaleString("en-IN")}
+  </div>
+  <div className="summary2-fill fill-purple" />
+  <div className="summary2-content">
+    <i className="fa fa-graduation-cap"></i>
+    <span>Fees Income</span>
+  </div>
+</div>
+
 
     {/* Income */}
     <div className="summary2-card">
@@ -141,7 +199,8 @@ export default function ExpensesPage({ adminUid, setActivePage }) {
     {/* Expense */}
     <div className="summary2-card">
       <div className="summary2-top">₹{totalExpense.toLocaleString("en-IN")}</div>
-      <div className="summary2-fill fill-yellow" />
+      <div className="summary2-fill fill-red" />
+
       <div className="summary2-content">
         <i className="fa fa-arrow-down"></i>
         <span>Total Expense</span>
@@ -162,8 +221,29 @@ export default function ExpensesPage({ adminUid, setActivePage }) {
 </div>
 
 </div>
+</div>
 </>
       )}
+      {/* ===== TODAY SUMMARY ===== */}
+<div className="today-summary">
+
+<div className="today-card blue">
+  <span>Today Income</span>
+  <h2>₹{todayIncome.toLocaleString("en-IN")}</h2>
+</div>
+
+<div className="today-card yellow">
+  <span>Today Expense</span>
+  <h2>₹{todayExpense.toLocaleString("en-IN")}</h2>
+</div>
+
+<div className="today-card green">
+  <span>Today Profit</span>
+  <h2>₹{todayProfit.toLocaleString("en-IN")}</h2>
+</div>
+
+</div>
+
 
       {/* NAV */}
       <div className="accounts-grid">
@@ -177,6 +257,6 @@ export default function ExpensesPage({ adminUid, setActivePage }) {
         )}
       </div>
 
-    </div>
+    </>
   );
 }

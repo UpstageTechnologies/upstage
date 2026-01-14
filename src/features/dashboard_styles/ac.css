@@ -1,23 +1,26 @@
-/* ================= ROOT THEME ================= */
 :root{
-    --bg:#f4f7fb;
-    --card:#ffffff;
-    --border:#e6ecf3;
-    --text:#0f172a;
-    --muted:#6b7280;
-  
-    --blue:#3b9df8;
-    --yellow:#fbbf24;
-    --green:#22c55e;
-  }
-  
-  /* ================= PAGE ================= */
-  .accounts-wrapper{
-    background: linear-gradient(180deg,#f7faff,#eef3f9);
-    min-height:100vh;
-    padding:32px;
-  }
-  
+  --bg:#f4f7fb;
+  --card:#ffffff;
+  --border:#e6ecf3;
+  --text:#0f172a;
+  --muted:#6b7280;
+
+  --blue:#3b9df8;
+  --yellow:#fbbf24;
+  --green:#22c55e;
+
+  --radius: clamp(12px, 2vw, 20px);
+  --pad: clamp(12px, 2vw, 32px);
+}
+.accounts-wrapper{
+  background: linear-gradient(180deg,#f7faff,#eef3f9);
+  min-height:100vh;
+  padding: var(--pad);
+  max-width: 1600px;
+  margin: auto;
+  overflow-x: visible;
+}
+
   /* ================= TITLE ================= */
   .page-title{
     font-size:28px;
@@ -25,14 +28,13 @@
     margin-bottom:24px;
     color:var(--text);
   }
-  
-  /* ================= TOP TOTAL CARDS ================= */
   .stats-grid{
     display:grid;
-    grid-template-columns:repeat(3,1fr);
+    grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
     gap:24px;
     margin-bottom:30px;
   }
+  
   .info-card1,.info-card2,.info-card3{
     background:white;
     border-radius:20px;
@@ -42,11 +44,15 @@
   .label{color:var(--muted);}
   .value{font-size:32px;font-weight:800;}
   
-  /* ================= MAIN SUMMARY LAYOUT ================= */
   .summary-layout{
-    display:flex;
+    display:grid;
+    grid-template-columns: 1fr 1.2fr;
     gap:30px;
-    margin-top:20px;
+  }
+  @media(max-width:1024px){
+    .summary-layout{
+      grid-template-columns:1fr;
+    }
   }
   
   /* ================= LEFT (MONTHLY FLOW) ================= */
@@ -68,27 +74,48 @@
   }
   .attendance-panel h1{font-size:32px;}
   
-  /* monthly flow */
-  .monthly-flow2{
-    position:relative;
-    height:160px;
-    margin-top:auto;
+  .monthly-flow2 {
+    position: relative;
+    width: 100%;
+    overflow-x: auto;        /* 👈 horizontal scroll */
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding-bottom: 10px;
   }
+  
   .trend-line{
     position:absolute;
     inset:0;
     width:100%;
     height:100%;
   }
+  /* FLOW BUBBLE TEXT */
+.flow-item{
+  font-size: clamp(11px, 2.5vw, 14px);   /* desktop → mobile */
+  line-height: 1.2;
+  padding: clamp(8px, 2vw, 14px);
+  min-width: clamp(90px, 22vw, 140px);
+}
+
+/* Amount inside bubble */
+.flow-item b{
+  display:block;
+  font-size: clamp(13px, 3vw, 16px);
+}
+
   .flow-item{
     position:absolute;
-    width:140px;
-    padding:16px;
+    width: clamp(90px, 15vw, 140px);
+    padding: clamp(10px, 2vw, 16px);
     border-radius:14px;
     color:white;
     text-align:center;
     font-weight:700;
+    display: inline-block;
+    min-width: 160px;
+    margin-right: 20px;
   }
+  
   .flow-item.green{background:#22c55e;}
   .flow-item.orange{background:#fbbf24;}
   
@@ -111,11 +138,12 @@
   }
   
   .summary2-cards{
-    display:flex;
-    gap:25px;
-    flex-wrap:wrap;
-    justify-content:center;
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px,1fr));
+    gap:20px;
+    width:100%;
   }
+  
   
   /* pill */
   .summary2-card{
@@ -127,22 +155,43 @@
     overflow:hidden;
   }
   .summary2-top{
-    height:35%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:26px;
-    font-weight:800;
+    font-size: clamp(15px, 3.5vw, 24px);
+    font-weight: 800;
+    line-height: 1.1;
+    text-align: center;
+    padding: 6px;
+    word-break: break-word;
+    letter-spacing: -0.5px;
   }
+  
+
   .summary2-fill{
     position:absolute;
     bottom:0;
     width:100%;
     height:65%;
   }
-  .fill-blue{background:#3b9df8;}
-  .fill-yellow{background:#fbbf24;}
-  .fill-green{background:#22c55e;}
+  .fill-blue{
+    background: linear-gradient(180deg, #7dbbff, #3b9df8);
+  }
+  
+  .fill-yellow{
+    background: linear-gradient(180deg, #ffe58a, #fbbf24);
+  }
+  
+  .fill-green{
+    background: linear-gradient(180deg, #6ee7b7, #22c55e);
+  }
+  
+  .fill-red{
+    background: linear-gradient(180deg, #ff9a9a, #ef4444);
+  }
+  
+  .fill-purple{
+    background: linear-gradient(180deg, #ffe58a, #fbbf24); /* Fees = Yellow */
+  }
+  
+  
   
   .summary2-content{
     position:absolute;
@@ -181,30 +230,363 @@
     }
   }
   
-  /* Mobile */
-  @media (max-width: 600px){
-    .accounts-wrapper{padding:16px;}
   
-    .stats-grid{
-      grid-template-columns:1fr;
-    }
-  
-    .summary2-card{
-      width:100px;
-      height:220px;
-    }
-  
-    .summary2-top{
-      font-size:22px;
-    }
-  
-    .accounts-grid{
-      grid-template-columns:repeat(2,1fr);
-    }
-  
-    .flow-item{
-      width:110px;
-      font-size:12px;
-    }
+  .today-summary{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+    gap:18px;
   }
   
+
+.today-card{
+  background:white;
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
+  border-left:8px solid;
+}
+
+.today-card span{
+  font-size:14px;
+  color:#6b7280;
+  font-weight:600;
+}
+
+.today-card h2{
+  font-size:28px;
+  margin-top:6px;
+  font-weight:800;
+}
+
+/* colors */
+.today-card.blue{
+  border-color:#4fa4ff;
+}
+.today-card.blue h2{
+  color:#4fa4ff;
+}
+
+.today-card.yellow{
+  border-color:#ffcb4f;
+}
+.today-card.yellow h2{
+  color:#ffb703;
+}
+
+.today-card.green{
+  border-color:#2ecc71;
+}
+.today-card.green h2{
+  color:#2ecc71;
+}
+/* Allow horizontal scroll inside main dashboard */
+.dash-main{
+  overflow-x: visible !important;
+}
+@media (max-width:768px){
+  .dash-layout{
+    overflow-x: visible !important;
+  }
+}@media (max-width:600px){
+
+  /* scrolling container */
+  .summary-scroll{
+    width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  /* kill GRID and make slider */
+  .summary-layout{
+    display:flex !important;     /* destroy grid */
+    flex-direction:row;
+    width:200vw;                /* 2 pages */
+    max-width:none;
+    gap:16px;
+  }
+
+  /* each page */
+  .summary-left,
+  .summary2-wrapper{
+    width:100vw;
+    flex-shrink:0;
+  }
+
+  .summary-scroll::-webkit-scrollbar{
+    display:none;
+  }
+}
+@media (max-width:600px){
+
+  /* break out of centered layout */
+  .summary-scroll{
+    width:100vw;
+
+    padding-left: var(--pad);
+    padding-right: var(--pad);
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .summary-layout{
+    display:flex !important;
+    flex-direction:row;
+    width:200vw;
+    max-width:none;
+    gap:16px;
+  }
+
+  .summary-left,
+  .summary2-wrapper{
+    width:100vw;
+    flex-shrink:0;
+  }
+
+  .summary-scroll::-webkit-scrollbar{
+    display:none;
+  }
+}
+@media (max-width:600px){
+
+  .summary-scroll{
+    scroll-snap-type: x mandatory;     /* page snap */
+    scroll-behavior: smooth;           /* buttery smooth */
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+  }
+
+  .summary-left,
+  .summary2-wrapper{
+    scroll-snap-align: start;          /* snap each card */
+  }
+
+  /* slightly reduce side padding for 360px */
+  .summary-scroll{
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+@media (max-width:360px){
+  .summary2-card{
+    width:100px;
+    height:230px;
+  }
+}
+
+@media (max-width: 768px){
+
+  .summary-scroll{
+    width: calc(100vw - 64px);   /* subtract sidebar */
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .summary-layout{
+    width: calc((100vw - 64px) * 2); /* 2 pages */
+  }
+
+  .summary-left,
+  .summary2-wrapper{
+    width: calc(100vw - 64px);
+  }
+}
+@media (max-width:360px){
+  .summary2-top{
+    font-size: 14px;
+  }
+
+  .flow-item{
+    font-size: 11px;
+    min-width: 85px;
+  }
+
+  .flow-item b{
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 600px){
+  .today-summary{
+    grid-template-columns: 1fr;   /* 1 per row */
+    gap: 14px;
+  }
+
+  .today-card{
+    padding: 14px;
+    border-left-width: 6px;
+  }
+
+  .today-card span{
+    font-size: 12px;
+  }
+
+  .today-card h2{
+    font-size: 20px;   /* mobile smaller */
+  }
+}
+/* ============ MOBILE: shrink Monthly + Overall block ============ */
+@media (max-width: 768px){
+
+  /* whole swipe pages height control */
+  .summary-left,
+  .summary2-wrapper{
+    padding: 16px !important;
+    border-radius: 16px;
+    min-height: auto;
+  }
+
+  /* Top stats inside monthly */
+  .attendance-panel h1{
+    font-size: 22px;
+  }
+
+  .attendance-panel h2{
+    font-size: 18px;
+  }
+
+  .attendance-panel h4{
+    font-size: 12px;
+  }
+
+  /* Monthly flow area height reduce */
+  .monthly-flow2{
+    height: 140px;      /* 👈 this is the key */
+    padding-bottom: 4px;
+  }
+
+  /* bubbles smaller */
+  .flow-item{
+    padding: 6px 10px;
+    min-width: 80px;
+    font-size: 11px;
+    border-radius: 10px;
+  }
+
+  .flow-item b{
+    font-size: 13px;
+  }
+
+  /* Pills smaller */
+  .summary2-card{
+    height: 160px;     /* was 240px */
+    border-radius: 18px;
+  }
+
+  .summary2-top{
+    font-size: 14px;
+    padding: 4px;
+  }
+
+  .summary2-content{
+    bottom: 18px;
+    font-size: 11px;
+  }
+
+  /* Pills grid tighter */
+  .summary2-cards{
+    gap: 10px;
+  }
+}
+
+/* Extra tiny phones (360px) */
+@media (max-width: 360px){
+  .monthly-flow2{
+    height: 120px;
+  }
+
+  .summary2-card{
+    height: 140px;
+  }
+}
+/* ===== TODAY SUMMARY MOBILE OPTIMIZATION ===== */
+@media (max-width: 600px){
+
+  .today-summary{
+    grid-template-columns: 1fr;   /* one below one */
+    gap: 12px;
+  }
+
+  .today-card{
+    padding: 14px;
+    border-left: 6px solid;
+    border-radius: 12px;
+  }
+
+  .today-card span{
+    font-size: 12px;
+  }
+
+  .today-card h2{
+    font-size: 20px;   /* number smaller */
+  }
+}
+.today-summary{
+  position: relative;
+  z-index: 1;
+  margin-top: 24px;
+}
+@media (max-width: 768px){
+  .summary-scroll{
+    height: 420px;     /* swipe area height */
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .summary-layout{
+    height: 100%;
+  }
+}
+.summary-scroll{
+  position: relative;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-bottom: 20px;
+}
+
+/* This makes the swipe container grow to content height */
+.summary-layout{
+  min-height: 100%;
+}
+/* ===== TODAY CARDS COMPACT (Mobile) ===== */
+@media (max-width: 768px){
+
+  .today-summary{
+    display: grid;
+    grid-template-columns: 1fr;   /* one below one */
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .today-card{
+    padding: 10px 12px;          /* 👈 smaller padding */
+    min-height: 64px;           /* 👈 reduce height */
+    border-left-width: 4px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.06);
+  }
+
+  .today-card span{
+    font-size: 11px;            /* 👈 label small */
+  }
+
+  .today-card h2{
+    font-size: 16px;            /* 👈 amount small */
+    margin-top: 2px;
+  }
+}
+
+/* Extra tiny phones */
+@media (max-width: 360px){
+  .today-card{
+    min-height: 58px;
+    padding: 8px 10px;
+  }
+
+  .today-card h2{
+    font-size: 15px;
+  }
+}
+.entries-box{
+  grid-template-columns: repeat(4, 1fr);
+}

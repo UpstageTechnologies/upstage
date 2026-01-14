@@ -1,19 +1,67 @@
 import React, { useEffect, useState } from "react";
-import { collection, addDoc, onSnapshot } from "firebase/firestore";
+import { collection, addDoc, onSnapshot ,query} from "firebase/firestore";
 import { db } from "../../../services/firebase";
 import "../../dashboard_styles/Accounts.css";
 import "../../dashboard_styles/studentSearch.css";
+
+
 
 export default function Inventory({ adminUid, setActivePage, plan, showUpgrade }) {
 
   /* ================= STATES ================= */
   const [feesMaster, setFeesMaster] = useState([]);
   const [feesLoaded, setFeesLoaded] = useState(false);
+  const [showEntryType, setShowEntryType] = useState(false);
+
 
   const [teachers, setTeachers] = useState([]);
   const [teacherSearch, setTeacherSearch] = useState("");
   const [showTeacherDropdown, setShowTeacherDropdown] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
+
+  const [showClassDropdown, setShowClassDropdown] = useState(false);
+  const [classSearch, setClassSearch] = useState("");
+  const classes = ["PreKG","LKG","UKG","1","2","3","4","5","6","7","8","9","10","11","12"];
+  const [categorySearch, setCategorySearch] = useState("");
+const [positionSearch, setPositionSearch] = useState("");
+const [salaryCategory, setSalaryCategory] = useState("");
+
+const [showCategory, setShowCategory] = useState(false);
+const [showPosition, setShowPosition] = useState(false);
+
+const [entrySearch, setEntrySearch] = useState("");
+const [showEntryDropdown, setShowEntryDropdown] = useState(false);
+
+const entryTypes = ["Fees", "Salary"];
+
+const filteredEntryTypes = entryTypes.filter(t =>
+  t.toLowerCase().includes(entrySearch.toLowerCase())
+);
+
+
+const categories = ["Office Staff", "Working Staff"];
+
+const positions = {
+  "Office Staff": ["Principal","Clerk","Accountant","Receptionist"],
+  "Working Staff": ["Teacher","Driver","Cleaner","Watchman","Helper"]
+};
+
+const filteredCategories = categories.filter(c =>
+  c.toLowerCase().includes(categorySearch.toLowerCase())
+);
+
+const filteredPositions = (positions[salaryCategory] || []).filter(p =>
+  p.toLowerCase().includes(positionSearch.toLowerCase())
+);
+
+  const filteredClasses = classes.filter(c =>
+    c.toLowerCase().includes(classSearch.toLowerCase())
+  );
+  
+
+
+
+  
 
   const [entryType, setEntryType] = useState(""); // fees | salary
   const [activeSummary, setActiveSummary] = useState("fees");
@@ -22,11 +70,9 @@ export default function Inventory({ adminUid, setActivePage, plan, showUpgrade }
   const [feeName, setFeeName] = useState("");
   const [feeAmount, setFeeAmount] = useState("");
 
-  const [salaryCategory, setSalaryCategory] = useState("");
+  
   const [salaryPosition, setSalaryPosition] = useState("");
 
-  const [showCategory, setShowCategory] = useState(false);
-  const [showPosition, setShowPosition] = useState(false);
 
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
 
@@ -35,6 +81,32 @@ export default function Inventory({ adminUid, setActivePage, plan, showUpgrade }
   const teachersRef = collection(db, "users", adminUid, "teachers");
 
   /* ================= LOAD ================= */
+  useEffect(() => {
+    if (!adminUid) return;
+  
+    const incomeRef = collection(db, "users", adminUid, "Account", "accounts", "Income");
+    const expenseRef = collection(db, "users", adminUid, "Account", "accounts", "Expenses");
+    const feesRef = collection(db, "users", adminUid, "FeesCollection");
+  
+    const unsubIncome = onSnapshot(query(incomeRef), snap => {
+      setIncomeList(snap.docs.map(d => d.data()));
+    });
+  
+    const unsubExpense = onSnapshot(query(expenseRef), snap => {
+      setExpenseList(snap.docs.map(d => d.data()));
+    });
+  
+    const unsubFees = onSnapshot(query(feesRef), snap => {
+      setFeesList(snap.docs.map(d => d.data()));
+    });
+  
+    return () => {
+      unsubIncome();
+      unsubExpense();
+      unsubFees();
+    };
+  }, [adminUid]);
+  
   useEffect(() => {
     if (!adminUid) return;
 
@@ -90,16 +162,36 @@ export default function Inventory({ adminUid, setActivePage, plan, showUpgrade }
       });
     }
 
-    // RESET
     setEntryType("");
-    setFeeClass("");
-    setFeeName("");
-    setFeeAmount("");
-    setSalaryCategory("");
-    setSalaryPosition("");
-    setSelectedTeacher(null);
-    setTeacherSearch("");
+setFeeClass("");
+setClassSearch("");
+setFeeName("");
+setFeeAmount("");
+setSalaryCategory("");
+setCategorySearch("");
+setSalaryPosition("");
+setPositionSearch("");
+setSelectedTeacher(null);
+setTeacherSearch("");
+
   };
+  const changeEntryType = (type) => {
+    setEntryType(type);
+  
+    setShowCategory(false);
+    setShowPosition(false);
+    setShowTeacherDropdown(false);
+    setShowClassDropdown(false);
+    setShowEntryDropdown(false);
+  
+    setCategorySearch("");
+    setPositionSearch("");
+    setTeacherSearch("");
+    setClassSearch("");
+    setEntrySearch("");
+  };
+  
+  
 
   /* ================= DATA ================= */
   const feesData = feesMaster.filter(i => i.type === "fees");
@@ -124,108 +216,224 @@ export default function Inventory({ adminUid, setActivePage, plan, showUpgrade }
       <div className="section-card entries-card">
         <h3 className="section-title">Add Item</h3>
 
-        {!entryType && (
-          <div className="entries-box">
-            <input type="date" value={date} onChange={e => setDate(e.target.value)} />
-            <select value={entryType} onChange={e => setEntryType(e.target.value)}>
-              <option value="">Select Type</option>
-              <option value="fees">Fees</option>
-              <option value="salary">Salary</option>
-            </select>
+        <div className="entries-box">
+  <input
+    type="date"
+    value={date}
+    onChange={e => setDate(e.target.value)}
+  />
+
+  <div className="student-dropdown">
+    <input
+      placeholder="Select Type"
+      value={
+        entryType
+          ? entryType === "fees" ? "Fees" : "Salary"
+          : entrySearch
+      }
+      onChange={e => {
+        setEntrySearch(e.target.value);
+        setEntryType("");
+        setShowEntryDropdown(true);
+      }}
+      onFocus={() => setShowEntryDropdown(true)}
+    />
+
+    {showEntryDropdown && (
+      <div className="student-dropdown-list">
+        {filteredEntryTypes.map(type => (
+          <div
+            key={type}
+            className="student-option"
+            onClick={() => {
+              changeEntryType(type.toLowerCase());
+              setEntrySearch("");
+              setShowEntryDropdown(false);
+            }}
+          >
+            {type}
           </div>
-        )}
+        ))}
+      </div>
+    )}
+  </div>
+</div>
 
-        {entryType === "fees" && (
-          <div className="entries-box">
-            <input type="date" value={date} onChange={e => setDate(e.target.value)} />
-            <select value={entryType} onChange={e => setEntryType(e.target.value)}>
-              <option value="fees">Fees</option>
-              <option value="salary">Salary</option>
-            </select>
 
-            <select value={feeClass} onChange={e => setFeeClass(e.target.value)}>
-              <option value="">Class</option>
-              {["PreKG","LKG","UKG","1","2","3","4","5","6","7","8","9","10","11","12"].map(c => <option key={c}>{c}</option>)}
-            </select>
 
-            <input placeholder="Fee Name" value={feeName} onChange={e => setFeeName(e.target.value)} />
-            <input type="number" placeholder="Amount" value={feeAmount} onChange={e => setFeeAmount(e.target.value)} />
+{entryType === "fees" && (
+  <div className="entries-box form-grid">
 
-            <button className="save-btn" onClick={saveFee}>Save</button>
-          </div>
-        )}
+    <input type="date" value={date} onChange={e=>setDate(e.target.value)}/>
+    <input value="Fees" disabled/>
 
-        {entryType === "salary" && (
-          <div className="entries-box">
-
-            <input type="date" value={date} onChange={e => setDate(e.target.value)} />
-
-            <div className="popup-select">
-              <div className="popup-input">Salary<span>▾</span></div>
+    <div className="student-dropdown">
+      <input
+        placeholder="Select Class"
+        value={feeClass || classSearch}
+        onChange={e=>{
+          setClassSearch(e.target.value);
+          setFeeClass("");
+          setShowClassDropdown(true);
+        }}
+        onFocus={()=>setShowClassDropdown(true)}
+      />
+      {showClassDropdown && (
+        <div className="student-dropdown-list">
+          {filteredClasses.map(cls=>(
+            <div key={cls} className="student-option"
+              onClick={()=>{
+                setFeeClass(cls);
+                setClassSearch("");
+                setShowClassDropdown(false);
+              }}>
+              Class {cls}
             </div>
+          ))}
+        </div>
+      )}
+    </div>
 
-            <div className="popup-select">
-              <div className="popup-input" onClick={() => setShowCategory(!showCategory)}>
-                {salaryCategory || "Category"} <span>▾</span>
-              </div>
-              {showCategory && (
-                <div className="popup-menu">
-                  <div onClick={() => { setSalaryCategory("Office Staff"); setShowCategory(false); }}>Office Staff</div>
-                  <div onClick={() => { setSalaryCategory("Working Staff"); setShowCategory(false); }}>Working Staff</div>
-                </div>
-              )}
+    <input
+      placeholder="Fee Name"
+      value={feeName}
+      onChange={e=>setFeeName(e.target.value)}
+    />
+
+    <input
+      type="number"
+      placeholder="Amount"
+      value={feeAmount}
+      onChange={e=>setFeeAmount(e.target.value)}
+    />
+
+    <button className="save-btn" onClick={saveFee}>
+      Save
+    </button>
+
+  </div>
+)}
+
+
+{entryType === "salary" && (
+  <div className="entries-box salary-grid">
+
+   
+
+    {/* Category */}
+    <div className="student-dropdown">
+      <input
+        placeholder="Select Category"
+        value={salaryCategory || categorySearch}
+        onChange={e=>{
+          setCategorySearch(e.target.value);
+          setSalaryCategory("");
+          setShowCategory(true);
+        }}
+        onFocus={()=>setShowCategory(true)}
+      />
+      {showCategory && (
+        <div className="student-dropdown-list">
+          {filteredCategories.map(cat=>(
+            <div
+              key={cat}
+              className="student-option"
+              onClick={()=>{
+                setSalaryCategory(cat);
+                setCategorySearch("");
+                setShowCategory(false);
+              }}
+            >
+              {cat}
             </div>
+          ))}
+        </div>
+      )}
+    </div>
 
-            <div className="popup-select">
-              <div className="popup-input" onClick={() => setShowPosition(!showPosition)}>
-                {salaryPosition || "Position"} <span>▾</span>
-              </div>
-              {showPosition && (
-                <div className="popup-menu">
-                  {salaryCategory === "Office Staff" && ["Principal","Clerk","Accountant","Receptionist"].map(p => (
-                    <div key={p} onClick={() => { setSalaryPosition(p); setShowPosition(false); }}>{p}</div>
-                  ))}
-                  {salaryCategory === "Working Staff" && ["Teacher","Driver","Cleaner","Watchman","Helper"].map(p => (
-                    <div key={p} onClick={() => { setSalaryPosition(p); setShowPosition(false); }}>{p}</div>
-                  ))}
-                </div>
-              )}
+    {/* Position */}
+    <div className="student-dropdown">
+      <input
+        placeholder="Select Position"
+        value={salaryPosition || positionSearch}
+        onChange={e=>{
+          setPositionSearch(e.target.value);
+          setSalaryPosition("");
+          setShowPosition(true);
+        }}
+        onFocus={()=>setShowPosition(true)}
+      />
+      {showPosition && (
+        <div className="student-dropdown-list">
+          {filteredPositions.map(pos=>(
+            <div
+              key={pos}
+              className="student-option"
+              onClick={()=>{
+                setSalaryPosition(pos);
+                setPositionSearch("");
+                setShowPosition(false);
+              }}
+            >
+              {pos}
             </div>
+          ))}
+        </div>
+      )}
+    </div>
 
-            <div className="student-dropdown">
-              <input
-                placeholder="Search Teacher"
-                value={selectedTeacher?.name || teacherSearch}
-                onChange={e => {
-                  setTeacherSearch(e.target.value);
-                  setSelectedTeacher(null);
-                  setShowTeacherDropdown(true);
-                }}
-                onFocus={() => setShowTeacherDropdown(true)}
-              />
-
-              {showTeacherDropdown && (
-                <div className="student-dropdown-list">
-                  {filteredTeachers.map(t => (
-                    <div key={t.id} className="student-option" onClick={() => {
-                      setSelectedTeacher(t);
-                      setTeacherSearch("");
-                      setShowTeacherDropdown(false);
-                    }}>
-                      <strong>{t.name}</strong>
-                      <span>{t.teacherId}</span>
-                    </div>
-                  ))}
-                  {filteredTeachers.length === 0 && <div className="student-option muted">No teachers</div>}
-                </div>
-              )}
+    {/* ===== Row 2 ===== */}
+    {/* Teacher */}
+    <div className="student-dropdown">
+      <input
+        placeholder="Teacher"
+        value={selectedTeacher?.name || teacherSearch}
+        onChange={e=>{
+          setTeacherSearch(e.target.value);
+          setShowTeacherDropdown(true);
+        }}
+        onFocus={()=>setShowTeacherDropdown(true)}
+      />
+      {showTeacherDropdown && (
+        <div className="student-dropdown-list">
+          {filteredTeachers.map(t=>(
+            <div
+              key={t.id}
+              className="student-option"
+              onClick={()=>{
+                setSelectedTeacher(t);
+                setTeacherSearch("");
+                setShowTeacherDropdown(false);
+              }}
+            >
+              {t.name}
             </div>
+          ))}
+        </div>
+      )}
+    </div>
 
-            <input type="number" placeholder="Amount" value={feeAmount} onChange={e => setFeeAmount(e.target.value)} />
+    {/* Amount */}
+    <input
+      type="number"
+      placeholder="Amount"
+      value={feeAmount}
+      onChange={e=>setFeeAmount(e.target.value)}
+    />
 
-            <button className="save-btn" onClick={saveFee}>Save</button>
-          </div>
-        )}
+    
+    {/* ===== Row 3 ===== */}
+    <button
+      className="save-btn"
+      style={{ gridColumn: "1 / -1" }}
+      onClick={saveFee}
+    >
+      Save
+    </button>
+  </div>
+)}
+
+
       </div>
 
       {/* SUMMARY */}

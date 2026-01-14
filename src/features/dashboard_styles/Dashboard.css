@@ -27,9 +27,8 @@ html, body {
   left: 0;
   height: calc(100vh - 60px);
   width: clamp(160px, 22vw, 220px);
-  min-width: 260px;
-  min-width: 0px;
-  background: #ffffff;;
+  min-width: 100px;
+  background: #ffffff;
   color:#000000;
   padding: 20px;
   transition: all 0.35s ease;
@@ -53,8 +52,7 @@ html, body {
 }
 
 .sidebar ul li:hover {
-  background:#52c3f7;
-  color:#ffffff; 
+background: linear-gradient(135deg, #3a9df5, #5fb3ff);  color:#ffffff; 
     transform: scale(1.1);
   transition: 0.2s ease;
 
@@ -388,4 +386,29 @@ html, body {
   height: 42px;
   border-radius: 8px;
   object-fit: cover;
+}
+/* ACTIVE MENU */
+.sidebar ul li.active {
+  background: linear-gradient(135deg, #3a9df5, #5fb3ff);
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 6px 16px rgba(58,157,245,0.35);
+}
+
+.sidebar ul li.active svg {
+  color: white;
+}
+
+/* No jump on hover */
+.sidebar ul li.active:hover {
+  transform: none;
+}
+.sidebar-close ul li.active {
+  background: #3a9df5;
+  border-radius: 10px;
+}
+
+.sidebar-close ul li.active svg {
+  color: white;
 }

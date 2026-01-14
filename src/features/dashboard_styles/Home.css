@@ -6,6 +6,7 @@
 /* ========== PERSONAL HEADER ========== */
 .student-header {
   display: flex;
+  flex-direction: column;  
   justify-content: space-between;
   background: white;
   padding: 20px;
@@ -106,8 +107,8 @@
 /* Pill */
 .summary2-card {
   position: relative;
-  width: 120px;
-  height: 280px;
+  width: 95px;
+  height: 260px;
   border-radius: 28px;
   overflow: hidden;
   background: #eaf2fb;
@@ -137,6 +138,7 @@
 .fill-blue   { background: #3a9df5; }
 .fill-yellow { background: #fbbf24; }
 .fill-red    { background: #fb5a5a; }
+.fill-green  { background: #4caf50; }
 
 /* icon + label */
 .summary2-content {
@@ -450,4 +452,187 @@
   .summary2-content {
     font-size: 11px;
   }
+}
+.attendance-toggle {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.attendance-toggle button {
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: none;
+  background: #eaf2fb;
+  font-weight: 600;
+  cursor: pointer;
+  color: #333;
+}
+
+.attendance-toggle button.active {
+  background: #3a9df5;
+  color: white;
+}
+
+.total-card .summary2-content span {
+  font-size: 14px;
+  opacity: 0.8;
+}
+/* ===== OVAL TOGGLE ===== */
+
+.oval-toggle {
+  position: relative;
+  width: 260px;
+  height: 52px;
+  background: #eaf2fb;
+  border-radius: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px;
+  margin: 0 auto 20px;
+}
+
+.oval-toggle button {
+  width: 50%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  z-index: 2;
+  cursor: pointer;
+}
+
+.oval-toggle button.active {
+  color: white;
+}
+
+/* Sliding circle */
+.oval-slider {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: calc(50% - 6px);
+  height: calc(100% - 12px);
+  background: #3a9df5;
+  border-radius: 30px;
+  transition: all 0.35s ease;
+  z-index: 1;
+}
+
+/* When Teachers selected */
+.oval-slider.right {
+  transform: translateX(100%);
+}
+  /* Remove black focus / border on toggle buttons */
+.oval-toggle button,
+.oval-toggle button:focus,
+.oval-toggle button:active {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Chrome, Edge blue/black focus ring */
+.oval-toggle button:focus-visible {
+  outline: none !important;
+}
+
+/* iOS & mobile tap highlight remove */
+.oval-toggle button {
+  -webkit-tap-highlight-color: transparent;
+}
+/* ===== TOP SUMMARY CARDS ===== */
+
+.top-summary-row {
+  width: 100%;
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.top-card {
+  background: #f4f8fd;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 6px 14px rgba(0,0,0,.05);
+}
+
+.top-card i {
+  font-size: 22px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.top-card b {
+  font-size: 20px;
+  display: block;
+}
+
+.top-card small {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* Colors */
+.top-card.green i { background:#4caf50; }
+.top-card.blue  i { background:#3a9df5; }
+.top-card.yellow i { background:#fbbf24; }
+.top-card.red   i { background:#fb5a5a; }
+
+/* Mobile */
+@media (max-width: 700px) {
+  .top-summary-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.student-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+/* ===== ROLE BADGE ===== */
+.role-badge {
+  margin-top: 6px;
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #3a9df5, #5fb3ff);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 10px rgba(58,157,245,.35);
+}
+.summary2-card.clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary2-card.clickable:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+}
+.name-role-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.name-role-row h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
 }

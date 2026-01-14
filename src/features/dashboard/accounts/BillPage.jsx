@@ -86,16 +86,7 @@ const balance = payable - paid;
             <b>Parent:</b> {student.parentName}
           </div>
 
-          <div>
-          <p>Total Fees: ₹{total}</p>
-<p>Discount: ₹{discount}</p>
-<p><b>Payable: ₹{payable}</b></p>
-<p>Paid Till Now: ₹{paid}</p>
-<p style={{ color: balance > 0 ? "red" : "green", fontWeight: "bold" }}>
-  Balance: ₹{balance}
-</p>
-
-          </div>
+       
 
           <div style={{ textAlign: "right" }}>
             <b>Date:</b> {billDate}<br />

@@ -104,7 +104,7 @@ select {
   margin-top: 10px;
   padding: 10px 18px;
   border-radius: 10px;
-  background: #1a73e8;
+  background: skyblue;
   color: #fff;
   border: none;
 }
@@ -839,7 +839,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .popup-menu div:hover {
   background: #eef0ff;
-  color: #6c63ff;
+  color: #aedaf7;
 }
 
 
