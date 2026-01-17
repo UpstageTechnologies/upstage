@@ -397,7 +397,7 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
               <FaCalendarAlt/> Teacher Timetable
             </li>
             <li className={activePage === "teacher-attendance" ? "active" : ""}onClick={() => setActivePage("teacher-attendance")}>
-            <FaUserCheck/>Teacher Timetable
+            <FaUserCheck/>Students Attendance
             </li>
             </>
             )}

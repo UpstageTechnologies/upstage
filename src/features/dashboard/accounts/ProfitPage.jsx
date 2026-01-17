@@ -157,15 +157,12 @@ const [incomeType, setIncomeType] = useState("");
     );
   });
 
-  const isFirstPayment =
-  selectedNewStudent &&
-  !incomeList.some(i => i.studentId === selectedNewStudent.id);
 
-// Full payment only (not Term1/2/3)
-const isFullPayment = newPayType === "full";
 
-const discount =
-  isFullPayment && isFirstPayment ? newTotal * 0.05 : 0;
+  const isFullPayment = newPayType === "full";
+
+  const discount = isFullPayment ? newTotal * 0.05 : 0;
+  
 
 
   const [oldClass, setOldClass] = useState("");
@@ -357,95 +354,93 @@ useEffect(() => {
   
   const saveNewAdmission = async () => {
 
-    if (!selectedNewStudent)
-  return alert("Select student first");
-
-const alreadyPaid = incomeList.some(i =>
-  i.studentId === selectedNewStudent.id &&
-  i.paymentStage === "Admission"
-);
-
-    
-    if (alreadyPaid) {
-      alert("Admission already paid for this student");
-      return;
-    }
-    
+  
     if (!newName || !newParent || !newClass || !newPayType || !entryDate)
       return alert("Fill all fields");
   
     const total = getClassTotal(newClass);
   
-    let discount = 0;
-
-    const isFirstPayment =
-      selectedNewStudent &&
-      !incomeList.some(i => i.studentId === selectedNewStudent.id);
-    
-    if (newPayType === "full" && isFirstPayment) {
-      discount = total * 0.05;
-    }
-    
-  
-    const payable = total - discount;
-  
     let final = 0;
-
-    const isPartialLike =
-      newPayType === "partial" ||
-      newPayType === "term1" ||
-      newPayType === "term2" ||
-      newPayType === "term3";
-    
-    // FULL payment
     if (newPayType === "full") {
-      final = payable;
-    }
-    
-    // PARTIAL / TERM1 / TERM2 / TERM3
-    if (isPartialLike) {
+      final = total - total * 0.05;
+    } else {
       if (!newPayAmount) return alert("Enter amount");
       final = Number(newPayAmount);
     }
+  // 🔹 generate readable Parent ID
+const generatedParentId = `P-${Date.now()}`;
+    /* ================= CREATE PARENT ================= */
+    const parentDocRef = await addDoc(
+      collection(db, "users", adminUid, "parents"),
+      {
+        parentName: newParent,
+        parentId: generatedParentId,
+        studentsCount: 1,
+        students: [],
+        createdAt: new Date()
+      }
+    );
+    
+    const studentDocRef = await addDoc(
+      collection(db, "users", adminUid, "students"),
+      {
+        studentName: newName,
+        studentId: `S-${Date.now()}`,
+        parentId: generatedParentId,   // ✅ MATCH WITH PARENT
+        parentName: newParent,
+        class: newClass,
+        section: "",
+        createdAt: new Date()
+      }
+    );
+    
+    // update parent student list
+    await updateDoc(
+      doc(db, "users", adminUid, "parents", parentDocRef.id),
+      {
+        students: [
+          {
+            studentDocId: studentDocRef.id,
+            studentName: newName,
+            class: newClass,
+            section: ""
+          }
+        ]
+      }
+    );
     
   
-    if (final > payable) {
-      return alert("Cannot pay more than payable amount");
-    }
+    /* ================= UPDATE PARENT WITH STUDENT ================= */
+    await updateDoc(
+      doc(db, "users", adminUid, "parents", parentDocRef.id),
+      {
+        students: [
+          {
+            studentDocId: studentDocRef.id,
+            studentName: newName,
+            class: newClass,
+            section: ""
+          }
+        ]
+      }
+    );
   
-    const balanceAfter = payable - final;
-  
-    if (!selectedNewStudent)
-    return alert("Select student from applications list");
-  
-  const studentDocRef = { id: selectedNewStudent.id };
-  const parentName = selectedNewStudent.parentName || newParent;
-  const parentId = selectedNewStudent.parentId || null;
-  
-  
+    /* ================= CREATE INCOME ================= */
     await addDoc(incomesRef, {
-      studentId: selectedNewStudent.id,
-      studentName: selectedNewStudent.studentName,
-      parentName,
-      parentId,
-      className: selectedNewStudent.class,
-    
+      studentId: studentDocRef.id,
+      studentName: newName,
+      parentId: parentDocRef.id,
+      parentName: newParent,
+      className: newClass,
       totalFees: total,
-      discountApplied: discount,
-      payableAmount: payable,
-    
-      paidAmount: final,
-      balanceBefore: payable,
-      balanceAfter,
-    
       paymentType: newPayType,
+      paidAmount: final,
       paymentStage: "Admission",
-    
       date: entryDate,
       createdAt: new Date()
     });
-    
   
+    /* ================= RESET ================= */
     setNewName("");
     setNewParent("");
     setNewClass("");
@@ -453,6 +448,7 @@ const alreadyPaid = incomeList.some(i =>
     setNewPayAmount("");
     setNewTotal(0);
   };
+  
   
   
 
@@ -842,44 +838,19 @@ if (activePage && activePage.startsWith("bill_")) {
     {incomeMode === "student" && studentMode === "new" && (
     <div className="entry-row source">
 
-<div className="student-dropdown">
-  <input
-    placeholder="Search Student"
-    value={selectedNewStudent?.studentName || newStudentSearch}
-    onChange={e => {
-      setNewStudentSearch(e.target.value);
-      setSelectedNewStudent(null);
-      setShowNewStudentDropdown(true);
-    }}
-    onFocus={() => setShowNewStudentDropdown(true)}
-  />
+<input
+  placeholder="Student Name"
+  value={newName}
+  onChange={e => setNewName(e.target.value)}
+/>
 
-  {showNewStudentDropdown && (
-    <div className="student-dropdown-list">
-      {newAdmissionStudents.map(s => (
-        <div
-          key={s.id}
-          className="student-option"
-          onClick={() => {
-            setSelectedNewStudent(s);
-            setNewName(s.studentName);
-            setNewParent(s.parentName || "");
-            setNewClass(s.class);
-            setNewTotal(getClassTotal(s.class));
-            setShowNewStudentDropdown(false);
-            setNewStudentSearch("");
-          }}
-        >
-          <strong>{s.studentName}</strong>
-          <span>Class {s.class} — {s.parentName}</span>
-        </div>
-      ))}
-    </div>
-  )}
-</div>
+<input
+  placeholder="Parent Name"
+  value={newParent}
+  onChange={e => setNewParent(e.target.value)}
+/>
 
-<input readOnly value={newParent ? `Parent: ${newParent}` : ""} />
-<input readOnly value={newClass ? `Class: ${newClass}` : ""} />
+
 
 
         <select
@@ -898,6 +869,7 @@ if (activePage && activePage.startsWith("bill_")) {
         <input readOnly value={newTotal ? `Total ₹${newTotal}` : ""} />
 
         <div className="student-dropdown">
+          
   <input
     placeholder="Select Payment Type"
     value={paymentType || paymentSearch}
@@ -1277,7 +1249,7 @@ if (activePage && activePage.startsWith("bill_")) {
     <div className="entry-row">
       <button
         className="save-btn"
-        style={{ gridColumn: "span 4" }}   // 🔥 full width
+        
         onClick={() => safeRequirePremium(saveSalary, "expense")}
       >
         Save
@@ -1393,16 +1365,16 @@ Save Fee</button>
 
           {/* DATA ROW */}
           <tr>
-            <td>{row.source}</td>
+            <td data-label="Description">{row.source}</td>
 
-            <td style={{ color: "green" }}>
+            <td datalabel="Income"style={{ color: "green" }}>
   {row.income === "***" ? "***" : row.income ? `₹${row.income}` : ""}
 </td>
 
-<td style={{ color: "red" }}>
+<td datalabel="Expense"style={{ color: "red" }}>
   {row.expense === "***" ? "***" : row.expense ? `₹${row.expense}` : ""}
 </td>
-<td style={{ textAlign: "center" }}>
+<td datalabel="Report" style={{ textAlign: "center" }}>
   {row.studentId && (
     <span
       style={{ cursor: "pointer", color: "#2140df", fontSize: 18 }}
@@ -1422,18 +1394,18 @@ Save Fee</button>
           {/* TOTAL ROW */}
           {isLastOfDate && (
             <tr style={{ fontWeight: "bold", background: "#fafafa" }}>
-              <td style={{ border: "1px solid #e5e7eb" }}>TOTAL</td>
+              <td datalabel="Total"style={{ border: "1px solid #e5e7eb" }}>TOTAL</td>
 
-              <td style={{ color: "green", border: "1px solid #e5e7eb" }}>
+              <td datalabel="Income"style={{ color: "green", border: "1px solid #e5e7eb" }}>
               ₹{dateIncomeTotal}
               </td>
 
-              <td style={{ color: "red", border: "1px solid #e5e7eb" }}>
+              <td datalabel="Expense"style={{ color: "red", border: "1px solid #e5e7eb" }}>
               ₹{dateExpenseTotal}
               </td>
 
               {/* Bill column empty but border needed */}
-              <td style={{ border: "1px solid #e5e7eb" }}></td>
+              <td datalabel="Report"style={{ border: "1px solid #e5e7eb" }}></td>
             </tr>
 
           )}

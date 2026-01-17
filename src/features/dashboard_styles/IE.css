@@ -33,8 +33,7 @@
 /* all inputs same size */
 .entries-box input,
 .entries-box select,
-.popup-input,
-.save-btn{
+.popup-input{
   height:44px;
   width:100%;
   padding:0 14px;
@@ -44,13 +43,6 @@
   font-weight:600;
 }
 
-/* Save button */
-.save-btn{
-  background:#52c3f7;
-  color:white;
-  border:none;
-  cursor:pointer;
-}
 
 /* Mobile */
 @media(max-width:900px){
@@ -87,6 +79,11 @@
   border-radius:12px;
   font-weight:700;
   cursor:pointer;
+}
+/* Save button lift */
+.entries-box .save-btn{
+  margin-top: -0px;
+  margin-bottom: 10px;
 }
 
 /* ================= DROPDOWNS ================= */
@@ -128,214 +125,123 @@
 .student-option:hover{
   background:var(--purple-soft);
 }
-
-@media(max-width:900px){
-  .entries-box{
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
+/* ================= MOBILE ACCOUNTS PERFECT FIX ================= */
 @media (max-width: 480px){
-  .entries-box{
-    grid-template-columns: 1fr;   /* one input per row */
-  }
-}
-@media (max-width: 480px){
-  .entries-box input,
-  .entries-box select,
-  .popup-input,
-  .save-btn{
-    height: 48px;
-    font-size: 16px;   /* avoids zoom bug in iOS */
-  }
-}
-@media (max-width: 480px){
-  .popup-menu,
-  .student-dropdown-list{
-    max-height: 200px;
-    left: 0;
-    right: 0;
-  }
-}
-/* ====== 360px MOBILE FIX ====== */
-@media (max-width: 360px){
 
-  /* one field per row */
-  .entries-box{
-    grid-template-columns: 1fr;
-    gap: 12px;
+  /* Summary Cards → 2 per row */
+  .today-summary{
+    display: flex;
+    flex-wrap: wrap;
+    gap:12px;  
+
   }
 
-  /* inputs bigger for fingers */
-  .entries-box input,
-  .entries-box select,
-  .popup-input,
-  .save-btn{
-    height: 50px;
-    font-size: 16px;
-    padding: 0 12px;
+  .today-card{
+    flex: 1 1 calc(50% - 6px);
+    min-height: 70px !important;
+    padding: 10px 12px !important;
+    border-radius: 14px;
   }
 
-  /* save button full width */
-  .save-btn{
-    width: 100%;
-    margin-top: 6px;
-  }
-
-  /* dropdown fit inside screen */
-  .popup-menu,
-  .student-dropdown-list{
-    max-height: 180px;
-    left: 0;
-    right: 0;
-    width: 100%;
-    overflow-y: auto;
-  }
-
-  /* cards padding small */
-  .entries-card{
-    padding: 14px;
-  }
-}
-/* ===========================
-   HARD OVERRIDE FOR 360px
-   =========================== */
-   @media screen and (max-width: 360px){
-
-    /* FORCE 1 column */
-    .entries-box{
-      display: grid !important;
-      grid-template-columns: 1fr !important;
-      gap: 12px !important;
-    }
-  
-    /* Bigger touch inputs */
-    .entries-box input,
-    .entries-box select,
-    .popup-input,
-    .save-btn{
-      height: 52px !important;
-      font-size: 16px !important;
-      padding: 0 12px !important;
-    }
-  
-    /* Full width save */
-    .save-btn{
-      width: 100% !important;
-      margin-top: 8px !important;
-    }
-  
-    /* Dropdown should not overflow */
-    .popup-menu,
-    .student-dropdown-list{
-      width: 100% !important;
-      left: 0 !important;
-      right: 0 !important;
-      max-height: 180px !important;
-      overflow-y: auto !important;
-    }
-  
-    /* Smaller card */
-    .entries-card{
-      padding: 12px !important;
-    }
-  }
-  
-
-/* tablet */
-@media (max-width: 900px){
-  .entries-box{
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-}
-
-/* mobile */
-@media (max-width: 480px){
-  .entries-box{
-    grid-template-columns: 1fr !important;
-  }
-}
-/* ===== FORCE 360px PERFECT LAYOUT ===== */
-@media (max-width: 360px){
-
-  /* one input per row */
-  .entries-box{
-    grid-template-columns: 1fr !important;
-    gap: 12px;
-  }
-
-  /* touch friendly inputs */
-  .entries-box input,
-  .entries-box select,
-  .popup-input,
-  .save-btn{
-    height: 50px !important;
+  .today-card h2{
     font-size: 16px !important;
-    padding: 0 12px;
   }
 
-  /* Save button full width */
-  .save-btn{
-    width: 100%;
-    margin-top: 8px;
+  /* Today Details Section Full Width */
+  .section-card{
+    width: 100% !important;
+    padding: 14px !important;
   }
 
-  /* dropdown should not overflow */
-  .popup-menu,
-  .student-dropdown-list{
-    max-height: 180px;
-    width: 100%;
-    left: 0;
-    right: 0;
-    overflow-y: auto;
+  /* Entries → One by One */
+  .entries-box{
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px;
   }
 
-  /* reduce card padding */
-  .entries-card{
-    padding: 12px;
+  /* Buttons Full Width */
+  .entries-box .save-btn{
+    width: 100% !important;
+    height: 48px !important;
+  }
+
+  /* Inventory / Journal / Income Cards Stack */
+  .inventory-card,
+  .last-entry-card,
+  .quick-card{
+    width: 100% !important;
+    margin-top: 10px;
+  }
+
+  /* Table scroll */
+  .nice-table-wrapper{
+    overflow-x: auto;
   }
 }
-/* ===========================
-   HARD OVERRIDE FOR 360px
-   =========================== */
-   @media screen and (max-width: 360px){
 
-    /* FORCE 1 column */
-    .entries-box{
-      display: grid !important;
-      grid-template-columns: 1fr !important;
-      gap: 12px !important;
-    }
-  
-    /* Bigger touch inputs */
-    .entries-box input,
-    .entries-box select,
-    .popup-input,
-    .save-btn{
-      height: 52px !important;
-      font-size: 16px !important;
-      padding: 0 12px !important;
-    }
-  
-    /* Full width save */
-    .save-btn{
-      width: 100% !important;
-      margin-top: 8px !important;
-    }
-  
-    /* Dropdown should not overflow */
-    .popup-menu,
-    .student-dropdown-list{
-      width: 100% !important;
-      left: 0 !important;
-      right: 0 !important;
-      max-height: 180px !important;
-      overflow-y: auto !important;
-    }
-  
-    /* Smaller card */
-    .entries-card{
-      padding: 12px !important;
-    }
+
+/* ===== EXTRA SMALL (360px) ===== */
+@media (max-width: 360px){
+  .today-card{
+    flex: 1 1 100%;
   }
-  
+  .today-summary{
+    display: flex;
+    flex-wrap: wrap;
+    gap:12px;  
+
+  }
+
+  .today-card h2{
+    font-size: 15px !important;
+  }
+
+  .entries-card{
+    padding: 10px !important;
+  }
+}
+/* ================= TODAY SUMMARY MOBILE FULL WIDTH ================= */
+
+@media (max-width: 480px){
+
+  .today-summary{
+    display: flex;
+    flex-direction: column;   /* one card per row */
+    gap: 12px;
+    width: 270px;
+  }
+
+  .today-card{
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 70px;
+    padding: 12px 14px !important;
+    border-radius: 16px;
+    box-sizing: border-box;
+  }
+
+  .today-card span{
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .today-card h2{
+    font-size: 18px !important;
+    margin-top: 4px;
+    word-break: break-word;
+  }
+}
+
+
+/* EXTRA SMALL DEVICES */
+@media (max-width: 360px){
+  .today-card{
+    min-height: 65px;
+    padding: 10px 12px !important;
+  }
+
+  .today-card h2{
+    font-size: 17px !important;
+  }
+}

@@ -590,3 +590,128 @@
 .entries-box{
   grid-template-columns: repeat(4, 1fr);
 }
+/* ================= FIX TODAY SUMMARY BELOW SWIPE ================= */
+@media (max-width:768px){
+
+  .today-summary{
+    width:100% !important;
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:10px;
+    margin-top:10px;
+  }
+
+  .today-card{
+    width:100% !important;
+    border-radius:12px;
+  }
+}
+
+
+/* ================= ACCOUNTS NAV MOBILE STACK ================= */
+@media (max-width:768px){
+
+  .accounts-grid{
+    grid-template-columns:1fr !important;
+    gap:12px;
+  }
+
+  .accounts-card{
+    width:100%;
+    padding:16px;
+    font-size:16px;
+  }
+}
+/* ================= HIDE TABLE HEADER IN MOBILE ================= */
+@media (max-width:620px){
+  .nice-table1 thead{
+    display:none;
+  }
+
+  .nice-table1,
+  .nice-table1 tbody,
+  .nice-table1 tr,
+  .nice-table1 td{
+    display:block;
+    width:100%;
+  }
+
+  .nice-table1 tr{
+    margin-bottom:14px;
+    background:#fff;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.05);
+    padding:8px 10px;
+  }
+
+  .nice-table1 td{
+    text-align:right;
+    padding:8px 6px;
+    position:relative;
+    border:none;
+    font-size:14px;
+  }
+
+  .nice-table1 td::before{
+    content:attr(data-label);   /* 🔥 label from React */
+    position:absolute;
+    left:6px;
+    font-weight:600;
+    color:#555;
+    text-transform:capitalize;
+  }
+
+  .date-heading td{
+    text-align:left !important;
+    background:#eef7ff !important;
+    border-radius:8px;
+    font-weight:700;
+  }
+}
+/* TOTAL row mobile card */
+@media (max-width:620px){
+
+  .nice-table1 tr:last-child{
+    background:#f0f9ff;
+    border:2px solid #e0f2fe;
+  }
+
+  .nice-table1 tr:last-child td{
+    font-weight:700;
+    font-size:15px;
+  }
+}
+@media (max-width:620px){
+
+  .pagination-bar{
+    width:100%;
+    margin-top:12px;
+  }
+
+  .tab-buttons{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+  }
+
+  .tab-btn{
+    flex:1 1 28%;
+    min-width:80px;
+    padding:8px 0;
+    font-size:13px;
+    border-radius:10px;
+  }
+
+  .tab-btn.active{
+    background:#3b9df8;
+    color:white;
+  }
+}
+@media (max-width:400px){
+  .tab-btn{
+    flex:1 1 45%;
+    font-size:12px;
+    padding:7px 0;
+  }
+}
