@@ -635,4 +635,34 @@
   margin: 0;
   font-size: 22px;
   font-weight: 700;
+}/* 📱 MOBILE FIX */
+@media (max-width: 768px) {
+
+  .student-top-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .student-left {
+    width: 100%;
+  }
+
+  .student-info {
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .student-info div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .name-role-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

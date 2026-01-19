@@ -596,18 +596,19 @@ const generatedParentId = `P-${Date.now()}`;
   
     const termPaidCount = getTermPaidCount(stu.id, fee.id);
 
-    const remainingBalance = balanceBefore;
-    const termAmount = Math.ceil(remainingBalance / (3 - termPaidCount));
+    const fixedTermAmount = Math.ceil(total / 3);
+
     
     
     if (oldPayType.startsWith("term")) {
-    
+
       if (termPaidCount >= 3) {
         alert("All 3 terms already paid");
         return;
       }
     
-      final = termAmount;
+      final = fixedTermAmount;
+    
     
     } else if (oldPayType === "full") {
     
@@ -782,14 +783,19 @@ const getTermPaidCount = (studentId, feeId) =>
   const getTermAmountUI = (studentId, fee) => {
     if (!studentId || !fee) return 0;
   
-    const balance = getFeeBalance(studentId, fee);
+    const total = fee.amount;
+    const paid = getFeePaid(studentId, fee.id);
+    const balance = total - paid;
+  
     const termPaid = getTermPaidCount(studentId, fee.id);
   
-    const remainingTerms = 3 - termPaid;
-    if (remainingTerms <= 0) return 0;
+    const oneTerm = Math.ceil(total / 3);
   
-    return Math.ceil(balance / remainingTerms);
+    if (termPaid === 0) return oneTerm;     // Term 1
+    if (termPaid === 1) return oneTerm;     // Term 2
+    return balance;                         // Term 3 (final remaining)
   };
+  
   
   const getNewTermAmount = (fee) => {
     if (!fee) return 0;
