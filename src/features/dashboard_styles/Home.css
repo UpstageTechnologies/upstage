@@ -666,3 +666,12 @@
     align-items: flex-start;
   }
 }
+/* 📱 Hide Class Days & Attendance Rate section in mobile */
+@media (max-width: 768px) {
+
+  .attendance-panel,
+  .monthly-flow2 {
+    display: none !important;
+  }
+
+}
