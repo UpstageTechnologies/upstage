@@ -88,6 +88,27 @@ const generateReport = () => {
     return () => unsub();
   }, [adminUid, mode]);
 
+  // how much already paid for this fee
+const getFeePaid = (studentId, feeId) =>
+incomeList
+  .filter(i => i.studentId === studentId && i.feeId === feeId)
+  .reduce((t, i) => t + Number(i.paidAmount || 0), 0);
+
+// balance using payableAmount (after discount)
+const getFeeBalance = (studentId, fee) => {
+const payments = incomeList.filter(
+  i => i.studentId === studentId && i.feeId === fee
+);
+
+if (!payments.length) return 0;
+
+const payable = payments[0].payableAmount || payments[0].totalFees || 0;
+const paid = getFeePaid(studentId, fee);
+
+return Math.max(0, payable - paid);
+};
+
+
   return (
     <div className="accounts-wrapper fade-in">
 
@@ -200,6 +221,27 @@ const generateReport = () => {
             >
               Partial Payment
             </button>
+            <button
+  className={incomeTab === "term1" ? "tab-btn active" : "tab-btn"}
+  onClick={() => setIncomeTab("term1")}
+>
+  Term 1
+</button>
+
+<button
+  className={incomeTab === "term2" ? "tab-btn active" : "tab-btn"}
+  onClick={() => setIncomeTab("term2")}
+>
+  Term 2
+</button>
+
+<button
+  className={incomeTab === "term3" ? "tab-btn active" : "tab-btn"}
+  onClick={() => setIncomeTab("term3")}
+>
+  Term 3
+</button>
+
             <button style={{marginLeft:"30%"}}
     className="report-btn"
     onClick={() => {setShowReport(true);setFilteredReport([]);}}
@@ -222,20 +264,19 @@ const generateReport = () => {
                       <th>Parent</th>
                       <th>Class</th>
                       <th>Paid</th>
-                      <th>Type</th>
                       <th>Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {incomeList
-                      .filter(i => i.studentId && i.isNew !== false)
+                      .filter(i => i.isNew === true)
+
                       .map(i => (
                         <tr key={i.id}>
                           <td>{i.studentName}</td>
                           <td>{i.parentName}</td>
                           <td>{i.className}</td>
                           <td>₹{i.paidAmount}</td>
-                          <td>{i.type}</td>
                           <td>{i.date}</td>
                         </tr>
                       ))}
@@ -262,7 +303,8 @@ const generateReport = () => {
                   </thead>
                   <tbody>
                     {incomeList
-                      .filter(i => i.studentId && i.isNew === false)
+                      .filter(i => i.isNew === false)
+
                       .map(i => (
                         <tr key={i.id}>
                           <td>{i.studentName}</td>
@@ -289,17 +331,22 @@ const generateReport = () => {
                       <th>Name</th>
                       <th>Class</th>
                       <th>Paid</th>
+                      <th>Balance</th>
                       <th>Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {incomeList
-                      .filter(i => i.type === "full")
+                      .filter(i => i.paymentType === "full")
+
                       .map(i => (
                         <tr key={i.id}>
                           <td>{i.studentName}</td>
                           <td>{i.className}</td>
                           <td>₹{i.paidAmount}</td>
+                          <td>
+                            ₹0
+                          </td>
                           <td>{i.date}</td>
                         </tr>
                       ))}
@@ -327,14 +374,16 @@ const generateReport = () => {
                   </thead>
                   <tbody>
                     {incomeList
-                      .filter(i => i.type === "partial")
+                      .filter(i => i.paymentType === "partial")
+
                       .map(i => (
                         <tr key={i.id}>
                           <td>{i.studentName}</td>
                           <td>{i.className}</td>
                           <td>₹{i.paidAmount}</td>
                           <td>
-                            ₹{(i.totalFees || 0) - (i.paidAmount || 0)}
+                          ₹{getFeeBalance(i.studentId, i.feeId)}
+
                           </td>
                           <td>{i.date}</td>
                         </tr>
@@ -344,6 +393,100 @@ const generateReport = () => {
               </div>
             </div>
           )}
+          {incomeTab === "term1" && (
+  <div className="section-card pop">
+    <h3 className="section-title">Term 1 Payments</h3>
+
+    <table className="nice-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Class</th>
+          <th>Paid</th>
+          <th>Balance</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {incomeList
+          .filter(i => i.paymentType === "term1")
+          .map(i => (
+            <tr key={i.id}>
+              <td>{i.studentName}</td>
+              <td>{i.className}</td>
+              <td>₹{i.paidAmount}</td>
+              <td>₹{getFeeBalance(i.studentId, i.feeId)}</td>
+
+              <td>{i.date}</td>
+            </tr>
+          ))}
+      </tbody>
+    </table>
+  </div>
+)}
+{incomeTab === "term2" && (
+  <div className="section-card pop">
+    <h3 className="section-title">Term 1 Payments</h3>
+
+    <table className="nice-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Class</th>
+          <th>Paid</th>
+          <th>Balance</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {incomeList
+          .filter(i => i.paymentType === "term2")
+          .map(i => (
+            <tr key={i.id}>
+              <td>{i.studentName}</td>
+              <td>{i.className}</td>
+              <td>₹{i.paidAmount}</td>
+              <td>₹{getFeeBalance(i.studentId, i.feeId)}</td>
+
+              <td>{i.date}</td>
+            </tr>
+          ))}
+      </tbody>
+    </table>
+  </div>
+)}
+{incomeTab === "term3" && (
+  <div className="section-card pop">
+    <h3 className="section-title">Term 1 Payments</h3>
+
+    <table className="nice-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Class</th>
+          <th>Paid</th>
+          <th>Balance</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {incomeList
+          .filter(i => i.paymentType === "term3")
+          .map(i => (
+            <tr key={i.id}>
+              <td>{i.studentName}</td>
+              <td>{i.className}</td>
+              <td>₹{i.paidAmount}</td>
+              <td>₹{getFeeBalance(i.studentId, i.feeId)}</td>
+
+              <td>{i.date}</td>
+            </tr>
+          ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
         </>
       )}
 

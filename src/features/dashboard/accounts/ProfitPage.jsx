@@ -504,6 +504,8 @@ const generatedParentId = `P-${Date.now()}`;
       parentId: parentDocRef.id,
       parentName: newParent,
       className: newClass,
+      isNew: true,
+
     
       feeId: fee.id,
       feeName: fee.name,
@@ -628,6 +630,8 @@ const generatedParentId = `P-${Date.now()}`;
       studentId: stu.id,
       studentName: stu.studentName,
       className: stu.class,
+      isNew: false,
+
       feeId: selectedFees[0]?.id || null,
 feeName: selectedFees[0]?.name || "",
 feeAmount: selectedFees[0]?.amount || 0,

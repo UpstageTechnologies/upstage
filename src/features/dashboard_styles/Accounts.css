@@ -852,10 +852,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   color: #2140df;
 }
 
-/* Inventory Fees Summary - Center Class Column */
-.nice-table th:first-child,
-.nice-table td:first-child {
-  text-align: center !important;
+/* Inventory Fees Summary Alignment */
+.nice-table th:nth-child(2),
+.nice-table td:nth-child(2) {
+  text-align: left !important;
+}
+
+.nice-table th:nth-child(3),
+.nice-table td:nth-child(3) {
+  text-align: right !important;
 }
 
 /* Accounts table - right align money columns */
