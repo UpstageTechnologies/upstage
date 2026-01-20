@@ -287,6 +287,18 @@ const OfficeStaff = () => {
                 <td>{s.phone}</td>
 
                 <td>
+                <button
+                    className="view-btn"
+                    onClick={() => {
+                      localStorage.setItem("viewAs", "office_staff");
+                      localStorage.setItem("viewStaffId", s.id);
+                      window.dispatchEvent(
+                        new CustomEvent("open-office-staff-dashboard")
+                      );
+                    }}
+                  >
+                    <FaEye /> View
+                  </button>
                   <button
                     className="edit-btn"
                     onClick={() => {
@@ -306,18 +318,7 @@ const OfficeStaff = () => {
                     <FaTrash /> Delete
                   </button>
 
-                  <button
-                    className="view-btn"
-                    onClick={() => {
-                      localStorage.setItem("viewAs", "office_staff");
-                      localStorage.setItem("viewStaffId", s.id);
-                      window.dispatchEvent(
-                        new CustomEvent("open-office-staff-dashboard")
-                      );
-                    }}
-                  >
-                    <FaEye /> View
-                  </button>
+
                 </td>
               </tr>
             ))}

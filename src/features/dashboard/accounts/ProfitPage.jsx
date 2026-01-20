@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { collection, onSnapshot, addDoc, updateDoc, doc } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, updateDoc,  deleteDoc, doc } from "firebase/firestore";
   import { db } from "../../../services/firebase";
 import "../../dashboard_styles/Accounts.css";
 import "../../dashboard_styles/studentSearch.css";
@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import OfficeStaff from "../OfficeStaff";
 import BillPage from "./BillPage";   
 import "../../dashboard_styles/IE.css";
-
+import {  FaTrash } from "react-icons/fa";
 
 
 
@@ -40,6 +40,15 @@ const [feesMaster, setFeesMaster] = useState([]);
 const [showIncomeType, setShowIncomeType] = useState(false);
 const [incomeType, setIncomeType] = useState("");
 
+const getSalaryFromInventory = (role, position, teacherName) => {
+  return feesMaster.find(
+    f =>
+      f.type === "salary" &&
+      f.category === role &&
+      f.position === position &&
+      f.name === teacherName
+  );
+};
 
 
 // ===== Searchable dropdown =====
@@ -833,6 +842,37 @@ if (activePage && activePage.startsWith("bill_")) {
     />
   );
 }
+useEffect(() => {
+  setTeacherSearch("");
+  setSelName("");
+  setShowTeacherDropdown(false);
+}, [salaryRole, salaryPosition]);
+
+const deleteEntry = async (row) => {
+  if (!window.confirm("Delete this entry?")) return;
+
+  try {
+    if (row.type === "income") {
+      await deleteDoc(
+        doc(db, "users", adminUid, "Account", "accounts", "Income", row.id)
+      );
+    }
+
+    if (row.type === "expense") {
+      await deleteDoc(
+        doc(db, "users", adminUid, "Account", "accounts", "Expenses", row.id)
+      );
+    }
+
+    console.log("Deleted successfully:", row.id);
+
+  } catch (err) {
+    console.error("Delete failed:", err);
+    alert("Failed to delete entry");
+  }
+};
+
+
 
 
   return (
@@ -1535,7 +1575,7 @@ if (activePage && activePage.startsWith("bill_")) {
 
 
       {/* Name */}
-      {salaryRole === "working" && salaryPosition === "Teacher" && (
+      {salaryRole === "Working Staff" && salaryPosition === "Teacher" && (
   <div className="student-dropdown">
     <input
       placeholder="Select Teacher"
@@ -1558,7 +1598,20 @@ if (activePage && activePage.startsWith("bill_")) {
               setSelName(t.name);
               setTeacherSearch("");
               setShowTeacherDropdown(false);
+            
+              const salaryItem = getSalaryFromInventory(
+                salaryRole,
+                salaryPosition,
+                t.name
+              );
+            
+              if (salaryItem) {
+                setManualSalary(salaryItem.amount); // 🔥 AUTO SET
+              } else {
+                setManualSalary("");
+              }
             }}
+            
           >
             <strong>{t.name}</strong>
             <span>{t.teacherId}</span>
@@ -1572,13 +1625,7 @@ if (activePage && activePage.startsWith("bill_")) {
     )}
   </div>
 )}
-{!(salaryRole === "working" && salaryPosition === "Teacher") && (
-  <input
-    placeholder="Person Name"
-    value={selName}
-    onChange={e => setSelName(e.target.value)}
-  />
-)}
+
 
 
 
@@ -1587,7 +1634,7 @@ if (activePage && activePage.startsWith("bill_")) {
         type="number"
         placeholder="Salary"
         value={manualSalary}
-        onChange={e => setManualSalary(e.target.value)}
+        readOnly  
       />
     </div>
 
@@ -1651,6 +1698,7 @@ Save Fee</button>
     <th>Income</th>
     <th>Expense</th>
     <th>Bill</th>
+    <th>Actions</th>  
   </tr>
 </thead>
 
@@ -1661,6 +1709,7 @@ Save Fee</button>
       .filter(i => i.date === entryDate)
       .map(i => ({
         id: i.id,
+        type: "income",          // 👈 IMPORTANT
         date: i.date,
         source: i.studentName || i.name || "Income",
         income: isOfficeStaff ? "***" : (i.paidAmount || 0),
@@ -1672,6 +1721,7 @@ Save Fee</button>
       .filter(e => e.date === entryDate)
       .map(e => ({
         id: e.id,
+        type: "expense",         // 👈 IMPORTANT
         date: e.date,
         source: e.name,
         income: "",
@@ -1679,6 +1729,7 @@ Save Fee</button>
         studentId: null
       }))
   ];
+  
   
     
     
@@ -1710,7 +1761,7 @@ all.sort((a, b) => {
           {/* DATE */}
           {lastDate !== row.date && (
             <tr className="date-heading">
-              <td colSpan={4} style={{ fontWeight: "bold", background: "#f3f3f3" }}>
+              <td colSpan={5} style={{ fontWeight: "bold", background: "#f3f3f3" }}>
                 {lastDate = row.date}
               </td>
             </tr>
@@ -1740,6 +1791,15 @@ all.sort((a, b) => {
     </span>
   )}
 </td>
+<td data-label="Actions" style={{ textAlign: "center" }}>
+  <button
+    className="delete-btn"
+    onClick={() => deleteEntry(row)}
+  >
+    <FaTrash /> Delete
+  </button>
+</td>
+
 
 
           </tr>
@@ -1759,6 +1819,8 @@ all.sort((a, b) => {
 
               {/* Bill column empty but border needed */}
               <td datalabel="Report"style={{ border: "1px solid #e5e7eb" }}></td>
+
+              <td style={{ border: "1px solid #e5e7eb" }}></td> {/* 🔥 Actions */}
             </tr>
 
           )}

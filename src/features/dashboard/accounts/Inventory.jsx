@@ -7,6 +7,8 @@ import {  FaEdit, FaTrash} from "react-icons/fa";
 
 export default function Inventory({ adminUid, setActivePage, plan, showUpgrade }) {
 
+  
+
   /* ================= STATES ================= */
   const [feesMaster, setFeesMaster] = useState([]);
   const [feesLoaded, setFeesLoaded] = useState(false);
@@ -34,8 +36,10 @@ const [showEntryDropdown, setShowEntryDropdown] = useState(false);
 const [incomeList, setIncomeList] = useState([]);
 const [expenseList, setExpenseList] = useState([]);
 const [feesList, setFeesList] = useState([]);
+const categories = ["Office Staff", "Working Staff"];
 
 const [editId, setEditId] = useState(null);
+
 
 
 
@@ -46,7 +50,6 @@ const filteredEntryTypes = entryTypes.filter(t =>
 );
 
 
-const categories = ["Office Staff", "Working Staff"];
 
 const positions = {
   "Office Staff": ["Principal","Clerk","Accountant","Receptionist"],
@@ -331,6 +334,23 @@ setTeacherSearch("");
     setPositionSearch("");
     setTeacherSearch("");
   };
+  useEffect(() => {
+    console.log("Teachers list:", teachers);
+  }, [teachers]);
+  
+  useEffect(() => {
+    console.log("salaryCategory:", salaryCategory);
+    console.log("salaryPosition:", salaryPosition);
+    console.log("teachers:", teachers);
+  }, [salaryCategory, salaryPosition, teachers]);
+  
+  useEffect(() => {
+    // salary category / position change aagumbodhu
+    // teacher dropdown reset
+    setSelectedTeacher(null);
+    setTeacherSearch("");
+    setShowTeacherDropdown(false);
+  }, [salaryCategory, salaryPosition]);
   
   /* ================= UI ================= */
   return (
@@ -507,34 +527,47 @@ setTeacherSearch("");
 
     {/* ===== Row 2 ===== */}
     {/* Teacher */}
-    <div className="student-dropdown">
-      <input
-        placeholder="Teacher"
-        value={selectedTeacher?.name || teacherSearch}
-        onChange={e=>{
-          setTeacherSearch(e.target.value);
-          setShowTeacherDropdown(true);
-        }}
-        onFocus={()=>setShowTeacherDropdown(true)}
-      />
-      {showTeacherDropdown && (
-        <div className="student-dropdown-list">
-          {filteredTeachers.map(t=>(
-            <div
-              key={t.id}
-              className="student-option"
-              onClick={()=>{
-                setSelectedTeacher(t);
-                setTeacherSearch("");
-                setShowTeacherDropdown(false);
-              }}
-            >
-              {t.name}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+    {salaryCategory?.trim() === "Working Staff" &&
+ salaryPosition?.trim() === "Teacher" && (
+  <div className="student-dropdown">
+    <input
+      placeholder="Teacher"
+      value={selectedTeacher?.name || teacherSearch}
+      onChange={e=>{
+        setTeacherSearch(e.target.value);
+
+  setSelectedTeacher(null);   // 👈 ADD THIS
+        setShowTeacherDropdown(true);
+      }}
+      onFocus={()=>setShowTeacherDropdown(true)}
+    />
+
+    {showTeacherDropdown && (
+      <div className="student-dropdown-list">
+        {filteredTeachers.map(t => (
+          <div
+            key={t.id}
+            className="student-option"
+            onClick={() => {
+              setSelectedTeacher(t);
+              setTeacherSearch("");
+              setShowTeacherDropdown(false);
+            }}
+          >
+            {t.name}
+          </div>
+        ))}
+
+        {filteredTeachers.length === 0 && (
+          <div className="student-option muted">
+            No teachers found
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+)}
+
 
     {/* Amount */}
     <input

@@ -217,3 +217,45 @@
 }
 
 
+/* ===== MOBILE ONLY: Application title layout ===== */
+@media (max-width: 768px) {
+
+  .app-title-bar{
+    display:flex;                 /* ensure flex */
+    flex-direction:row;           /* row than */
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+
+  .app-title-text{
+    font-size:18px;
+    max-width:65%;                /* text left side */
+  }
+
+  .header-book-img{
+    width:80px;                   /* small image */
+    flex-shrink:0;                /* image shrink aagakoodaadhu */
+  }
+
+}
+/* ===== EXTRA SMALL MOBILE ( < 400px ) ===== */
+@media (max-width: 400px) {
+
+  .app-title-bar{
+    padding:12px;
+    gap:8px;
+  }
+
+  .app-title-text{
+    font-size:12px;          /* 👈 smaller title */
+    font-weight:700;
+    max-width:70%;
+    line-height:1.2;
+  }
+
+  .header-book-img{
+    width:40px;              /* 👈 smaller image */
+  }
+
+}

@@ -1027,3 +1027,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background: #eef4ff !important;
   }
 }
+.student-dropdown {
+  position: relative;
+  z-index: 50;
+}
+
+.student-dropdown-list {
+  position: absolute;
+  z-index: 9999;
+}

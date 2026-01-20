@@ -395,3 +395,26 @@
   align-items: center;
   justify-content: center;
 }
+@media (max-width: 620px) {
+  .action-cell {
+    flex-direction: row;     /* or column if you want vertical */
+    justify-content: center;
+  }
+
+  .action-cell button {
+    min-width: 90px;
+  }
+}
+/* ===== FORCE CENTER ACTION BUTTONS (MOBILE FIX) ===== */
+@media (max-width: 620px){
+
+  .nice-table td.action-cell{
+    justify-content: center !important;  /* override space-between */
+    gap: 12px;
+  }
+
+  /* remove label spacing for action column */
+  .nice-table td.action-cell::before{
+    content: none !important;
+  }
+}

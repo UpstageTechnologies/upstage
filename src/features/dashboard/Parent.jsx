@@ -506,7 +506,7 @@ if (editId) {
       {/* MODAL same as before */}
       {showModal && (
         <div className="modal-overlay ">
-           <div className="form-scroll">
+           
           <div className="modal">
             <h3>{editId ? "Edit Parent" : "Add Parent"}</h3>
 
@@ -679,7 +679,7 @@ if (editId) {
               </button>
             </div>
           </div></div>
-        </div>
+        
       )}
       
     </div>

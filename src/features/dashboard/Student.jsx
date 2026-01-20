@@ -353,7 +353,7 @@ const Student = ({ requirePremium }) => {
 
       {showModal && (
         <div className="modal-overlay">
-          <div className="form-scroll">
+          
           <div className="modal">
             <h3>{editId ? "Edit Student" : "Add Student"}</h3>
             <div style={{ textAlign: "center", marginBottom: 10 }}>
@@ -469,7 +469,7 @@ const Student = ({ requirePremium }) => {
             </div>
           </div>
           </div>
-        </div>
+        
       )}
     </div>
   );

@@ -402,7 +402,7 @@ if (!/^\d{10}$/.test(phoneClean)) {
       {/* MODAL */}
       {showModal && (
         <div className="modal-overlay " >
-          <div className="form-scroll">
+          
           <div className="modal popup-box"  >
             <h3>{editId ? "Edit Teacher" : "Add Teacher"}</h3>
             <div style={{ textAlign: "center", marginBottom: 10 }}>
@@ -601,7 +601,7 @@ if (!/^\d{10}$/.test(phoneClean)) {
             </div>
           </div>
           </div>
-        </div>
+      
       )}
     </div>
   );
