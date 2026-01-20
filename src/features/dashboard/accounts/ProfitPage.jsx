@@ -1807,20 +1807,20 @@ all.sort((a, b) => {
           {/* TOTAL ROW */}
           {isLastOfDate && (
             <tr style={{ fontWeight: "bold", background: "#fafafa" }}>
-              <td datalabel="Total"style={{ border: "1px solid #e5e7eb" }}>TOTAL</td>
+              <td data-label="Total"style={{ border: "1px solid #e5e7eb" }}>TOTAL</td>
 
-              <td datalabel="Income"style={{ color: "green", border: "1px solid #e5e7eb" }}>
+              <td data-label="Income"style={{ color: "green", border: "1px solid #e5e7eb" }}>
               ₹{dateIncomeTotal}
               </td>
 
-              <td datalabel="Expense"style={{ color: "red", border: "1px solid #e5e7eb" }}>
+              <td data-label="Expense"style={{ color: "red", border: "1px solid #e5e7eb" }}>
               ₹{dateExpenseTotal}
               </td>
 
               {/* Bill column empty but border needed */}
-              <td datalabel="Report"style={{ border: "1px solid #e5e7eb" }}></td>
+              <td data-label="Report"style={{ border: "1px solid #e5e7eb" }}></td>
 
-              <td style={{ border: "1px solid #e5e7eb" }}></td> {/* 🔥 Actions */}
+              <td style={{ border: "1px solid #e5e7eb" }}></td> 
             </tr>
 
           )}
