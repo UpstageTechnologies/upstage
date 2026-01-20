@@ -113,7 +113,9 @@ export default function BillPage({ adminUid, billStudentId, billDate, setActiveP
         ← Back
       </span>
 
-      <div className="bill-card invoice">
+      <div className="bill-card">
+  <div className="invoice invoice-responsive">
+
 
       <div className="invoice-header" style={{ display: "flex", alignItems: "center", gap: 12 ,alignContent:"center",textAlign:"center",justifyContent:"center"}}>
 
@@ -164,23 +166,20 @@ export default function BillPage({ adminUid, billStudentId, billDate, setActiveP
           </thead>
 
           <tbody>
-          {allPayments
-  .filter(p => p.date)   // remove broken rows 🔥
-  .sort((a, b) => String(a.date).localeCompare(String(b.date)))
-  .map((p, i) => (
+  {allPayments
+    .filter(p => p.date)
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)))
+    .map((p, i) => (
+      <tr key={i} style={{ background: p.date === billDate ? "#e8f0ff" : "" }}>
+        <td data-label="Date">{p.date}</td>
+        <td data-label="Stage">{formatStage(p)}</td>
+        <td data-label="Paid">₹{p.paidAmount}</td>
+        <td data-label="Discount">₹{p.discountApplied || 0}</td>
+        <td data-label="Balance">₹{p.balanceAfter ?? ""}</td>
+      </tr>
+    ))}
+</tbody>
 
-                <tr key={i} style={{ background: p.date === billDate ? "#e8f0ff" : "" }}>
-                  <td>{p.date}</td>
-
-                  <td>{formatStage(p)}</td>
-
-
-                  <td>₹{p.paidAmount}</td>
-                  <td>₹{p.discountApplied || 0}</td>
-                  <td>₹{p.balanceAfter ?? ""}</td>
-                </tr>
-              ))}
-          </tbody>
         </table>
 
         <hr />
@@ -209,6 +208,7 @@ export default function BillPage({ adminUid, billStudentId, billDate, setActiveP
           </button>
         </div>
 
+      </div>
       </div>
     </div>
   );

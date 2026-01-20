@@ -13,7 +13,7 @@
   --pad: clamp(12px, 2vw, 32px);
 }
 .accounts-wrapper{
-  background: linear-gradient(180deg,#f7faff,#eef3f9);
+  background: #f7feff;
   min-height:100vh;
   padding: var(--pad);
   max-width: 1600px;
@@ -695,7 +695,7 @@
   }
 }
 /* 🔥 HIDE MONTHLY + OVERALL CARDS IN MOBILE */
-@media (max-width: 480px){
+@media (max-width: 768px){
   .summary2-scroll{
     display: none !important;
   }

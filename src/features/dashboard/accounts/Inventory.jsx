@@ -440,7 +440,7 @@ setTeacherSearch("");
       </div>
 
       {/* SUMMARY */}
-      <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
+      <div style={{ display: "flex", gap: 10, marginTop: 20 ,marginBottom:20 }}>
         <button onClick={() => setActiveSummary("fees")}>Fees Summary</button>
         <button onClick={() => setActiveSummary("salary")}>Salary Summary</button>
       </div>

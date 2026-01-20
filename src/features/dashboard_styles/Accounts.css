@@ -870,3 +870,169 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .nice-table1 td:nth-child(3) {
   text-align: right !important;
 }
+@supports (-webkit-touch-callout: none) {
+  input[type="date"] {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* ================= BILL PAGE MOBILE FIX ================= */
+
+.bill-page {
+  padding: 12px;
+}
+
+/* Card should never overflow screen */
+.bill-card {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Invoice box */
+.invoice-responsive {
+  width: 100%;
+  max-width: 700px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* Header stack on mobile */
+@media (max-width: 480px) {
+  .invoice-header {
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+
+  .invoice-header h1 {
+    font-size: 20px;
+  }
+
+  .invoice-header p {
+    font-size: 14px;
+  }
+}
+
+/* Student + Date section */
+@media (max-width: 480px) {
+  .invoice-row {
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  .invoice-row div {
+    text-align: left !important;
+  }
+}
+
+/* ================= TABLE → CARD MODE ================= */
+
+@media (max-width: 600px) {
+
+  .invoice-table,
+  .invoice-table thead {
+    display: none;
+  }
+
+  .invoice-table tbody,
+  .invoice-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .invoice-table tr {
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .invoice-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 13px;
+    border: none;
+  }
+
+  .invoice-table td::before {
+    font-weight: 600;
+    color: #555;
+  }
+
+  .invoice-table td:nth-child(1)::before { content: "Date"; }
+  .invoice-table td:nth-child(2)::before { content: "Stage"; }
+  .invoice-table td:nth-child(3)::before { content: "Paid"; }
+  .invoice-table td:nth-child(4)::before { content: "Discount"; }
+  .invoice-table td:nth-child(5)::before { content: "Balance"; }
+}
+
+/* ================= SUMMARY STACK ================= */
+
+@media (max-width: 480px) {
+  .invoice-summary {
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+  }
+
+  .invoice-amount {
+    font-size: 18px;
+    text-align: center;
+  }
+}
+
+/* Print safe */
+@media print {
+  .invoice-responsive {
+    max-width: 100%;
+    padding: 20px;
+  }
+}
+/* ================= BILL PAGE – MOBILE CARD VIEW ================= */
+
+@media (max-width: 600px) {
+
+  .invoice-table,
+  .invoice-table thead,
+  .invoice-table tbody,
+  .invoice-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .invoice-table thead {
+    display: none; /* hide header */
+  }
+
+  .invoice-table tr {
+    background: #ffffff;
+    border-radius: 14px;
+    margin-bottom: 12px;
+    padding: 12px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  }
+
+  .invoice-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border: none;
+    font-size: 14px;
+  }
+
+  .invoice-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #555;
+  }
+
+  /* Highlight today's payment */
+  .invoice-table tr[style*="background"] {
+    background: #eef4ff !important;
+  }
+}

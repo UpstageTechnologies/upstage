@@ -316,7 +316,7 @@ const OfficeStaff = () => {
                       );
                     }}
                   >
-                    👁 View
+                    <FaEye /> View
                   </button>
                 </td>
               </tr>

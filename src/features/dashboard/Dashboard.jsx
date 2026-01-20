@@ -68,7 +68,7 @@ import UpgradePopup from "../../components/UpgradePopup";
     const [upgradeDisabled, setUpgradeDisabled] = useState(false);
 
 
-    const [menuOpen, setMenuOpen] = useState(true);
+    const [menuOpen, setMenuOpen] = useState(false);
     const [accountMenuOpen, setAccountMenuOpen] = useState(false);
     const [activePage, setActivePage] = useState("home");
     const [userMenuOpen, setUserMenuOpen] = useState(false);
