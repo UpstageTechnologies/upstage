@@ -676,6 +676,24 @@
 } /* 📱 4 SUMMARY CARDS – SAME SIZE BELOW 440px */
 @media (max-width: 440px) {
 
+  .student-top-row h3 {
+    font-size: 16px;        /* name smaller */
+  }
+
+  .student-top-row .role-badge {
+    font-size: 10px;        /* MASTER badge small */
+    padding: 4px 10px;
+    border-radius: 12px;
+  }
+
+  .student-info div {
+    font-size: 11px;        /* Email / Phone / Address text */
+  }
+
+  .student-info b,
+  .student-info strong {
+    font-size: 12px;
+  }
   /* container */
   .top-summary-row {
     grid-template-columns: repeat(2, 1fr); /* 2 x 2 layout */
@@ -685,9 +703,10 @@
   /* each card */
   .top-card {
     padding: 10px;
-    min-height: 90px;        /* 🔥 same height */
+    min-height: 50px;        /* 🔥 same height */
     border-radius: 12px;
     gap: 8px;
+    
   }
 
   /* icon */
@@ -695,6 +714,8 @@
     width: 36px;
     height: 36px;
     font-size: 18px;
+    
+  
   }
 
   /* number */
@@ -728,4 +749,51 @@
     width: calc(50% - 4px);
     border-radius: 20px;
   }
+}
+/* 📱 4 SUMMARY CARDS – SAME SIZE BELOW 440px */
+@media (max-width: 400px) {
+
+  /* container */
+  .top-summary-row {
+    grid-template-columns: repeat(2, 1fr); /* 2 x 2 layout */
+    gap: 5px;
+  }
+
+  /* each card */
+  .top-card {
+    padding: 8px;
+    min-width: 50px;
+    min-height: 50px;        /* 🔥 same height */
+    border-radius: 12px;
+    gap: 5px;
+    
+  }
+
+  /* icon */
+  .top-card i {
+    width: 26px;
+    height: 26px;
+    font-size: 9px;
+    
+  
+  }
+
+  /* number */
+  .top-card b {
+    font-size: 18px;
+  }
+
+  /* label text */
+  .top-card small {
+    font-size: 11px;
+  }
+}
+/* 🔥 REMOVE SHADOW FROM ALL CARDS */
+.student-header,
+.summary-left,
+.summary-wrapper,
+.top-card,
+.summary-card,
+.home-card {
+  box-shadow: none !important;
 }
