@@ -166,6 +166,13 @@ if (!/^\d{10}$/.test(phoneClean)) {
       photoURL: ""
     });
   };
+  const handleView = (admin) => {
+    window.open(
+      `/dashboard/view?role=admin&id=${admin.id}`,
+      "_blank"
+    );
+  };
+  
 
   return (
     <div className="teacher-page">
@@ -252,12 +259,14 @@ if (!/^\d{10}$/.test(phoneClean)) {
         <td data-label="Experience">{a.experience || "-"}</td>
 
         <td >
+     
         <button
-    className="view-btn"
-    onClick={() => setViewStudent(s)}
-  >
-   <FaEye /> View
-  </button>
+  className="view-btn"
+  onClick={() => handleView(a)}
+>
+  <FaEye /> View
+</button>
+
           <button
             className="edit-btn"
             onClick={() => {

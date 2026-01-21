@@ -22,6 +22,7 @@ import ApplicationForm from "./useTheme/pages/ApplicationForm";
 import ApplicationList from "./features/dashboard/ApplicationList";
 import  Accounts from "./features/dashboard/Accounts"
 import FeesPage from "./features/dashboard/accounts/FeesPage";
+import UserViewDashboard from "./features/dashboard/UserViewDashboard";
 
 function App() {
   return (
@@ -48,7 +49,8 @@ function App() {
         <Route path="/admin/applications" element={<ApplicationList />} />
         <Route path="Accounts" element={<Accounts/>}/>
         <Route path="FeesPage" element={<FeesPage />} />
-        
+        <Route path="/dashboard/view"element={<UserViewDashboard />}/>
+
 
       </Routes>
     </Router>

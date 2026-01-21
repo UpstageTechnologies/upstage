@@ -81,7 +81,6 @@ import UpgradePopup from "../../components/UpgradePopup";
 
     const isPremium = plan === "premium" || plan === "lifetime"; 
 
-    const viewParentId = localStorage.getItem("viewParentId");
 
       
 
@@ -279,8 +278,7 @@ useEffect(() => {
   return () =>
     window.removeEventListener("open-teacher-dashboard", handler);
 }, []);
-const viewAs = localStorage.getItem("viewAs"); // "teacher" | null
-const viewTeacherId = localStorage.getItem("viewTeacherId");
+
 
     
     
@@ -309,7 +307,27 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
       });
     };
     
+    const params = new URLSearchParams(window.location.search);
+    const viewAs = params.get("viewAs");        // admin | teacher | parent
+    const viewAdminId = params.get("viewAdminId");
+    const viewTeacherId = params.get("viewTeacherId");
+    const viewParentId = params.get("viewParentId");
+    
+    const effectiveRole = viewAs || localStorage.getItem("role");
+
+    const effectiveAdminId =
+      viewAs === "admin" ? viewAdminId : localStorage.getItem("adminId");
+    
+    const effectiveTeacherId =
+      viewAs === "teacher" ? viewTeacherId : localStorage.getItem("teacherDocId");
+    
+    const effectiveParentId =
+      viewAs === "parent" ? viewParentId : localStorage.getItem("parentDocId");
+    
+
+    
     const adminUid = user?.uid || localStorage.getItem("adminUid");
+
 
     return (
       <><BackConfirm />
@@ -593,7 +611,12 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
   adminUid={adminUid}
   setActivePage={setActivePage}
   plan={plan}
+  viewAs={viewAs}
+  viewAdminId={viewAdminId}
+  viewTeacherId={viewTeacherId}
+  viewParentId={viewParentId}
 />
+
 
 )}
 

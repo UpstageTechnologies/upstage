@@ -54,25 +54,13 @@ import React, { useEffect, useState } from "react";
 };
 
 const role = localStorage.getItem("role");
-const teacherId = localStorage.getItem("teacherDocId");
+const teacherId =
+  localStorage.getItem("teacherDocId") ||
+  localStorage.getItem("viewTeacherId");
+
 const parentId = localStorage.getItem("parentDocId"); 
 
-if (role === "teacher") {
-  return (
-    <TeacherHome
-      adminUid={adminUid}
-      teacherId={teacherId}
-    />
-  );
-}
-if (role === "parent") {
-  return (
-    <ParentHome
-      adminUid={adminUid}
-      parentId={parentId}
-    />
-  );
-}
+
 
     console.log("USER PLAN =", plan, "isPremium =", isPremium);
 
@@ -111,10 +99,7 @@ if (role === "parent") {
 
     if (role === "admin")
       ref = doc(db, "users", adminUid, "admins", localStorage.getItem("adminId"));
-    if (role === "teacher")
-      ref = doc(db, "users", adminUid, "teachers", localStorage.getItem("teacherDocId"));
-    if (role === "parent")
-      ref = doc(db, "users", adminUid, "parents", localStorage.getItem("parentDocId"));
+
 
     const unsub = onSnapshot(ref, snap => {
       if (snap.exists()) {
