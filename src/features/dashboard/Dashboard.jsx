@@ -294,6 +294,12 @@ const viewTeacherId = localStorage.getItem("viewTeacherId");
       navigate("/logout", { replace: true }); // ✅ YES → home page
     };
     
+    useEffect(() => {
+      if (role === "office_staff") {
+        setActivePage("accounts"); // 🔥 direct profit page
+      }
+    }, [role]);
+    
 
     const adminUid = user?.uid || localStorage.getItem("adminUid");
 
