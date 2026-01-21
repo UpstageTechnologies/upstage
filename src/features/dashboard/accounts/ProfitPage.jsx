@@ -1419,6 +1419,7 @@ const deleteEntry = async (row) => {
 </div>
 
 
+
 {oldStudent && selectedFees[0] && oldPayType !== "partial" && (
   <input
     readOnly

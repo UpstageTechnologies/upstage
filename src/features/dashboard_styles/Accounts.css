@@ -13,7 +13,7 @@
   background: linear-gradient(135deg, #9feef1, #52c2ff);
   border-radius: 18px;
   padding: 16px 18px;
-  
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
   color: #033;
 }
 
@@ -21,7 +21,7 @@
   background: linear-gradient(135deg, #e9d7e8, #c69ad3);
   border-radius: 18px;
   padding: 16px 18px;
- 
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
   color: #2c0d2b;
 }
 
@@ -29,7 +29,7 @@
   background: linear-gradient(135deg, #b0f4d3, #4ed18e);
   border-radius: 18px;
   padding: 16px 18px;
- 
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
   color: #06391e;
 }
 
@@ -60,7 +60,7 @@
   border-radius: 18px;
   padding: 18px;
   margin-bottom: 16px;
-  
+  box-shadow: 0 12px 28px rgba(0,0,0,.08);
   transition: .25s ease;
   color: black;
 }
@@ -264,7 +264,7 @@ select {
     padding: 10px;
     background: #fff;
     border-radius: 12px;
-   
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   }
 
   .nice-table1 td {
@@ -351,7 +351,7 @@ select {
 .entries-card select:focus {
   outline: none;
   border-color: #4e73df;
-  
+  box-shadow: 0 0 0 2px rgba(78,115,223,.18);
   background: #fff;
 }
 
@@ -416,7 +416,7 @@ select {
     background: #fff;
     border-radius: 16px;
     padding: 16px;
-    
+    box-shadow: 0 5px 12px rgba(0,0,0,0.07);
   }
   
   .accounts-grid {
@@ -447,7 +447,7 @@ select {
     background: #fff;
     border-radius: 18px;
     padding: 16px;
-    
+    box-shadow: 0 6px 14px rgba(0,0,0,0.06);
   }
   
  
@@ -468,14 +468,14 @@ select {
   background: #f9fafb;
   border-radius: 18px;
   padding: 18px;
-  
+  box-shadow: 0 10px 18px rgba(0,0,0,.08);
   cursor: pointer;
   transition: 0.25s;
 }
 
 .accounts-card:hover {
   transform: translateY(-3px);
- 
+  box-shadow: 0 14px 24px rgba(0,0,0,.1); 
 }
 
 
@@ -515,7 +515,7 @@ select {
   margin: auto;
   padding: 30px;
   border: 1px solid #ddd;
- 
+  box-shadow: 0 0 20px rgba(0,0,0,0.08);
   font-family: Arial, sans-serif;
 }
 
@@ -750,7 +750,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   overflow-y: auto;
   background: white;
   border-radius: 12px;
-  
+  box-shadow: 0 10px 25px rgba(0,0,0,.15);
   z-index: 50;
 }
 
@@ -826,7 +826,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   right: 0;
   background: white;
   border-radius: 12px;
-  
+  box-shadow: 0 15px 40px rgba(0,0,0,.25);
   z-index: 999;
   overflow: hidden;
 }
@@ -852,7 +852,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   color: #2140df;
 }
 
+/* Inventory Fees Summary Alignment */
+.nice-table th:nth-child(2),
+.nice-table td:nth-child(2) {
+  text-align: left !important;
+}
 
+.nice-table th:nth-child(3),
+.nice-table td:nth-child(3) {
+  text-align: right !important;
+}
 
 /* Accounts table - right align money columns */
 .nice-table1 th:nth-child(2),
@@ -861,6 +870,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .nice-table1 td:nth-child(3) {
   text-align: right !important;
 }
+.student-dropdown-list,
+.popup-menu{
+  top: 100%;
+}
+.popup-select{
+  position: relative;
+}
+
 @supports (-webkit-touch-callout: none) {
   input[type="date"] {
     position: relative;
@@ -1026,13 +1043,4 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .invoice-table tr[style*="background"] {
     background: #eef4ff !important;
   }
-}
-.student-dropdown {
-  position: relative;
-  z-index: 50;
-}
-
-.student-dropdown-list {
-  position: absolute;
-  z-index: 9999;
 }
