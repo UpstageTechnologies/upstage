@@ -533,29 +533,47 @@ useEffect(() => {
           <FaWpforms /> Applications
         </li>
       )}
-      <button
-  className={activePage === "calendar" ? "active" : ""}
+
+<li
+  className={`calendar-btn ${activePage === "calendar" ? "active" : ""}`}
   onClick={() => setActivePage("calendar")}
 >
-  📅 Calendar
-</button>
+  <FaCalendarAlt className="calendar-icon" />
 
-                    {/* 🎁 TRIAL BANNER */}
-  {sidebarState === "open" && trialAccess && trialExpiresAt && (
-    <div
-      style={{
-        background: "#fef3c7",
-        color: "#92400e",
-        padding: "10px 14px",
-        borderRadius: 8,
-        marginBottom: 12,
-        fontWeight: 500
-      }}
-    >
-      🎁 Trial valid till{" "}
-      {trialExpiresAt.toDate().toLocaleDateString()}
-    </div>
+  {/* 🔹 Text only when sidebar open */}
+  {sidebarState === "open" && (
+    <span className="calendar-text">Calendar</span>
   )}
+</li>
+
+
+{/* 🎁 TRIAL BANNER */}
+{sidebarState === "open" && trialAccess && trialExpiresAt && (
+  <div
+    style={{
+      background: "#fef3c7",
+      color: "#92400e",
+      padding: "6px 10px",      // ⬅ smaller padding
+      borderRadius: 6,          // ⬅ slightly smaller radius
+      marginBottom: 8,
+      fontSize: 12,             // ⬅ smaller text
+      lineHeight: "16px",
+      fontWeight: 500,
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      marginTop: 12,  
+      
+    }}
+  >
+    🎁
+    <span>
+      Trial till{" "}
+      {trialExpiresAt.toDate().toLocaleDateString()}
+    </span>
+  </div>
+)}
+
     </>
   )}
 </ul>
