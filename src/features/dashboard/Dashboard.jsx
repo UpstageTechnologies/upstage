@@ -77,6 +77,9 @@ import UpgradePopup from "../../components/UpgradePopup";
     const [logo, setLogo] = useState(""); 
     const [accountsSubMenuOpen, setAccountsSubMenuOpen] = useState(false);
     const [showUpgrade, setShowUpgrade] = useState(false);
+    const [trialAccess, setTrialAccess] = useState(false);
+const [trialExpiresAt, setTrialExpiresAt] = useState(null);
+
 
 
     const isPremium = plan === "premium" || plan === "lifetime"; 
@@ -101,12 +104,26 @@ import UpgradePopup from "../../components/UpgradePopup";
     };
 
     const requirePremium = (callback) => {
-      if (plan === "premium" || plan === "lifetime") {
-        callback();
-      } else {
+      const now = new Date();
+    
+      const hasPremiumAccess =
+        plan === "premium" ||
+        plan === "lifetime" ||
+        (
+          plan === "basic" &&
+          trialAccess === true &&
+          trialExpiresAt &&
+          trialExpiresAt.toDate() > now
+        );
+    
+      if (!hasPremiumAccess) {
         setShowUpgrade(true);
+        return;
       }
+    
+      callback(); // ✅ allow action
     };
+    
     
     
     /* ================= AUTH + ROLE ================= */
@@ -185,6 +202,10 @@ const requirePremium = (page) => {
         localStorage.setItem("schoolLogo", data.schoolLogo || "");
         
         setPlan((data.plan || "basic").toLowerCase());
+        setTrialAccess(data.trialAccess === true);
+setTrialExpiresAt(data.trialExpiresAt || null);
+
+
         localStorage.setItem("plan", (data.plan || "basic").toLowerCase());
 
 
@@ -324,7 +345,25 @@ useEffect(() => {
     const effectiveParentId =
       viewAs === "parent" ? viewParentId : localStorage.getItem("parentDocId");
     
-
+      useEffect(() => {
+        if (
+          plan === "basic" &&
+          trialAccess === true &&
+          trialExpiresAt &&
+          trialExpiresAt.toDate() <= new Date()
+        ) {
+          // 1️⃣ show popup
+          setShowUpgrade(true);
+      
+          // 2️⃣ optional alert (once)
+          alert("⏰ Trial expired. Please upgrade.");
+      
+          // 3️⃣ stop trial
+          setTrialAccess(false);
+        }
+      }, [plan, trialAccess, trialExpiresAt]);
+      
+      
     
     const adminUid = user?.uid || localStorage.getItem("adminUid");
 
@@ -473,6 +512,22 @@ useEffect(() => {
           <FaWpforms /> Applications
         </li>
       )}
+                    {/* 🎁 TRIAL BANNER */}
+  {sidebarState === "open" && trialAccess && trialExpiresAt && (
+    <div
+      style={{
+        background: "#fef3c7",
+        color: "#92400e",
+        padding: "10px 14px",
+        borderRadius: 8,
+        marginBottom: 12,
+        fontWeight: 500
+      }}
+    >
+      🎁 Trial valid till{" "}
+      {trialExpiresAt.toDate().toLocaleDateString()}
+    </div>
+  )}
     </>
   )}
 </ul>
@@ -605,6 +660,7 @@ useEffect(() => {
           </nav>
 
           <div className="dashboard-content">
+
 
 {activePage === "home" && (
   <Home

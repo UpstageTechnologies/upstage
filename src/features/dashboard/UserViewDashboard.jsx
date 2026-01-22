@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useSearchParams } from "react-router-dom";
 import Home from "./Home";
 import TeacherHome from "./TeacherHome";
@@ -12,50 +12,58 @@ export default function UserViewDashboard() {
 
   const adminUid = localStorage.getItem("adminUid");
 
-  useEffect(() => {
-    if (!role || !id) return;
-
-    // 🔐 backup
-    sessionStorage.setItem("view_backup_role", localStorage.getItem("role"));
-    sessionStorage.setItem("view_backup_adminId", localStorage.getItem("adminId"));
-    sessionStorage.setItem("view_backup_teacherId", localStorage.getItem("teacherDocId"));
-    sessionStorage.setItem("view_backup_parentId", localStorage.getItem("parentDocId"));
-
-    // 🔁 override
-    localStorage.setItem("role", role);
-
-    if (role === "admin") localStorage.setItem("adminId", id);
-    if (role === "teacher") localStorage.setItem("teacherDocId", id);
-    if (role === "parent") localStorage.setItem("parentDocId", id);
-
-    // ♻️ restore on close
-    return () => {
-      localStorage.setItem("role", sessionStorage.getItem("view_backup_role"));
-      localStorage.setItem("adminId", sessionStorage.getItem("view_backup_adminId"));
-      localStorage.setItem("teacherDocId", sessionStorage.getItem("view_backup_teacherId"));
-      localStorage.setItem("parentDocId", sessionStorage.getItem("view_backup_parentId"));
-    };
-  }, [role, id]);
+  if (!role || !id) {
+    return <div>Invalid view</div>;
+  }
 
   return (
     <div className="home-page view-mode-full">
       {/* 🔒 VIEW MODE BANNER */}
-      <div className="view-banner">
-        <span>Viewing as {role?.toUpperCase()} — Read only</span>
-        <button className="view-close-btn" onClick={() => window.close()}>
+      <div
+        style={{
+          background: "#FEF3C7",
+          color: "#92400E",
+          padding: "12px 16px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          fontWeight: 500
+        }}
+      >
+        <span>
+          Viewing as <b>{role.toUpperCase()}</b> — Read only
+        </span>
+
+        <button
+          onClick={() => window.close()}
+          style={{
+            background: "#EF4444",
+            color: "#fff",
+            border: "none",
+            padding: "6px 12px",
+            borderRadius: 6,
+            cursor: "pointer"
+          }}
+        >
           ✕ Close
         </button>
       </div>
 
-      {/* 🔥 ROLE BASED RENDER */}
+      {/* 🔥 ROLE BASED VIEW */}
       {role === "admin" && (
-        <Home adminUid={adminUid} plan="premium" />
+        <Home
+          adminUid={adminUid}
+          viewAs="admin"
+          viewAdminId={id}
+          plan="premium"   // read-only view → allow charts
+        />
       )}
 
       {role === "teacher" && (
         <TeacherHome
           adminUid={adminUid}
           teacherId={id}
+          viewAs="teacher"
         />
       )}
 
@@ -63,6 +71,7 @@ export default function UserViewDashboard() {
         <ParentHome
           adminUid={adminUid}
           parentId={id}
+          viewAs="parent"
         />
       )}
     </div>

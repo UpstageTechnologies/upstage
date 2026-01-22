@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
   } from "firebase/firestore";
   import { db } from "../../services/firebase";
   import "../dashboard_styles/Home.css";
+  import { getDoc } from "firebase/firestore";
 
   import {
     FaUserGraduate,
@@ -24,7 +25,7 @@ import React, { useEffect, useState } from "react";
 
   const today = new Date().toLocaleDateString("en-CA");
 
-  export default function Home({ adminUid, setActivePage,plan }) {
+  export default function Home({ adminUid, setActivePage,plan,viewAs,viewAdminId }) {
   const [stats, setStats] = useState({
     studentPresent: 0,
     studentAbsent: 0,
@@ -52,6 +53,13 @@ import React, { useEffect, useState } from "react";
   if (!total || total <= 0) return 0;
   return Math.min((value / total) * 100, 100);
 };
+const effectiveRole = viewAs || localStorage.getItem("role");
+
+const effectiveAdminId =
+  viewAs === "admin"
+    ? viewAdminId
+    : localStorage.getItem("adminId");
+
 
 const role = localStorage.getItem("role");
 const teacherId =
@@ -89,26 +97,52 @@ const parentId = localStorage.getItem("parentDocId");
     return () => unsub();
   }, [adminUid]);
 
+ 
 
-    useEffect(() => {
+  useEffect(() => {
     if (!adminUid) return;
-
-    const role = localStorage.getItem("role");
-
-    let ref = doc(db, "users", adminUid);
-
-    if (role === "admin")
-      ref = doc(db, "users", adminUid, "admins", localStorage.getItem("adminId"));
-
-
-    const unsub = onSnapshot(ref, snap => {
-      if (snap.exists()) {
-        setProfile(snap.data());
+  
+    let ref;
+    let cacheKey = "profile_cache_master";
+  
+    // 👀 VIEW MODE
+    if (viewAs === "admin" && viewAdminId) {
+      ref = doc(db, "users", adminUid, "admins", viewAdminId);
+      cacheKey = `profile_cache_admin_${viewAdminId}`;
+    }
+    // 👤 NORMAL MODE
+    else {
+      const role = localStorage.getItem("role");
+  
+      if (role === "admin") {
+        const id = localStorage.getItem("adminId");
+        ref = doc(db, "users", adminUid, "admins", id);
+        cacheKey = `profile_cache_admin_${id}`;
+      } else {
+        ref = doc(db, "users", adminUid);
+        cacheKey = "profile_cache_master";
       }
-    });
-
-    return () => unsub();
-  }, [adminUid]);
+    }
+  
+    // ⚡ 1️⃣ INSTANT render from cache
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      setProfile(JSON.parse(cached));
+    }
+  
+    // 🔄 2️⃣ Background refresh (non-blocking)
+    (async () => {
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const data = snap.data();
+        setProfile(data);
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+      }
+    })();
+  }, [adminUid, viewAs, viewAdminId]);
+  
+  
+  
 
 
   useEffect(() => {
@@ -264,7 +298,8 @@ const parentId = localStorage.getItem("parentDocId");
       <div  className="name-role-row">
         <h3>{profile.name || profile.username}</h3>
         <span className="role-badge">
-  {profile.role || localStorage.getItem("role")}
+        {viewAs || profile.role || localStorage.getItem("role")}
+
 </span>
 
       </div>
