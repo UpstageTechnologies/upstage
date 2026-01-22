@@ -42,6 +42,10 @@ import ExpensesPage from "./accounts/ExpensesPage";
 import ProfitPage from "./accounts/ProfitPage";
 import Inventory from "./accounts/Inventory";
 import UpgradePopup from "../../components/UpgradePopup";
+import TeacherHome from "./TeacherHome";
+import ParentHome from "./ParentHome";
+
+
 
 
 
@@ -220,6 +224,8 @@ setTrialExpiresAt(data.trialExpiresAt || null);
       return () => unsubscribe && unsubscribe();
     }, [navigate]);
 
+
+
     
 
 useEffect(() => {
@@ -364,7 +370,15 @@ useEffect(() => {
       }, [plan, trialAccess, trialExpiresAt]);
       
       
-    
+      useEffect(() => {
+        if (role === "teacher") {
+          setActivePage("teacher-home");
+        }
+        if (role === "parent") {
+          setActivePage("parent-home");
+        }
+      }, [role]);
+      
     const adminUid = user?.uid || localStorage.getItem("adminUid");
 
 
@@ -386,9 +400,21 @@ useEffect(() => {
   {/* ================= MASTER / ADMIN ================= */}
   {!isOfficeStaff && (
     <>
-      <li className={activePage === "home" ? "active" : ""} onClick={() => setActivePage("home")}>
-        <FaHome /> Home
-      </li>
+<li
+  className={activePage === "home" ? "active" : ""}
+  onClick={() => {
+    if (role === "teacher") {
+      setActivePage("teacher-home");
+    } else if (role === "parent") {
+      setActivePage("parent-home");
+    } else
+    setActivePage("home");
+  
+  }}
+>
+  <FaHome /> Home
+</li>
+
 
       {role === "master" && (
         <li className={activePage === "payment" ? "active" : ""}onClick={() => navigate("/payment")}>
@@ -660,9 +686,22 @@ useEffect(() => {
           </nav>
 
           <div className="dashboard-content">
+            {/* 👩‍🏫 TEACHER HOME */}
+{role === "teacher" && activePage === "teacher-home" && (
+  <TeacherHome
+    adminUid={localStorage.getItem("adminUid")}
+    teacherId={localStorage.getItem("teacherDocId")}
+  />
+)}
+{role === "parent" && activePage === "parent-home" && (
+  <ParentHome
+    adminUid={localStorage.getItem("adminUid")}
+    parentId={localStorage.getItem("parentDocId")}
+  />
+)}
 
 
-{activePage === "home" && (
+{(role === "master" || role === "admin") && activePage === "home" &&(
   <Home
   adminUid={adminUid}
   setActivePage={setActivePage}
@@ -675,6 +714,15 @@ useEffect(() => {
 
 
 )}
+{/* 👩‍🏫 TEACHER HOME */}
+{role === "teacher" && activePage === "teacher-home" && (
+  <TeacherHome
+    adminUid={localStorage.getItem("adminUid")}
+    teacherId={localStorage.getItem("teacherDocId")}
+  />
+)}
+
+
 
 {isAdminOrSubAdmin && activePage === "fees" && (
   <FeesPage adminUid={adminUid} setActivePage={setActivePage}/>
