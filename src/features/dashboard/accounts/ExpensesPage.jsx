@@ -4,6 +4,7 @@ import { db } from "../../../services/firebase";
 
 import "../../dashboard_styles/ac.css";
 
+
 export default function ExpensesPage({ adminUid, setActivePage }) {
 
   const [incomeList, setIncomeList] = useState([]);
@@ -245,6 +246,8 @@ const todayProfit = todayIncome - todayExpense;
           <>
             <div className="accounts-card" onClick={() => setActivePage("income")}>💵 Income</div>
             <div className="accounts-card" onClick={() => setActivePage("expenses")}>💸 Expenses</div>
+
+
           </>
         )}
       </div>

@@ -45,6 +45,8 @@ import UpgradePopup from "../../components/UpgradePopup";
 import TeacherHome from "./TeacherHome";
 import ParentHome from "./ParentHome";
 import SchoolCalendar from "../../components/SchoolCalendar";
+import BalancePaymentPage from "./accounts/BalancePaymentPage";
+
 
 
   /* ================= SLIDER ================= */
@@ -766,6 +768,13 @@ useEffect(() => {
     setActivePage={setActivePage}
   />
 )}
+{(isAdminOrSubAdmin || isOfficeStaff) && activePage === "balancePayment" && (
+  <BalancePaymentPage
+    adminUid={adminUid}
+    setActivePage={setActivePage}
+  />
+)}
+
 
 
 

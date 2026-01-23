@@ -975,16 +975,7 @@ const getTermPaidCount = (studentId, feeId) =>
   }, [isOfficeStaff]);
   // 🔥 ALWAYS KEEP AFTER ALL HOOKS
 // ✅ AFTER ALL useEffect / useState / hooks
-if (activePage && activePage.startsWith("bill_")) {
-  return (
-    <BillPage
-      adminUid={adminUid}
-      billStudentId={activePage.split("_")[1]}
-      billDate={activePage.split("_")[2]}
-      setActivePage={setActivePage}
-    />
-  );
-}
+
 
 
 const deleteEntry = async (row) => {
@@ -1022,9 +1013,18 @@ useEffect(() => {
 
 
   return (
-    
-    
     <>
+    {activePage && activePage.startsWith("bill_") ? (
+      <BillPage
+        adminUid={adminUid}
+        billStudentId={activePage.split("_")[1]}
+        billDate={activePage.split("_")[2]}
+        setActivePage={setActivePage}
+      />
+    ) : (
+      <>
+      
+    
 {!isOfficeStaff && (
   <span
     style={{ color: "#2140df", cursor: "pointer", fontWeight: 600 }}
@@ -1406,6 +1406,7 @@ useEffect(() => {
 
       </div>
     )}
+    
 
 {incomeMode === "student" && studentMode === "old" && (
   <div className="entry-row source">
@@ -2030,7 +2031,7 @@ all.sort((a, b) => {
   {row.expense === "***" ? "***" : row.expense ? `₹${row.expense}` : ""}
 </td>
 <td datalabel="Report" style={{ textAlign: "center" }}>
-  {row.studentId && (
+  {row.type === "income" && row.studentId && (
     <span
       style={{ cursor: "pointer", color: "#2140df", fontSize: 18 }}
       title="View Bill"
@@ -2124,6 +2125,16 @@ all.sort((a, b) => {
 </div>
         </div>
         </div>
+        </>
+    )}
+    {activePage === "balancePayment" && (
+  <BalancePaymentPage
+    adminUid={adminUid}
+    setActivePage={setActivePage}
+  />
+)}
+
+
       </>
   );
 }
