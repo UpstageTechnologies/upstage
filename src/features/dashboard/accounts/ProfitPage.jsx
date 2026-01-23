@@ -48,6 +48,9 @@ const [feesMaster, setFeesMaster] = useState([]);
 const [showIncomeType, setShowIncomeType] = useState(false);
 const [incomeType, setIncomeType] = useState("");
 
+
+
+
 const getSalaryFromInventory = (role, position, teacherName) => {
   return feesMaster.find(
     f =>
@@ -59,12 +62,14 @@ const getSalaryFromInventory = (role, position, teacherName) => {
 };
 
 
-// ===== Searchable dropdown =====
-const categories = ["Office Staff", "Working Staff"];
+const categories = [
+  "Teaching Staff",
+  "Non Teaching Staff"
+];
 
 const positions = {
-  "Office Staff": ["Principal","Clerk","Accountant","Receptionist","Office Assistant"],
-  "Working Staff": ["Teacher","Driver","Cleaner","Watchman","Helper"]
+  "Teaching Staff": ["Teacher"],
+  "Non Teaching Staff": ["Helper", "ECA Staff"]
 };
 
 const [categorySearch, setCategorySearch] = useState("");
@@ -90,6 +95,11 @@ const [showSalaryPositionDD, setShowSalaryPositionDD] = useState(false);
 const [teachers, setTeachers] = useState([]);
 const [teacherSearch, setTeacherSearch] = useState("");
 const [showTeacherDropdown, setShowTeacherDropdown] = useState(false);
+const [staffSearch, setStaffSearch] = useState("");
+const [showStaffDropdown, setShowStaffDropdown] = useState(false);
+const [showStaffType, setShowStaffType] = useState(false);
+
+
 
 
 
@@ -236,6 +246,14 @@ const filteredPaymentTypes = paymentTypes.filter(p =>
 
   // EXPENSE
   const [expenseMode, setExpenseMode] = useState("");
+  // 🔥 STAFF MODE (NEW / OLD)
+const [staffMode, setStaffMode] = useState(""); 
+// "new" | "old"
+
+// New staff details
+const [newStaffName, setNewStaffName] = useState("");
+const [newStaffPhone, setNewStaffPhone] = useState("");
+
 
   
   const [selName, setSelName] = useState("");                // typed person name
@@ -312,9 +330,22 @@ const parentsRef = collection(db, "users", adminUid, "parents");
 
 
 
-const filteredTeachers = teachers.filter(t =>
-  t.name?.toLowerCase().includes(teacherSearch.toLowerCase())
-);
+const filteredTeachers = teachers
+  .filter(t => t.category === "Teaching Staff")
+  .filter(t =>
+    t.name?.toLowerCase().includes(teacherSearch.toLowerCase())
+  );
+
+  const filteredNonTeachingStaff = teachers
+  .filter(
+    t =>
+      t.category === "Non Teaching Staff" &&
+      t.nonTeachingRole === salaryPosition
+  )
+  .filter(t =>
+    t.name?.toLowerCase().includes(staffSearch.toLowerCase())
+  );
+
 useEffect(() => {
   if (!adminUid) return;
 
@@ -733,22 +764,92 @@ const todayProfit = todayIncome - todayExpense;
   };
 
   /* ---------- EXPENSE: SALARY ---------- */
-  const saveSalary = async ()=>{
-    if(!salaryRole||!salaryPosition||!selName||!manualSalary||!entryDate)
-      return alert("Fill all salary fields");
+  const saveSalary = async () => {
 
-    await addDoc(expensesRef,{
-      type:"salary",
-      role:salaryRole,
-      position:salaryPosition,
-      name:selName,
-      amount:Number(manualSalary),
-      date:entryDate,
-      createdAt:new Date()
-    });
-
-    setSalaryRole("");setSalaryPosition("");setSelName("");setManualSalary("");
+    if (!salaryRole || !salaryPosition || !entryDate) {
+      alert("Fill category, position & date");
+      return;
+    }
+  
+    // ================= OLD STAFF =================
+    if (staffMode === "old") {
+      if (!selName || !manualSalary) {
+        alert("Select staff & salary");
+        return;
+      }
+  
+      await addDoc(expensesRef, {
+        type: "salary",
+        role: salaryRole,
+        position: salaryPosition,
+        name: selName,
+        amount: Number(manualSalary),
+        date: entryDate,
+        createdAt: new Date()
+      });
+    }
+  
+    // ================= NEW STAFF =================
+    if (staffMode === "new") {
+      if (!newStaffName || !newStaffPhone || !manualSalary) {
+        alert("Fill new staff details");
+        return;
+      }
+    
+      // 🔹 STEP A: CREATE STAFF
+      const staffDocRef = await addDoc(
+        collection(db, "users", adminUid, "teachers"),
+        {
+          name: newStaffName,
+          phone: newStaffPhone,
+          category: salaryRole,
+          nonTeachingRole:
+            salaryRole === "Non Teaching Staff" ? salaryPosition : "",
+          teacherId: `ST-${Date.now()}`,
+          assignedClasses: [],  
+          createdAt: new Date()
+        }
+      );
+    
+      // 🔹 STEP B: SAVE EXPENSE (monthly payment)
+      await addDoc(expensesRef, {
+        type: "salary",
+        role: salaryRole,
+        position: salaryPosition,
+        name: newStaffName,
+        staffId: staffDocRef.id,
+        amount: Number(manualSalary),
+        date: entryDate,
+        createdAt: new Date()
+      });
+    
+      // 🔹 STEP C: SAVE SALARY IN INVENTORY (FeesMaster)
+      await addDoc(
+        collection(db, "users", adminUid, "Account", "accounts", "FeesMaster"),
+        {
+          type: "salary",
+          category: salaryRole,
+          position: salaryPosition,
+          name: newStaffName,
+          teacherId: staffDocRef.id,
+          amount: Number(manualSalary),
+          createdAt: new Date()
+        }
+      );
+    }
+    
+    
+  
+    // 🔄 RESET
+    setStaffMode("");
+    setNewStaffName("");
+    setNewStaffPhone("");
+    setSalaryRole("");
+    setSalaryPosition("");
+    setSelName("");
+    setManualSalary("");
   };
+  
   
 // how much paid for a specific fee
 const getFeePaid = (studentId, feeId) =>
@@ -858,9 +959,13 @@ const getTermPaidCount = (studentId, feeId) =>
 
   useEffect(() => {
     setTeacherSearch("");
+    setStaffSearch("");
     setSelName("");
+    setManualSalary("");
     setShowTeacherDropdown(false);
+    setShowStaffDropdown(false);
   }, [salaryRole, salaryPosition]);
+  
   
   useEffect(() => {
     if (isOfficeStaff) {
@@ -906,6 +1011,12 @@ const deleteEntry = async (row) => {
   }
 };
 
+useEffect(() => {
+  setSelName("");
+  setManualSalary("");
+  setNewStaffName("");
+  setNewStaffPhone("");
+}, [staffMode]);
 
 
 
@@ -1534,10 +1645,67 @@ const deleteEntry = async (row) => {
       </div>
     )}
   </div>
+  
 
   {expenseMode === "salary" && (
   <>
     <div className="entry-row">
+
+      {/* ===== STAFF TYPE (NEW / OLD) ===== */}
+      <div className="popup-select">
+  <div
+    className="popup-input"
+    onClick={() => setShowStaffType(!showStaffType)}
+  >
+    {staffMode
+      ? staffMode === "new"
+        ? "New Staff"
+        : "Old Staff"
+      : "Staff Type"}
+    <span>▾</span>
+  </div>
+
+  {showStaffType && (
+    <div className="popup-menu">
+      <div
+        onClick={() => {
+          setStaffMode("new");
+          setShowStaffType(false);   // 🔥 CLOSE
+        }}
+      >
+        New Staff
+      </div>
+
+      <div
+        onClick={() => {
+          setStaffMode("old");
+          setShowStaffType(false);   // 🔥 CLOSE
+        }}
+      >
+        Old Staff
+      </div>
+    </div>
+  )}
+</div>
+
+
+      {/* ===== NEW STAFF BASIC DETAILS ===== */}
+{staffMode === "new" && (
+  <>
+    <input
+      placeholder="Staff Name"
+      value={newStaffName}
+      onChange={e => setNewStaffName(e.target.value)}
+    />
+
+    <input
+      placeholder="Phone Number"
+      value={newStaffPhone}
+      onChange={e => setNewStaffPhone(e.target.value)}
+    />
+  </>
+)}
+
   {/* CATEGORY */}
 <div className="student-dropdown">
   <input
@@ -1571,6 +1739,8 @@ const deleteEntry = async (row) => {
     </div>
   )}
 </div>
+
+
 
 
 
@@ -1616,67 +1786,106 @@ const deleteEntry = async (row) => {
 
 
       {/* Name */}
-      {salaryRole === "Working Staff" && salaryPosition === "Teacher" && (
-  <div className="student-dropdown">
-    <input
-      placeholder="Select Teacher"
-      value={selName || teacherSearch}
-      onChange={e => {
-        setTeacherSearch(e.target.value);
-        setSelName("");
-        setShowTeacherDropdown(true);
-      }}
-      onFocus={() => setShowTeacherDropdown(true)}
-    />
+      {staffMode === "old" &&
+  salaryRole === "Teaching Staff" &&
+  salaryPosition === "Teacher" && (
+    <div className="student-dropdown">
+      <input
+        placeholder="Select Teacher"
+        value={selName || teacherSearch}
+        onChange={e => {
+          setTeacherSearch(e.target.value);
+          setSelName("");
+          setShowTeacherDropdown(true);
+        }}
+        onFocus={() => setShowTeacherDropdown(true)}
+      />
 
-    {showTeacherDropdown && (
-      <div className="student-dropdown-list">
-        {filteredTeachers.map(t => (
-          <div
-            key={t.id}
-            className="student-option"
-            onClick={() => {
-              setSelName(t.name);
-              setTeacherSearch("");
-              setShowTeacherDropdown(false);
-            
-              const salaryItem = getSalaryFromInventory(
-                salaryRole,
-                salaryPosition,
-                t.name
-              );
-            
-              if (salaryItem) {
-                setManualSalary(salaryItem.amount); // 🔥 AUTO SET
-              } else {
-                setManualSalary("");
-              }
-            }}
-            
-          >
-            <strong>{t.name}</strong>
-            <span>{t.teacherId}</span>
-          </div>
-        ))}
+      {showTeacherDropdown && (
+        <div className="student-dropdown-list">
+          {filteredTeachers.map(t => (
+            <div
+              key={t.id}
+              className="student-option"
+              onClick={() => {
+                setSelName(t.name);
+                setTeacherSearch("");
+                setShowTeacherDropdown(false);
 
-        {filteredTeachers.length === 0 && (
-          <div className="student-option muted">No teachers found</div>
-        )}
-      </div>
-    )}
-  </div>
+                const salaryItem = getSalaryFromInventory(
+                  salaryRole,
+                  salaryPosition,
+                  t.name
+                );
+
+                setManualSalary(salaryItem ? salaryItem.amount : "");
+              }}
+            >
+              <strong>{t.name}</strong>
+              <span>{t.teacherId}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
 )}
+{staffMode === "old" &&
+  salaryRole === "Non Teaching Staff" &&
+  salaryPosition && (
+    <div className="student-dropdown">
+      <input
+        placeholder="Select Name"
+        value={selName || staffSearch}
+        onChange={e => {
+          setStaffSearch(e.target.value);
+          setSelName("");
+          setShowStaffDropdown(true);
+        }}
+        onFocus={() => setShowStaffDropdown(true)}
+      />
+
+      {showStaffDropdown && (
+        <div className="student-dropdown-list">
+          {filteredNonTeachingStaff.map(staff => (
+            <div
+              key={staff.id}
+              className="student-option"
+              onClick={() => {
+                setSelName(staff.name);
+                setStaffSearch("");
+                setShowStaffDropdown(false);
+
+                const salaryItem = getSalaryFromInventory(
+                  salaryRole,
+                  salaryPosition,
+                  staff.name
+                );
+
+                setManualSalary(salaryItem ? salaryItem.amount : "");
+              }}
+            >
+              {staff.name}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+)}
+
+
 
 
 
 
       {/* Salary */}
       <input
-        type="number"
-        placeholder="Salary"
-        value={manualSalary}
-        readOnly  
-      />
+  type="number"
+  placeholder="Salary"
+  value={manualSalary}
+  onChange={e => setManualSalary(e.target.value)}
+  readOnly={staffMode === "old"}   // 🔥 IMPORTANT LINE
+/>
+
     </div>
 
     {/* Save row */}
@@ -1705,6 +1914,7 @@ const deleteEntry = async (row) => {
   )}
 </>
 )}
+
 
 
         {/* SET FEES */}

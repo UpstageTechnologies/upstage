@@ -36,9 +36,12 @@ const [showEntryDropdown, setShowEntryDropdown] = useState(false);
 const [incomeList, setIncomeList] = useState([]);
 const [expenseList, setExpenseList] = useState([]);
 const [feesList, setFeesList] = useState([]);
-const categories = ["Office Staff", "Working Staff"];
+
 
 const [editId, setEditId] = useState(null);
+
+const [staffSearch, setStaffSearch] = useState("");
+const [showStaffDropdown, setShowStaffDropdown] = useState(false);
 
 
 
@@ -49,12 +52,18 @@ const filteredEntryTypes = entryTypes.filter(t =>
   t.toLowerCase().includes(entrySearch.toLowerCase())
 );
 
-
+const categories = [
+  "Teaching Staff",
+  "Non Teaching Staff"
+];
 
 const positions = {
-  "Office Staff": ["Principal","Clerk","Accountant","Receptionist"],
-  "Working Staff": ["Teacher","Driver","Cleaner","Watchman","Helper"]
+  "Teaching Staff": ["Teacher"],
+  "Non Teaching Staff": ["Helper", "ECA Staff"]
 };
+
+
+
 
 const filteredCategories = categories.filter(c =>
   c.toLowerCase().includes(categorySearch.toLowerCase())
@@ -133,9 +142,12 @@ const filteredPositions = (positions[salaryCategory] || []).filter(p =>
     };
   }, [adminUid]);
 
-  const filteredTeachers = teachers.filter(t =>
+  const filteredTeachers = teachers
+  .filter(t => t.category === "Teaching Staff")
+  .filter(t =>
     t.name?.toLowerCase().includes(teacherSearch.toLowerCase())
   );
+
 
   /* ================= SAVE ================= */
   const saveFee = async () => {
@@ -345,13 +357,24 @@ setTeacherSearch("");
   }, [salaryCategory, salaryPosition, teachers]);
   
   useEffect(() => {
-    // salary category / position change aagumbodhu
-    // teacher dropdown reset
     setSelectedTeacher(null);
     setTeacherSearch("");
+    setStaffSearch("");
     setShowTeacherDropdown(false);
+    setShowStaffDropdown(false);
   }, [salaryCategory, salaryPosition]);
   
+
+  const filteredNonTeachingStaff = teachers
+  .filter(
+    t =>
+      t.category === "Non Teaching Staff" &&
+      t.nonTeachingRole === salaryPosition
+  )
+  .filter(t =>
+    t.name?.toLowerCase().includes(staffSearch.toLowerCase())
+  );
+
   /* ================= UI ================= */
   return (
     <div className="accounts-wrapper fade-in">
@@ -527,8 +550,9 @@ setTeacherSearch("");
 
     {/* ===== Row 2 ===== */}
     {/* Teacher */}
-    {salaryCategory?.trim() === "Working Staff" &&
+    {salaryCategory?.trim() === "Teaching Staff" &&
  salaryPosition?.trim() === "Teacher" && (
+
   <div className="student-dropdown">
     <input
       placeholder="Teacher"
@@ -567,6 +591,51 @@ setTeacherSearch("");
     )}
   </div>
 )}
+{/* ===== Non Teaching Staff Name ===== */}
+{salaryCategory === "Non Teaching Staff" &&
+ salaryPosition && (
+
+  <div className="student-dropdown">
+    <input
+      placeholder="Select Name"
+      value={selectedTeacher?.name || staffSearch}
+      onChange={e => {
+        setStaffSearch(e.target.value);
+        setSelectedTeacher(null);
+        setShowStaffDropdown(true);
+      }}
+      onFocus={() => setShowStaffDropdown(true)}
+    />
+
+    {showStaffDropdown && (
+      <div className="student-dropdown-list">
+        {filteredNonTeachingStaff.map(staff => (
+          <div
+            key={staff.id}
+            className="student-option"
+            onClick={() => {
+              setSelectedTeacher({
+                id: staff.id,
+                name: staff.name
+              });
+              setStaffSearch("");
+              setShowStaffDropdown(false);
+            }}
+          >
+            {staff.name}
+          </div>
+        ))}
+
+        {filteredNonTeachingStaff.length === 0 && (
+          <div className="student-option muted">
+            No staff found
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+)}
+
 
 
     {/* Amount */}

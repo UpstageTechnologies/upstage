@@ -60,7 +60,9 @@ const Teacher = ({requirePremium}) => {
     qualification: "",
     experience: "",
     assignedClasses: [],
-    photoURL: ""
+    photoURL: "",
+    category: "Teaching Staff"  ,
+    nonTeachingRole: ""
   });
 
   const [classForm, setClassForm] = useState({
@@ -259,8 +261,11 @@ if (!/^\d{10}$/.test(phoneClean)) {
       qualification: "",
       experience: "",
       assignedClasses: [],
-      photoURL: ""   
+      photoURL: "",
+      category: "Teaching Staff",
+      nonTeachingRole: ""
     });
+    
     setClassForm({ class: "", section: "", subject: "" });
   };
 
@@ -371,7 +376,10 @@ if (!/^\d{10}$/.test(phoneClean)) {
     className="edit-btn"
     onClick={() =>
       requirePremium(() => {
-      setForm({ ...t });
+        setForm({
+          ...t,
+          assignedClasses: t.assignedClasses || []
+        });
       setEditId(t.id);
       setPassword(t.password || "");
       setShowModal(true); // ✅ FIXED
@@ -513,45 +521,64 @@ if (!/^\d{10}$/.test(phoneClean)) {
               <option>Female</option>
               <option>Other</option>
             </select>
-
-            <h4>Assigned Classes</h4>
-
             <select
-              value={classForm.class}
-              onChange={e =>
-                setClassForm({ ...classForm, class: e.target.value })
-              }
-            >
-              <option value="">Class</option>
-              {classes.map(c => (
-                <option key={c}>{c}</option>
-              ))}
-            </select>
+  value={form.category}
+  onChange={e => {
+    const value = e.target.value;
+    setForm(prev => ({
+      ...prev,
+      category: value,
+      assignedClasses:
+        value === "Non Teaching Staff" ? [] : prev.assignedClasses,
+      nonTeachingRole: value === "Teaching Staff" ? "" : prev.nonTeachingRole
+    }));
+  }}
+>
+  <option value="Teaching Staff">Teaching Staff</option>
+  <option value="Non Teaching Staff">Non Teaching Staff</option>
+</select>
 
-            <select
-              value={classForm.section}
-              onChange={e =>
-                setClassForm({ ...classForm, section: e.target.value })
-              }
-            >
-              <option value="">Section</option>
-              {sections.map(s => (
-                <option key={s}>{s}</option>
-              ))}
-            </select>
+{/* 👇 ADD THIS BLOCK HERE */}
+{form.category === "Teaching Staff" && (
+  <>
+    <h4>Assigned Classes</h4>
 
-            <input
-              placeholder="Subject"
-              value={classForm.subject}
-              onChange={e =>
-                setClassForm({ ...classForm, subject: e.target.value })
-              }
-            />
+    <select
+      value={classForm.class}
+      onChange={e =>
+        setClassForm({ ...classForm, class: e.target.value })
+      }
+    >
+      <option value="">Class</option>
+      {classes.map(c => (
+        <option key={c}>{c}</option>
+      ))}
+    </select>
 
-            <button onClick={addAssignedClass}>+ Add Class</button>
+    <select
+      value={classForm.section}
+      onChange={e =>
+        setClassForm({ ...classForm, section: e.target.value })
+      }
+    >
+      <option value="">Section</option>
+      {sections.map(s => (
+        <option key={s}>{s}</option>
+      ))}
+    </select>
 
-            <ul>
-  {form.assignedClasses.map((c, i) => (
+    <input
+      placeholder="Subject"
+      value={classForm.subject}
+      onChange={e =>
+        setClassForm({ ...classForm, subject: e.target.value })
+      }
+    />
+
+    <button onClick={addAssignedClass}>+ Add Class</button>
+
+    <ul>
+  {(form.assignedClasses || []).map((c, i) => (
     <li
       key={i}
       style={{
@@ -585,6 +612,28 @@ if (!/^\d{10}$/.test(phoneClean)) {
     </li>
   ))}
 </ul>
+
+
+  </>
+)}
+
+{form.category === "Non Teaching Staff" && (
+  <select
+    value={form.nonTeachingRole}
+    onChange={e =>
+      setForm({ ...form, nonTeachingRole: e.target.value })
+    }
+  >
+    <option value="">Select Role</option>
+    <option value="Helper">Helper</option>
+    <option value="ECA Staff">ECA Staff</option>
+  </select>
+)}
+
+
+
+        
+
 
 
 
