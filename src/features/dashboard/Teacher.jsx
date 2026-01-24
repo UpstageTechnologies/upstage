@@ -510,6 +510,14 @@ if (!/^\d{10}$/.test(phoneClean)) {
     setForm({ ...form, phone: v.slice(0, 10) });   // max 10 digits
   }}
 />
+<input
+  placeholder="Address"
+  value={form.address}
+  rows={3}
+  onChange={e =>
+    setForm({ ...form, address: e.target.value })
+  }
+/>
 
 
             <select
