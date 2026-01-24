@@ -360,56 +360,60 @@ const getBalance = (studentId, fee) => {
     </h3>
 
     <table className="nice-table">
-    <thead>
-  <tr>
-    <th>Student</th>
-    <th>Class</th>
-    <th>Payment Type</th>
-    <th>Paid</th>
-    <th>Balance</th>
-    <th>Date</th>
-  </tr>
-</thead>
-
-
-
-<tbody>
-  {reportData.length === 0 ? (
+  <thead>
     <tr>
-      <td colSpan="6" style={{ textAlign: "center" }}>
-        No data found
-      </td>
+      <th>Student</th>
+      <th>Class</th>
+      <th>Payment Type</th>
+      <th>Paid</th>
+      <th>Balance</th>
+      <th>Date</th>
     </tr>
-  ) : (
-    reportData.map(i => {
-      const balance =
-        i.paymentType === "pending"
-          ? i.balance
-          : getFeeBalance(i.studentId, i.feeId);
+  </thead>
 
-      return (
-        <tr key={i.id}>
-          <td>{i.studentName}</td>
-          <td>{i.className}</td>
+  <tbody>
+    {reportData.length === 0 ? (
+      <tr>
+        <td colSpan="6" style={{ textAlign: "center" }}>
+          No data found
+        </td>
+      </tr>
+    ) : (
+      reportData.map(i => {
+        const balance =
+          i.paymentType === "pending"
+            ? i.balance
+            : getFeeBalance(i.studentId, i.feeId);
 
-          <td style={{ textTransform: "capitalize" }}>
-            {i.paymentType}
-          </td>
+        return (
+          <tr key={i.id}>
+            <td data-label="Student">{i.studentName}</td>
+            <td data-label="Class">{i.className}</td>
 
-          <td>₹{i.paidAmount || 0}</td>
+            <td
+              data-label="Payment Type"
+              style={{ textTransform: "capitalize" }}
+            >
+              {i.paymentType}
+            </td>
 
-          <td style={{ color: balance > 0 ? "red" : "green" }}>
-            ₹{balance}
-          </td>
+            <td data-label="Paid">₹{i.paidAmount || 0}</td>
 
-          <td>{i.date || "-"}</td>
-        </tr>
-      );
-    })
-  )}
-</tbody>
+            <td
+              data-label="Balance"
+              style={{ color: balance > 0 ? "red" : "green" }}
+            >
+              ₹{balance}
+            </td>
 
-    </table>
+            <td data-label="Date">{i.date || "-"}</td>
+          </tr>
+        );
+      })
+    )}
+  </tbody>
+</table>
+
   </div>
 )}
 
@@ -577,9 +581,9 @@ const getBalance = (studentId, fee) => {
 
             return (
               <tr key={s.id}>
-                <td>{s.studentName}</td>
-                <td>₹{getPaidAmount(s.id, pendingFee.id)}</td>
-                <td style={{ color: "red" }}>₹{balance}</td>
+                <td data-label="Student Name">{s.studentName}</td>
+                <td data-label="Paid">₹{getPaidAmount(s.id, pendingFee.id)}</td>
+                <td data-label="Balance"style={{ color: "red" }}>₹{balance}</td>
               </tr>
             );
           })}

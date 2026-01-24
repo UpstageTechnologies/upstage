@@ -665,16 +665,25 @@ const generatedParentId = `P-${Date.now()}`;
     
     
     if (oldPayType.startsWith("term")) {
-
       if (termPaidCount >= 3) {
         alert("All 3 terms already paid");
         return;
       }
     
-      final = fixedTermAmount;
-    
-    
-    } else if (oldPayType === "full") {
+      // 🔥 Term 3 → manual
+      if (oldPayType === "term3") {
+        if (!oldPayAmount) {
+          alert("Enter Term 3 amount");
+          return;
+        }
+        final = Number(oldPayAmount);
+      } 
+      // 🔹 Term 1 & Term 2 → auto
+      else {
+        final = fixedTermAmount;
+      }
+    }
+    else if (oldPayType === "full") {
     
       final = balanceBefore;
     
@@ -1572,31 +1581,52 @@ useEffect(() => {
 
 
 
-{oldStudent && selectedFees[0] && oldPayType !== "partial" && (
+{/* FULL PAYMENT */}
+{oldPayType === "full" && oldStudent && selectedFees[0] && (
   <input
     readOnly
     value={`Payable ₹${
-      oldPayType === "full" &&
       getFeePaid(oldStudent, selectedFees[0].id) === 0
         ? Math.ceil(selectedFees[0].amount * 0.95)
-        : oldPayType.startsWith("term")
-        ? getTermAmountUI(oldStudent, selectedFees[0])
         : getFeeBalance(oldStudent, selectedFees[0])
     }`}
+  />
+)}
+
+{/* TERM 1 & TERM 2 → READONLY */}
+{(oldPayType === "term1" || oldPayType === "term2") &&
+  oldStudent &&
+  selectedFees[0] && (
+    <input
+      readOnly
+      value={`Payable ₹${getTermAmountUI(oldStudent, selectedFees[0])}`}
+    />
+)}
+
+{/* 🔥 TERM 3 → MANUAL INPUT */}
+{oldPayType === "term3" && (
+  <input
+    type="number"
+    placeholder="Enter Term 3 Amount"
+    value={oldPayAmount}
+    onChange={e => setOldPayAmount(e.target.value)}
+  />
+)}
+
+{/* PARTIAL */}
+{oldPayType === "partial" && (
+  <input
+    type="number"
+    placeholder="Enter Amount"
+    value={oldPayAmount}
+    onChange={e => setOldPayAmount(e.target.value)}
   />
 )}
 
 
 
 
-    {oldPayType === "partial" && (
-      <input
-        type="number"
-        placeholder="Enter Amount"
-        value={oldPayAmount}
-        onChange={e => setOldPayAmount(e.target.value)}
-      />
-    )}
+
 
     <button className="save-btn" onClick={() => safeRequirePremium(saveOldAdmission, "income")}>
       Save
