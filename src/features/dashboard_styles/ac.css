@@ -788,8 +788,21 @@
   background:#facc15;
   color:#000;
 }
+/* ===== HIDE OVERALL ACCOUNTS & MONTHLY FLOW ON MOBILE ===== */
+@media (max-width: 768px){
 
+  /* Monthly Profit Card */
+  .summary2-left{
+    display:none !important;
+  }
 
+  /* Overall Accounts Pills */
+  .summary2-wrapper{
+    display:none !important;
+  }
 
-
-
+  /* Also remove swipe container height */
+  .summary2-scroll{
+    display:none !important;
+  }
+}

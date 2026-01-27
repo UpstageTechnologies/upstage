@@ -178,6 +178,74 @@ export default function Settings({ adminUid }) {
   margin-top: 20px;
   color: var(--muted);
 }
+/* ================= MOBILE & TABLET RESPONSIVE ================= */
+
+@media (max-width: 768px){
+
+  .settings-page{
+    padding: 20px;
+  }
+
+  .settings-header h1{
+    font-size: 24px;
+  }
+
+  .settings-header p{
+    font-size: 14px;
+  }
+
+  .settings-card{
+    max-width: 100%;
+    padding: 18px;
+    border-radius: 12px;
+  }
+
+  .input-row{
+    flex-direction: column;   /* stack input & button */
+    gap: 8px;
+  }
+
+  .input-row input{
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .input-row button{
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .class-item{
+    padding: 10px 12px;
+  }
+
+  .class-item span{
+    font-size: 14px;
+  }
+
+  .delete-btn{
+    font-size: 14px;
+  }
+}
+
+/* Extra Small Phones */
+@media (max-width: 400px){
+
+  .settings-header h1{
+    font-size: 22px;
+  }
+
+  .settings-card{
+    padding: 14px;
+  }
+
+  .class-item span{
+    font-size: 13px;
+  }
+
+}
+
 `}</style>
 
     </div>

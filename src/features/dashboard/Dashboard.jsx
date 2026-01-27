@@ -680,19 +680,16 @@ useEffect(() => {
       >
         <FaUserCircle /> Profile
       </div>
-        <div
-          className="dropdown-item"
-          onClick={() => {
-            setActivePage("settings");
-            setUserMenuOpen(false);
-            setAccountMenuOpen(false);
-          }}
-        >
-          <FaCog /> Settings
-          
-        </div>
-      
-
+      <div
+  className="dropdown-item"
+  onClick={() => {
+    setActivePage("settings");
+    setUserMenuOpen(false);
+    setAccountMenuOpen(false);
+  }}
+>
+  <FaCog /> Settings
+</div>
         <div
           className="dropdown-item logout"
           onClick={handleLogout}
