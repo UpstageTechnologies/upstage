@@ -1643,7 +1643,6 @@ const deleteEntry = async (row) => {
     }}
     onFocus={()=>setShowSalaryCategory(true)}
   />
-
   {showSalaryCategory && (
     <div className="student-dropdown-list">
       {filteredCategories.map(cat => (
